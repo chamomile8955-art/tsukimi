@@ -664,14 +664,21 @@ impl JellyfinClient {
         let mut path = jellyfin_cache_path().await;
         path.push(format!("{}-{}-{}", id, image_type, tag.unwrap_or(0)));
 
-        let mut etag: Option<String> = None;
-
-        if path.exists() {
-            etag = xattr::get(&path, "user.etag")
-                .ok()
-                .flatten()
-                .and_then(|v| String::from_utf8(v).ok());
-        }
+        let etag: Option<String> = if path.exists() {
+            #[cfg(unix)]
+            {
+                xattr::get(&path, "user.etag")
+                    .ok()
+                    .flatten()
+                    .and_then(|v| String::from_utf8(v).ok())
+            }
+            #[cfg(not(unix))]
+            {
+                None
+            }
+        } else {
+            None
+        };
 
         match self.image_request(id, image_type, tag, etag).await {
             Ok(response) => {
@@ -740,11 +747,14 @@ impl JellyfinClient {
         let path = format!("{}-{}-{}", id, image_type, tag.unwrap_or(0));
         let path = cache_path.join(path);
         tokio::fs::write(&path, bytes).await.unwrap();
+        #[cfg(unix)]
         if let Some(etag) = etag {
             xattr::set(&path, "user.etag", etag.as_bytes()).unwrap_or_else(|e| {
                 tracing::warn!("Failed to set etag xattr: {}", e);
             });
         }
+        #[cfg(not(unix))]
+        let _ = etag;
         path.to_string_lossy().to_string()
     }
 
