@@ -1,4 +1,4 @@
-name: Windows Build
+name: Windows
 
 on:
   workflow_dispatch:
@@ -6,52 +6,245 @@ on:
 permissions:
   contents: read
 
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_REGISTRIES_CRATES_IO_PROTOCOL: sparse
+
 jobs:
-  windows:
+  build:
+    name: Build (UCRT64)
     runs-on: windows-latest
 
     steps:
+      - name: Preserve LF line endings
+        shell: pwsh
+        run: git config --global core.autocrlf input
+
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Install MSYS2 dependencies
+      - name: Set up MSYS2 UCRT64
+        id: msys2
         uses: msys2/setup-msys2@v2
         with:
           msystem: UCRT64
           update: true
+          path-type: minimal
           install: >-
             git
-            base-devel
             mingw-w64-ucrt-x86_64-toolchain
+            mingw-w64-ucrt-x86_64-rust
             mingw-w64-ucrt-x86_64-pkgconf
             mingw-w64-ucrt-x86_64-meson
             mingw-w64-ucrt-x86_64-ninja
+            mingw-w64-ucrt-x86_64-gettext-tools
+            mingw-w64-ucrt-x86_64-libxml2
+            mingw-w64-ucrt-x86_64-dbus
+            mingw-w64-ucrt-x86_64-openssl
             mingw-w64-ucrt-x86_64-gtk4
             mingw-w64-ucrt-x86_64-libadwaita
+            mingw-w64-ucrt-x86_64-libepoxy
             mingw-w64-ucrt-x86_64-mpv
             mingw-w64-ucrt-x86_64-gstreamer
             mingw-w64-ucrt-x86_64-gst-plugins-base
             mingw-w64-ucrt-x86_64-gst-plugins-good
             mingw-w64-ucrt-x86_64-gst-plugins-bad
-            mingw-w64-ucrt-x86_64-openssl
+            mingw-w64-ucrt-x86_64-gst-libav
 
-      - name: Build
+      - name: Verify UCRT64 toolchain and dependencies
+        shell: msys2 {0}
+        env:
+          PKG_CONFIG: pkgconf
+          PKG_CONFIG_PATH: ${{ steps.msys2.outputs.msys2-location }}\ucrt64\lib\pkgconfig;${{ steps.msys2.outputs.msys2-location }}\ucrt64\share\pkgconfig
+        run: |
+          set -euxo pipefail
+
+          for tool in cargo rustc pkgconf meson; do
+            case "$(command -v "$tool")" in
+              /ucrt64/bin/*) ;;
+              *)
+                echo "$tool is not coming from the UCRT64 toolchain" >&2
+                exit 1
+                ;;
+            esac
+          done
+
+          cargo --version
+          rustc -vV
+          rustc -vV | grep -F 'host: x86_64-pc-windows-gnu'
+          pkgconf --version
+          meson --version
+
+          pkgconf --print-errors --exists \
+            openssl \
+            dbus-1 \
+            glib-2.0 \
+            gio-2.0 \
+            gtk4 \
+            libadwaita-1 \
+            epoxy \
+            mpv \
+            gstreamer-1.0 \
+            gstreamer-base-1.0 \
+            gstreamer-audio-1.0 \
+            gstreamer-play-1.0 \
+            gstreamer-plugins-base-1.0 \
+            gstreamer-plugins-bad-1.0 \
+            gstreamer-bad-audio-1.0
+
+      - name: Configure and build
+        shell: msys2 {0}
+        env:
+          PKG_CONFIG: pkgconf
+          PKG_CONFIG_PATH: ${{ steps.msys2.outputs.msys2-location }}\ucrt64\lib\pkgconfig;${{ steps.msys2.outputs.msys2-location }}\ucrt64\share\pkgconfig
+          RUSTFLAGS: -Lnative=${{ steps.msys2.outputs.msys2-location }}\ucrt64\lib
+        run: |
+          set -euxo pipefail
+
+          # This performs the same dependency and version checks as the Linux
+          # build. src/meson.build delegates compilation to Cargo, but its final
+          # copy command assumes the Unix filename "tsukimi" rather than the
+          # Windows filename "tsukimi.exe", so invoke that delegated command
+          # directly after a successful Meson configuration.
+          meson setup build --prefix=/ucrt64 -Drust-target=release
+
+          version="$(
+            python -c \
+              'import tomllib; print(tomllib.load(open("Cargo.toml", "rb"))["package"]["version"])'
+          )"
+          export TSUKIMI_VERSION="$version"
+          export TSUKIMI_LOCALEDIR="share/locale"
+          export TSUKIMI_PKGDATADIR="share/tsukimi"
+
+          cargo build --release --locked
+          test -f target/release/tsukimi.exe
+
+      - name: Assemble portable runtime
         shell: msys2 {0}
         run: |
-          cargo build --release
+          set -euxo pipefail
 
-      - name: Package
+          dist="$PWD/dist/tsukimi-windows-x86_64"
+          mkdir -p "$dist"
+          cp target/release/tsukimi.exe "$dist/"
+          cp LICENSE "$dist/"
+
+          # Tsukimi loads its GResource and GSettings schema at runtime.
+          mkdir -p "$dist/share/tsukimi"
+          glib-compile-resources resources/resources.gresource.xml \
+            --sourcedir=resources \
+            --target="$dist/share/tsukimi/tsukimi.gresource"
+
+          schema_dir="$dist/share/glib-2.0/schemas"
+          mkdir -p "$schema_dir"
+          find /ucrt64/share/glib-2.0/schemas -maxdepth 1 -type f \
+            \( -name '*.xml' -o -name '*.override' \) \
+            -exec cp '{}' "$schema_dir/" ';'
+          cp resources/moe.tsuna.tsukimi.gschema.xml "$schema_dir/"
+          glib-compile-schemas "$schema_dir"
+
+          while IFS= read -r locale; do
+            test -n "$locale" || continue
+            locale_dir="$dist/share/locale/$locale/LC_MESSAGES"
+            mkdir -p "$locale_dir"
+            msgfmt "po/$locale.po" -o "$locale_dir/tsukimi.mo"
+          done < po/LINGUAS
+
+          # These trees are discovered relative to the relocated GLib,
+          # GdkPixbuf, GTK and GStreamer DLLs.
+          for tree in \
+            etc/fonts \
+            etc/gtk-4.0 \
+            lib/gdk-pixbuf-2.0 \
+            lib/gio/modules \
+            lib/gstreamer-1.0 \
+            libexec/gstreamer-1.0 \
+            share/fontconfig \
+            share/fonts \
+            share/gstreamer-1.0 \
+            share/gtk-4.0 \
+            share/icons/Adwaita \
+            share/icons/hicolor \
+            share/mime
+          do
+            if test -e "/ucrt64/$tree"; then
+              mkdir -p "$dist/$(dirname "$tree")"
+              cp -a "/ucrt64/$tree" "$dist/$tree"
+            fi
+          done
+
+          # Generate a relocatable pixbuf loader cache. Running from the
+          # package root makes the cached module paths relative to that root.
+          for loader_dir in "$dist"/lib/gdk-pixbuf-2.0/*/loaders; do
+            test -d "$loader_dir" || continue
+            loader_rel="${loader_dir#"$dist"/}"
+            (
+              cd "$dist"
+              GDK_PIXBUF_MODULEDIR="$loader_rel" \
+                gdk-pixbuf-query-loaders > "${loader_rel%/loaders}/loaders.cache"
+            )
+          done
+
+          # Copy every UCRT64 DLL imported by the executable and by its
+          # dynamically loaded media/image modules. System Windows DLLs are
+          # intentionally left to the operating system.
+          copy_runtime_dlls() {
+            local queue=("$@")
+            local current dependency destination
+
+            while ((${#queue[@]})); do
+              current="${queue[0]}"
+              queue=("${queue[@]:1}")
+
+              while IFS= read -r dependency; do
+                test -n "$dependency" || continue
+                destination="$dist/$(basename "$dependency")"
+                if ! test -f "$destination"; then
+                  cp "$dependency" "$destination"
+                  queue+=("$destination")
+                fi
+              done < <(
+                ldd "$current" |
+                  awk '$3 ~ /^\/ucrt64\/bin\/.*\.dll$/ { print $3 }'
+              )
+            done
+          }
+
+          runtime_files=("$dist/tsukimi.exe")
+          while IFS= read -r -d '' module; do
+            runtime_files+=("$module")
+          done < <(
+            find \
+              "$dist/lib/gdk-pixbuf-2.0" \
+              "$dist/lib/gio/modules" \
+              "$dist/lib/gstreamer-1.0" \
+              "$dist/libexec/gstreamer-1.0" \
+              -type f \( -name '*.dll' -o -name '*.exe' \) -print0
+          )
+          copy_runtime_dlls "${runtime_files[@]}"
+
+          # --version exits before GTK initialization, but still proves that
+          # Windows can load the executable and all of its directly linked DLLs.
+          (
+            cd "$dist"
+            ./tsukimi.exe --version
+          )
+
+          if ldd "$dist/tsukimi.exe" | grep -q 'not found'; then
+            ldd "$dist/tsukimi.exe"
+            exit 1
+          fi
+
+      - name: Create ZIP
         shell: pwsh
         run: |
-          New-Item -ItemType Directory -Force dist
-          Copy-Item target/release/tsukimi.exe dist/
-          Compress-Archive -Path dist/* -DestinationPath tsukimi-windows.zip
+          Compress-Archive `
+            -Path dist/tsukimi-windows-x86_64 `
+            -DestinationPath tsukimi-windows-x86_64.zip
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
-          name: tsukimi-windows
-          path: tsukimi-windows.zip
+          name: tsukimi-windows-x86_64
+          path: tsukimi-windows-x86_64.zip
+          archive: false

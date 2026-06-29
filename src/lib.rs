@@ -43,11 +43,86 @@ const APP_RESOURCE_PATH: &str = "/moe/tsuna/tsukimi";
 const GRESOURCE_FILE: &str = "tsukimi.gresource";
 
 pub fn locale_dir() -> &'static str {
-    static FLOCALEDIR: OnceCell<&'static str> = OnceCell::new();
-    FLOCALEDIR.get_or_init(|| LOCALEDIR)
+    static FLOCALEDIR: OnceCell<String> = OnceCell::new();
+    FLOCALEDIR
+        .get_or_init(|| installation_path(LOCALEDIR).to_string_lossy().into_owned())
+        .as_str()
+}
+
+fn installation_path(path: &str) -> std::path::PathBuf {
+    let path = std::path::PathBuf::from(path);
+    #[cfg(target_os = "windows")]
+    let path = if path.is_relative() {
+        std::env::current_exe()
+            .ok()
+            .and_then(|executable| executable.parent().map(std::path::Path::to_path_buf))
+            .map_or(path.clone(), |directory| directory.join(path))
+    } else {
+        path
+    };
+    path
+}
+
+#[cfg(target_os = "windows")]
+fn configure_windows_runtime() {
+    let Some(directory) = std::env::current_exe()
+        .ok()
+        .and_then(|executable| executable.parent().map(std::path::Path::to_path_buf))
+    else {
+        return;
+    };
+
+    let set_path_if_unset = |name: &str, path: std::path::PathBuf| {
+        if std::env::var_os(name).is_none() {
+            unsafe { std::env::set_var(name, path) };
+        }
+    };
+
+    set_path_if_unset(
+        "GSETTINGS_SCHEMA_DIR",
+        directory.join("share/glib-2.0/schemas"),
+    );
+    set_path_if_unset("XDG_DATA_DIRS", directory.join("share"));
+    set_path_if_unset("GIO_EXTRA_MODULES", directory.join("lib/gio/modules"));
+    set_path_if_unset(
+        "GST_PLUGIN_PATH",
+        directory.join("lib/gstreamer-1.0"),
+    );
+    set_path_if_unset(
+        "GST_PLUGIN_SCANNER",
+        directory.join("libexec/gstreamer-1.0/gst-plugin-scanner.exe"),
+    );
+    set_path_if_unset("FONTCONFIG_PATH", directory.join("etc/fonts"));
+
+    let pixbuf_directory = directory.join("lib/gdk-pixbuf-2.0");
+    if let Ok(versions) = std::fs::read_dir(pixbuf_directory)
+        && let Some(cache) = versions
+            .filter_map(Result::ok)
+            .map(|entry| entry.path().join("loaders.cache"))
+            .find(|path| path.is_file())
+    {
+        if let Some(version_directory) = cache.parent() {
+            set_path_if_unset(
+                "GDK_PIXBUF_MODULEDIR",
+                version_directory.join("loaders"),
+            );
+        }
+        set_path_if_unset("GDK_PIXBUF_MODULE_FILE", cache);
+    }
+
+    let mut paths = vec![directory];
+    if let Some(path) = std::env::var_os("PATH") {
+        paths.extend(std::env::split_paths(&path));
+    }
+    if let Ok(path) = std::env::join_paths(paths) {
+        unsafe { std::env::set_var("PATH", path) };
+    }
 }
 
 pub fn run() -> gtk::glib::ExitCode {
+    #[cfg(target_os = "windows")]
+    configure_windows_runtime();
+
     Args::parse().init();
     // Initialize gettext
     setlocale(LocaleCategory::LcAll, String::new());
@@ -69,7 +144,7 @@ pub fn run() -> gtk::glib::ExitCode {
 }
 
 fn register_gio_resources() {
-    let path = std::path::Path::new(PKGDATADIR).join(GRESOURCE_FILE);
+    let path = installation_path(PKGDATADIR).join(GRESOURCE_FILE);
     let resources = gtk::gio::Resource::load(path).expect("Failed to load resources.");
     gtk::gio::resources_register(&resources);
 }
