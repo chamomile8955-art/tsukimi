@@ -1188,11 +1188,10 @@ impl MPVPage {
 
     fn on_cache_speed_update(&self, value: i64) {
         let label = &self.imp().network_speed_label;
-        if value >= 2 * 1024 * 1024 {
-            label.set_text(&format!("{:.2} MiB/s", value as f64 / (1024.0 * 1024.0)));
-        } else {
-            label.set_text(&format!("{} KiB/s", value / 1024));
-        }
+        label.set_text(&format!(
+            "{:.2} MB/s",
+            value as f64 / (1024.0 * 1024.0)
+        ));
     }
 
     #[template_callback]
