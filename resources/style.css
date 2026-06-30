@@ -164,6 +164,23 @@ button.star.interacted:not(.starred) image {
   border-radius: 10px;
 }
 
+.top-navigation {
+  padding: 2px 8px;
+}
+
+.top-navigation button {
+  font-size: 1.08em;
+  padding: 6px 18px;
+}
+
+.source-sidebar {
+  padding: 10px;
+}
+
+.poster-section-title {
+  font-size: 1.12em;
+}
+
 .horizontal-listview>row {
   margin-left: 9px;
   margin-right: 9px;
@@ -179,12 +196,40 @@ picture {
   border-radius: 10px;
 }
 
+.picture-loader {
+  background-image: linear-gradient(135deg,
+      rgba(128, 128, 128, 0.08),
+      rgba(128, 128, 128, 0.16),
+      rgba(128, 128, 128, 0.08));
+  border-radius: 10px;
+}
+
+.poster-missing {
+  background-image: linear-gradient(145deg,
+      rgba(94, 101, 113, 0.42),
+      rgba(46, 50, 59, 0.52) 48%,
+      rgba(25, 28, 34, 0.64));
+  color: rgba(128, 128, 128, 0.75);
+  border-radius: 10px;
+}
+
+.picture-loader.no-cover {
+  background-image: linear-gradient(145deg,
+      rgba(82, 89, 101, 0.44),
+      rgba(39, 43, 51, 0.54) 48%,
+      rgba(23, 26, 32, 0.68));
+}
+
 listview {
   background-color: transparent;
 }
 
 gridview {
   background-color: transparent;
+}
+
+gridview > child {
+  margin: 14px;
 }
 
 gridview > child:hover,
@@ -364,12 +409,6 @@ progressbar.accent > trough {
 
 .picture-loader.inbox {
     box-shadow: none;
-}
-
-.picture-loader {
-    background-color: transparent;
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-    border-radius: 10px;
 }
 
 .tulistitem {

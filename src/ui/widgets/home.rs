@@ -47,6 +47,9 @@ use crate::{
     },
 };
 
+static STARTUP_API_TIMING_LOGGED: std::sync::atomic::AtomicBool =
+    std::sync::atomic::AtomicBool::new(false);
+
 mod imp {
 
     use std::{
@@ -166,6 +169,7 @@ impl HomePage {
     }
 
     pub async fn setup(&self, enable_cache: bool) {
+        let started = std::time::Instant::now();
         fraction_reset!(self);
         let merge_resume_and_next_up = SETTINGS.merge_resume_and_next_up();
         let merge_resume_and_next_up_changed = self
@@ -178,6 +182,13 @@ impl HomePage {
             self.setup_next_up(enable_cache, merge_resume_and_next_up_changed),
             self.setup_library(enable_cache)
         );
+        if !STARTUP_API_TIMING_LOGGED.swap(true, std::sync::atomic::Ordering::Relaxed) {
+            tracing::info!(
+                elapsed_ms = started.elapsed().as_millis() as u64,
+                "Startup timing: home API and cached metadata ready"
+            );
+            crate::log_startup_timing("API ready");
+        }
         fraction!(self);
     }
 

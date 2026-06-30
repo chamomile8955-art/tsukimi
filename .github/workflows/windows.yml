@@ -120,11 +120,11 @@ jobs:
         run: |
           set -euxo pipefail
 
-          # This performs the same dependency and version checks as the Linux
-          # build. src/meson.build delegates compilation to Cargo, but its final
-          # copy command assumes the Unix filename "tsukimi" rather than the
-          # Windows filename "tsukimi.exe", so invoke that delegated command
-          # directly after a successful Meson configuration.
+          # This performs the project's Meson dependency and version checks.
+          # src/meson.build delegates compilation to Cargo, but its final copy
+          # command assumes the Unix filename "tsukimi" rather than the Windows
+          # filename "tsukimi.exe", so invoke that delegated command directly
+          # after a successful Meson configuration.
           meson setup build --prefix=/ucrt64 -Drust-target=release
 
           version="$(

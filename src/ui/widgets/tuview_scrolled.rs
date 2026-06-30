@@ -154,8 +154,8 @@ impl TuViewScrolled {
             return;
         };
 
+        let old_count = store.n_items();
         if C {
-            store.remove_all();
             let size = resolve_prefer_size(self.unify_size(), &items);
             self.imp().prefer_size_cache.replace(size);
         }
@@ -164,14 +164,20 @@ impl TuViewScrolled {
         let prefer_poster = self.prefer_poster();
         let is_resume = self.is_resume();
 
-        for item in items {
-            let tu_item = TuItem::from_simple(item);
-            tu_item.set_is_resume(is_resume);
-            tu_item.set_prefer_poster(prefer_poster);
-            tu_item.set_prefer_size(prefer_size);
-            let tu_item = TuObject::new(tu_item);
-            store.append(&tu_item);
-        }
+        let items = items
+            .into_iter()
+            .map(|item| {
+                let tu_item = TuItem::from_simple(item);
+                tu_item.set_is_resume(is_resume);
+                tu_item.set_prefer_poster(prefer_poster);
+                tu_item.set_prefer_size(prefer_size);
+                TuObject::new(tu_item).upcast::<glib::Object>()
+            })
+            .collect::<Vec<_>>();
+
+        let position = if C { 0 } else { old_count };
+        let removals = if C { old_count } else { 0 };
+        store.splice(position, removals, &items);
     }
 
     pub fn set_view_type(&self, view_type: ViewType) {

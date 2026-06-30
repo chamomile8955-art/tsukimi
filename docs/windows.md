@@ -1,5 +1,10 @@
 # Windows portable build
 
+This fork maintains Windows portable builds only. The artifact is built by
+[`.github/workflows/windows.yml`](../.github/workflows/windows.yml). Linux and
+macOS users should use the
+[official `tsukinaha/tsukimi` repository](https://github.com/tsukinaha/tsukimi).
+
 The Windows ZIP is a portable build. Extract the complete `Tsukimi` directory
 to a writable location and run `tsukimi.exe` from that directory. Do not place
 the extracted application under `Program Files`, because portable mode must be

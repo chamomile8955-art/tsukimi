@@ -1,6 +1,10 @@
 use std::{
     env,
-    sync::LazyLock,
+    sync::{
+        LazyLock,
+        OnceLock,
+    },
+    time::Instant,
 };
 
 mod app;
@@ -41,6 +45,17 @@ pub const APP_ID: &str = "moe.tsuna.tsukimi";
 pub const CLIENT_ID: &str = "Tsukimi";
 const APP_RESOURCE_PATH: &str = "/moe/tsuna/tsukimi";
 const GRESOURCE_FILE: &str = "tsukimi.gresource";
+static STARTUP_STARTED: OnceLock<Instant> = OnceLock::new();
+
+pub(crate) fn log_startup_timing(stage: &str) {
+    if let Some(started) = STARTUP_STARTED.get() {
+        tracing::info!(
+            stage = %stage,
+            elapsed_ms = started.elapsed().as_millis() as u64,
+            "Startup timing"
+        );
+    }
+}
 
 #[cfg(target_os = "windows")]
 #[derive(Debug)]
@@ -187,6 +202,8 @@ fn configure_windows_runtime() {
 }
 
 pub fn run() -> gtk::glib::ExitCode {
+    STARTUP_STARTED.get_or_init(Instant::now);
+
     #[cfg(target_os = "windows")]
     configure_windows_runtime();
 
@@ -203,6 +220,7 @@ pub fn run() -> gtk::glib::ExitCode {
     register_gio_resources();
 
     widgets::init();
+    log_startup_timing("init");
 
     // Initialize the GTK application
     gtk::glib::set_application_name(CLIENT_ID);

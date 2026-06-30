@@ -1,8 +1,18 @@
 use std::{
+    cell::{
+        Cell,
+        RefCell,
+    },
+    collections::{
+        HashMap,
+        VecDeque,
+    },
     path::PathBuf,
     sync::{
         LazyLock,
+        Mutex,
         atomic::{
+            AtomicBool,
             AtomicUsize,
             Ordering,
         },
@@ -45,14 +55,73 @@ use crate::{
     },
 };
 
-const IMAGE_LOAD_DELAY: std::time::Duration = std::time::Duration::from_millis(80);
-const IMAGE_DECODE_RETRY_DELAY: std::time::Duration = std::time::Duration::from_millis(120);
+const IMAGE_LOAD_DELAY: std::time::Duration = std::time::Duration::from_millis(16);
+const IMAGE_DECODE_RETRY_DELAY: std::time::Duration = std::time::Duration::from_millis(16);
+const IMAGE_RESULT_BATCH_DELAY: std::time::Duration = std::time::Duration::from_millis(16);
+const IMAGE_NETWORK_RETRY_DELAY: std::time::Duration = std::time::Duration::from_millis(180);
+const DECODED_IMAGE_CACHE_CAPACITY: usize = 300;
 static MAX_IMAGE_DECODE_TASKS: LazyLock<usize> = LazyLock::new(rayon::current_num_threads);
 static IMAGE_DECODE_TASKS: AtomicUsize = AtomicUsize::new(0);
+static FIRST_POSTER_RENDERED: AtomicBool = AtomicBool::new(false);
+static IN_FLIGHT_DOWNLOADS: LazyLock<
+    Mutex<
+        HashMap<
+            String,
+            Vec<tokio::sync::oneshot::Sender<Result<(), String>>>,
+        >,
+    >,
+> = LazyLock::new(|| Mutex::new(HashMap::new()));
 
 enum LoadedImage {
     Texture(gtk::gdk::Texture),
     Decoded(DecodedPaintable),
+}
+
+struct DecodeWaiter {
+    loader: glib::WeakRef<PictureLoader>,
+    cancellable: gio::Cancellable,
+    generation: u64,
+    cache_file_path: Option<PathBuf>,
+    fetch_on_error: bool,
+}
+
+#[derive(Default)]
+struct DecodedImageCache {
+    entries: HashMap<String, gtk::gdk::Paintable>,
+    order: VecDeque<String>,
+}
+
+impl DecodedImageCache {
+    fn get(&mut self, key: &str) -> Option<gtk::gdk::Paintable> {
+        let paintable = self.entries.get(key)?.clone();
+        self.order.retain(|cached_key| cached_key != key);
+        self.order.push_back(key.to_string());
+        Some(paintable)
+    }
+
+    fn insert(&mut self, key: String, paintable: gtk::gdk::Paintable) {
+        self.order.retain(|cached_key| cached_key != &key);
+        self.entries.insert(key.clone(), paintable);
+        self.order.push_back(key);
+
+        while self.entries.len() > DECODED_IMAGE_CACHE_CAPACITY {
+            if let Some(oldest) = self.order.pop_front() {
+                self.entries.remove(&oldest);
+            }
+        }
+    }
+}
+
+type DecodeResult = Result<LoadedImage, String>;
+
+thread_local! {
+    static DECODED_IMAGE_CACHE: RefCell<DecodedImageCache> =
+        RefCell::new(DecodedImageCache::default());
+    static IN_FLIGHT_DECODES: RefCell<HashMap<String, Vec<DecodeWaiter>>> =
+        RefCell::new(HashMap::new());
+    static PENDING_DECODE_RESULTS: RefCell<Vec<(String, DecodeResult, bool)>> =
+        RefCell::new(Vec::new());
+    static DECODE_FLUSH_SCHEDULED: Cell<bool> = const { Cell::new(false) };
 }
 
 struct DecodePermit;
@@ -135,11 +204,23 @@ pub(crate) mod imp {
 
     #[glib::derived_properties]
     impl ObjectImpl for PictureLoader {
-        fn constructed(&self) {
-            self.parent_constructed();
+        fn dispose(&self) {
+            self.obj().cancel_loading();
+        }
+    }
+
+    impl WidgetImpl for PictureLoader {
+        fn map(&self) {
+            self.parent_map();
 
             let obj = self.obj();
+            if self.picture.paintable().is_some() || self.cancellable.borrow().is_some() {
+                return;
+            }
 
+            // GridView and LazyDiffView only map the viewport plus their
+            // overscan rows, so mapped loading naturally preloads the next
+            // small batch without scanning the full poster wall.
             if let Some(url) = obj.url() {
                 obj.start_url_loading(url);
             } else {
@@ -147,12 +228,11 @@ pub(crate) mod imp {
             }
         }
 
-        fn dispose(&self) {
+        fn unmap(&self) {
             self.obj().cancel_loading();
+            self.parent_unmap();
         }
     }
-
-    impl WidgetImpl for PictureLoader {}
     impl BinImpl for PictureLoader {}
 }
 
@@ -194,7 +274,9 @@ impl PictureLoader {
         self.set_tag(tag);
         self.set_url(None::<String>);
         self.set_animated(animated);
-        self.start_loading();
+        if self.is_mapped() {
+            self.start_loading();
+        }
     }
 
     pub fn reset(&self) {
@@ -204,6 +286,7 @@ impl PictureLoader {
         imp.broken.set_visible(false);
         imp.spinner.set_visible(true);
         imp.picture.set_paintable(None::<&gtk::gdk::Paintable>);
+        self.remove_css_class("no-cover");
     }
 
     pub fn reset_in(widget: &gtk::Widget) {
@@ -279,7 +362,15 @@ impl PictureLoader {
         self.imp().picture.set_content_fit(gtk::ContentFit::Contain);
 
         let file = gio::File::for_uri(&url);
-        self.load_file_bytes(file, None, cancellable, generation, false);
+        let cache_key = format!("url:{}:{url}", self.animated());
+        self.load_file_bytes(
+            file,
+            cache_key,
+            None,
+            cancellable,
+            generation,
+            false,
+        );
     }
 
     pub async fn load_pic(&self, cancellable: gio::Cancellable, generation: u64) {
@@ -296,8 +387,14 @@ impl PictureLoader {
         fetch_on_error: bool,
     ) {
         let file = gio::File::for_path(&cache_file_path);
+        let cache_key = format!(
+            "file:{}:{}",
+            self.animated(),
+            cache_file_path.display()
+        );
         self.load_file_bytes(
             file,
+            cache_key,
             Some(cache_file_path),
             cancellable,
             generation,
@@ -311,7 +408,11 @@ impl PictureLoader {
         }
 
         let imp = self.imp();
+        self.remove_css_class("no-cover");
         imp.spinner.set_visible(false);
+        if !FIRST_POSTER_RENDERED.swap(true, Ordering::Relaxed) {
+            crate::log_startup_timing("first poster render ready");
+        }
         spawn(clone!(
             #[weak]
             imp,
@@ -332,6 +433,7 @@ impl PictureLoader {
         }
 
         let imp = self.imp();
+        self.add_css_class("no-cover");
         imp.broken.set_visible(true);
         imp.spinner.set_visible(false);
         spawn(clone!(
@@ -349,127 +451,140 @@ impl PictureLoader {
     }
 
     fn load_file_bytes(
-        &self, file: gio::File, cache_file_path: Option<PathBuf>, cancellable: gio::Cancellable,
-        generation: u64, fetch_on_error: bool,
+        &self, file: gio::File, cache_key: String, cache_file_path: Option<PathBuf>,
+        cancellable: gio::Cancellable, generation: u64, fetch_on_error: bool,
     ) {
         if !self.is_current(&cancellable, generation) {
             return;
         }
 
-        let weak_self: glib::SendWeakRef<Self> = self.downgrade().into();
-        let read_cancellable = cancellable.clone();
-        file.load_bytes_async(Some(&cancellable), move |res| {
-            let cancellable = read_cancellable;
+        if !self.animated()
+            && let Some(paintable) =
+                DECODED_IMAGE_CACHE.with(|cache| cache.borrow_mut().get(&cache_key))
+        {
+            self.imp().picture.set_paintable(Some(&paintable));
+            self.set_picture_visible(cancellable, generation);
+            return;
+        }
 
-            if cancellable.is_cancelled() {
-                return;
+        let waiter = DecodeWaiter {
+            loader: self.downgrade(),
+            cancellable,
+            generation,
+            cache_file_path,
+            fetch_on_error,
+        };
+        let is_leader = IN_FLIGHT_DECODES.with(|in_flight| {
+            let mut in_flight = in_flight.borrow_mut();
+            if let Some(waiters) = in_flight.get_mut(&cache_key) {
+                waiters.push(waiter);
+                false
+            } else {
+                in_flight.insert(cache_key.clone(), vec![waiter]);
+                true
             }
+        });
+        if !is_leader {
+            return;
+        }
 
-            let Ok((bytes, _etag)) = res else {
-                let weak_self = weak_self.into_weak_ref();
-                let Some(obj) = weak_self.upgrade() else {
-                    return;
-                };
-
-                if !obj.is_current(&cancellable, generation) {
-                    return;
-                }
-
-                if fetch_on_error {
-                    if let Some(path) = cache_file_path {
-                        obj.get_file(path, cancellable, generation);
-                    }
-                } else {
-                    obj.set_broken(cancellable, generation);
-                }
-                return;
-            };
-
-            let animated = {
-                let weak_self = weak_self.clone().into_weak_ref();
-                let Some(obj) = weak_self.upgrade() else {
-                    return;
-                };
-
-                if !obj.is_current(&cancellable, generation) {
-                    return;
-                }
-
-                obj.animated()
-            };
-
-            Self::try_spawn_decode(
-                weak_self,
-                bytes,
-                animated,
-                cache_file_path,
-                cancellable,
-                generation,
-                fetch_on_error,
-            );
+        let animated = self.animated();
+        file.load_bytes_async(None::<&gio::Cancellable>, move |res| match res {
+            Ok((bytes, _etag)) => {
+                Self::start_decode(cache_key, bytes, animated);
+            }
+            Err(error) => {
+                debug!("Failed to read poster {cache_key}: {error}");
+                Self::finish_decode(cache_key, Err(error.to_string()), animated);
+            }
         });
     }
 
-    fn try_spawn_decode(
-        weak_self: glib::SendWeakRef<Self>, bytes: glib::Bytes, animated: bool,
-        cache_file_path: Option<PathBuf>, cancellable: gio::Cancellable, generation: u64,
-        fetch_on_error: bool,
-    ) {
+    fn start_decode(cache_key: String, bytes: glib::Bytes, animated: bool) {
         let Some(decode_permit) = try_acquire_decode_permit() else {
             glib::timeout_add_local_once(IMAGE_DECODE_RETRY_DELAY, move || {
-                let weak_ref = weak_self.clone().into_weak_ref();
-                let Some(obj) = weak_ref.upgrade() else {
-                    return;
-                };
-                if obj.is_current(&cancellable, generation) {
-                    Self::try_spawn_decode(
-                        weak_self,
-                        bytes,
-                        animated,
-                        cache_file_path,
-                        cancellable,
-                        generation,
-                        fetch_on_error,
-                    );
-                }
+                Self::start_decode(cache_key, bytes, animated);
             });
             return;
         };
 
         rayon::spawn(move || {
-            let decoded = Self::decode_bytes(bytes, animated);
+            let decoded = Self::decode_bytes(bytes, animated).map_err(|error| error.to_string());
             drop(decode_permit);
             glib::idle_add_once(move || {
-                let weak_self = weak_self.into_weak_ref();
-                let Some(obj) = weak_self.upgrade() else {
-                    return;
-                };
-
-                if !obj.is_current(&cancellable, generation) {
-                    return;
-                }
-
-                match decoded {
-                    Ok(LoadedImage::Texture(texture)) => {
-                        obj.imp().picture.set_paintable(Some(&texture));
-                        obj.set_picture_visible(cancellable, generation);
-                    }
-                    Ok(LoadedImage::Decoded(decoded)) => {
-                        let paintable = ImagePaintable::from_decoded(decoded);
-                        obj.imp().picture.set_paintable(Some(&paintable));
-                        obj.set_picture_visible(cancellable, generation);
-                    }
-                    Err(_) if fetch_on_error => {
-                        if let Some(path) = cache_file_path {
-                            obj.get_file(path, cancellable, generation);
-                        } else {
-                            obj.set_broken(cancellable, generation);
-                        }
-                    }
-                    Err(_) => obj.set_broken(cancellable, generation),
-                }
+                Self::queue_decode_result(cache_key, decoded, animated);
             });
         });
+    }
+
+    fn queue_decode_result(cache_key: String, decoded: DecodeResult, animated: bool) {
+        PENDING_DECODE_RESULTS.with(|pending| {
+            pending.borrow_mut().push((cache_key, decoded, animated));
+        });
+
+        let was_scheduled = DECODE_FLUSH_SCHEDULED.with(|scheduled| scheduled.replace(true));
+        if was_scheduled {
+            return;
+        }
+
+        glib::timeout_add_local_once(IMAGE_RESULT_BATCH_DELAY, move || {
+            DECODE_FLUSH_SCHEDULED.with(|scheduled| scheduled.set(false));
+            let completed =
+                PENDING_DECODE_RESULTS.with(|pending| std::mem::take(&mut *pending.borrow_mut()));
+            for (cache_key, decoded, animated) in completed {
+                Self::finish_decode(cache_key, decoded, animated);
+            }
+        });
+    }
+
+    fn finish_decode(cache_key: String, decoded: DecodeResult, animated: bool) {
+        let waiters = IN_FLIGHT_DECODES.with(|in_flight| {
+            in_flight
+                .borrow_mut()
+                .remove(&cache_key)
+                .unwrap_or_default()
+        });
+
+        let paintable = decoded.map(|loaded| match loaded {
+            LoadedImage::Texture(texture) => texture.upcast::<gtk::gdk::Paintable>(),
+            LoadedImage::Decoded(decoded) => {
+                ImagePaintable::from_decoded(decoded).upcast::<gtk::gdk::Paintable>()
+            }
+        });
+
+        if let Ok(paintable) = &paintable
+            && !animated
+        {
+            DECODED_IMAGE_CACHE.with(|cache| {
+                cache
+                    .borrow_mut()
+                    .insert(cache_key, paintable.clone());
+            });
+        }
+
+        for waiter in waiters {
+            let Some(obj) = waiter.loader.upgrade() else {
+                continue;
+            };
+            if !obj.is_current(&waiter.cancellable, waiter.generation) {
+                continue;
+            }
+
+            match &paintable {
+                Ok(paintable) => {
+                    obj.imp().picture.set_paintable(Some(paintable));
+                    obj.set_picture_visible(waiter.cancellable, waiter.generation);
+                }
+                Err(_) if waiter.fetch_on_error => {
+                    if let Some(path) = waiter.cache_file_path {
+                        obj.get_file(path, waiter.cancellable, waiter.generation);
+                    } else {
+                        obj.set_broken(waiter.cancellable, waiter.generation);
+                    }
+                }
+                Err(_) => obj.set_broken(waiter.cancellable, waiter.generation),
+            }
+        }
     }
 
     fn decode_bytes(
@@ -497,23 +612,24 @@ impl PictureLoader {
     }
 
     pub fn get_file(&self, pathbuf: PathBuf, cancellable: gio::Cancellable, generation: u64) {
+        self.get_file_attempt(pathbuf, cancellable, generation, 0);
+    }
+
+    fn get_file_attempt(
+        &self, pathbuf: PathBuf, cancellable: gio::Cancellable, generation: u64, attempt: u8,
+    ) {
         let id = self.id();
         let image_type = self.imagetype();
         let tag = self.tag();
         let weak_self = self.downgrade();
+        let request_key = pathbuf.to_string_lossy().into_owned();
         spawn(async move {
             if cancellable.is_cancelled() {
                 return;
             }
 
-            spawn_tokio(async move {
-                let tag = tag.to_owned();
-                if let Err(e) = JELLYFIN_CLIENT
-                    .get_image(&id, &image_type, tag.and_then(|s| s.parse::<u8>().ok()))
-                    .await
-                {
-                    warn!("{}: {}-{}", e, id, image_type);
-                }
+            let result = spawn_tokio(async move {
+                Self::download_once(request_key, id, image_type, tag).await
             })
             .await;
 
@@ -521,10 +637,72 @@ impl PictureLoader {
                 return;
             };
 
-            if obj.is_current(&cancellable, generation) {
-                debug!("Setting image: {}", &pathbuf.display());
-                obj.reveal_picture(pathbuf, cancellable, generation, false);
+            if !obj.is_current(&cancellable, generation) {
+                return;
+            }
+
+            match result {
+                Ok(()) => {
+                    debug!("Setting image: {}", &pathbuf.display());
+                    obj.reveal_picture(pathbuf, cancellable, generation, false);
+                }
+                Err(error) => {
+                    warn!("{error}");
+                    if attempt == 0 {
+                        glib::timeout_future(IMAGE_NETWORK_RETRY_DELAY).await;
+                        if obj.is_current(&cancellable, generation) {
+                            obj.get_file_attempt(pathbuf, cancellable, generation, 1);
+                        }
+                    } else {
+                        obj.set_broken(cancellable, generation);
+                    }
+                }
             }
         });
+    }
+
+    async fn download_once(
+        request_key: String, id: String, image_type: String, tag: Option<String>,
+    ) -> Result<(), String> {
+        let receiver = {
+            let mut in_flight = IN_FLIGHT_DOWNLOADS
+                .lock()
+                .unwrap_or_else(|poisoned| poisoned.into_inner());
+            if let Some(waiters) = in_flight.get_mut(&request_key) {
+                let (sender, receiver) = tokio::sync::oneshot::channel();
+                waiters.push(sender);
+                Some(receiver)
+            } else {
+                in_flight.insert(request_key.clone(), Vec::new());
+                None
+            }
+        };
+
+        if let Some(receiver) = receiver {
+            return receiver
+                .await
+                .unwrap_or_else(|_| Err(format!("Poster request cancelled: {request_key}")));
+        }
+
+        let result = JELLYFIN_CLIENT
+            .get_image(
+                &id,
+                &image_type,
+                tag.and_then(|value| value.parse::<u8>().ok()),
+            )
+            .await
+            .map(|_| ())
+            .map_err(|error| format!("{error}: {id}-{image_type}"));
+
+        let waiters = IN_FLIGHT_DOWNLOADS
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner())
+            .remove(&request_key)
+            .unwrap_or_default();
+        for waiter in waiters {
+            let _ = waiter.send(result.clone());
+        }
+
+        result
     }
 }

@@ -2,10 +2,10 @@
 <interface>
   <template parent="AdwBin" class="HortuScrolled">
     <property name="visible">False</property>
-    <property name="margin-start">18</property>
-    <property name="margin-end">18</property>
-    <property name="margin-top">12</property>
-    <property name="margin-bottom">12</property>
+    <property name="margin-start">28</property>
+    <property name="margin-end">28</property>
+    <property name="margin-top">16</property>
+    <property name="margin-bottom">16</property>
     <child>
       <object class="GtkEventControllerMotion">
         <signal name="enter" handler="on_enter_focus" swapped="yes"/>
@@ -35,6 +35,7 @@
                     </attributes>
                     <style>
                       <class name="title-4" />
+                      <class name="poster-section-title" />
                     </style>
                   </object>
                 </child>
@@ -60,7 +61,7 @@
                 <property name="margin-end">12</property>
                 <child>
                   <object class="LazyDiffView" id="diffview">
-                    <property name="spacing">20</property>
+                    <property name="spacing">26</property>
                   </object>
                 </child>
                 <child type="overlay">

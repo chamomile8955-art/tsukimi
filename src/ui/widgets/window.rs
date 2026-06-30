@@ -23,6 +23,7 @@ mod imp {
     };
 
     use crate::{
+        client::Account,
         ui::{
             SETTINGS,
             mpv::{
@@ -116,6 +117,7 @@ mod imp {
         pub progress_bar_fade_animation: OnceCell<adw::TimedAnimation>,
 
         pub last_content_list_selection: RefCell<Option<i32>>,
+        pub context_server: RefCell<Option<Account>>,
 
         pub mpv_playlist_selection: gtk::SingleSelection,
 
@@ -168,6 +170,24 @@ mod imp {
             klass.install_action("win.search", None, |obj, _, _| {
                 obj.searchpage();
             });
+            klass.install_action("win.home", None, |obj, _, _| {
+                obj.homepage();
+            });
+            klass.install_action("win.favorites", None, |obj, _, _| {
+                obj.likedpage();
+            });
+            klass.install_action("win.server-switch", None, |obj, _, _| {
+                obj.switch_context_server();
+            });
+            klass.install_action("win.server-default", None, |obj, _, _| {
+                obj.set_context_server_default();
+            });
+            klass.install_action("win.server-edit", None, |obj, _, _| {
+                obj.edit_context_server();
+            });
+            klass.install_action("win.server-delete", None, |obj, _, _| {
+                obj.delete_context_server();
+            });
             klass.install_action("win.add-server", None, |obj, _, _| {
                 obj.new_account();
             });
@@ -213,6 +233,7 @@ mod imp {
             ));
 
             obj.bind_about_action();
+            obj.setup_server_context_menu();
 
             spawn(glib::clone!(
                 #[weak(rename_to = obj)]
@@ -296,6 +317,108 @@ pub const PROGRESSBAR_FADE_ANIMATION_DURATION: u32 = 500;
 
 #[template_callbacks]
 impl Window {
+    fn setup_server_context_menu(&self) {
+        let menu = gio::Menu::new();
+        menu.append(
+            Some(&gettext("Switch Server")),
+            Some("win.server-switch"),
+        );
+        menu.append(
+            Some(&gettext("Set as Default")),
+            Some("win.server-default"),
+        );
+        menu.append(Some(&gettext("Edit Server")), Some("win.server-edit"));
+        menu.append(
+            Some(&gettext("Delete Server")),
+            Some("win.server-delete"),
+        );
+        self.imp().servers_section.set_menu_model(Some(&menu));
+
+        self.imp().selectlist.connect_setup_menu(glib::clone!(
+            #[weak(rename_to = obj)]
+            self,
+            move |_, item| {
+                let account = item
+                    .filter(|item| {
+                        item.section()
+                            .is_some_and(|section| section == *obj.imp().servers_section)
+                    })
+                    .and_then(|item| {
+                        SETTINGS
+                            .accounts()
+                            .get(item.section_index() as usize)
+                            .cloned()
+                    });
+                obj.imp().context_server.replace(account);
+            }
+        ));
+    }
+
+    fn switch_context_server(&self) {
+        let Some(account) = self.imp().context_server.borrow().clone() else {
+            return;
+        };
+        spawn(glib::clone!(
+            #[weak(rename_to = obj)]
+            self,
+            async move {
+                SETTINGS
+                    .set_preferred_server(&account.servername)
+                    .expect("Failed to set preferred server");
+                let _ = JELLYFIN_CLIENT.init(&account).await;
+                obj.reset();
+            }
+        ));
+    }
+
+    fn set_context_server_default(&self) {
+        let Some(account) = self.imp().context_server.borrow().clone() else {
+            return;
+        };
+        SETTINGS
+            .set_preferred_server(&account.servername)
+            .expect("Failed to set preferred server");
+    }
+
+    fn edit_context_server(&self) {
+        use crate::ui::widgets::account_add::imp::ActionType;
+
+        let Some(account) = self.imp().context_server.borrow().clone() else {
+            return;
+        };
+        let dialog = crate::ui::widgets::account_add::AccountWindow::new();
+        dialog.imp().nav.set_title(&gettext("Edit Server"));
+        dialog.set_action_type(ActionType::Edit);
+        dialog.imp().old_account.replace(Some(account.clone()));
+        dialog.imp().username_entry.set_text(&account.username);
+        dialog.imp().password_entry.set_text(&account.password);
+        dialog.imp().servername_entry.set_text(&account.servername);
+        dialog.imp().port_entry.set_text(&account.port);
+        dialog.imp().server_entry.set_text(&account.server);
+        dialog
+            .imp()
+            .server_type
+            .set_selected(account.server_type.unwrap_or_default().index());
+        dialog.present(Some(self));
+    }
+
+    fn delete_context_server(&self) {
+        let Some(account) = self.imp().context_server.borrow().clone() else {
+            return;
+        };
+        SETTINGS
+            .remove_account(account)
+            .expect("Failed to remove server");
+        spawn(glib::clone!(
+            #[weak(rename_to = obj)]
+            self,
+            async move {
+                obj.set_servers().await;
+                obj.set_nav_servers();
+            }
+        ));
+    }
+
     pub fn homepage(&self) {
         let imp = self.imp();
         if imp.homepage.child().is_none() {
@@ -313,7 +436,7 @@ impl Window {
         if imp.likedpage.child().is_none() {
             imp.likedpage.set_child(Some(&LikedPage::new()));
         }
-        imp.navipage.set_title(&gettext("Liked"));
+        imp.navipage.set_title(&gettext("Favorites"));
         imp.mainview.pop_to_tag("mainpage");
         imp.insidestack.set_visible_child_name("likedpage");
         imp.popbutton.set_visible(false);
@@ -368,7 +491,12 @@ impl Window {
                 && account.servername == SETTINGS.preferred_server()
                 && JELLYFIN_CLIENT.session().account.user_id.is_empty()
             {
+                let started = std::time::Instant::now();
                 let _ = JELLYFIN_CLIENT.init(account).await;
+                tracing::info!(
+                    elapsed_ms = started.elapsed().as_millis() as u64,
+                    "Startup timing: server API initialized"
+                );
                 self.reset();
             }
         }
@@ -464,6 +592,7 @@ impl Window {
         for account in accounts {
             let item = adw::SidebarItem::new(&account.servername);
             item.set_icon_name(Some("network-server-symbolic"));
+            item.set_subtitle(Some(&format!("{}:{}", account.server, account.port)));
             imp.servers_section.append(item);
         }
     }

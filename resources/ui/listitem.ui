@@ -75,7 +75,7 @@
                 <property name="margin-end">10</property>
                 <property name="opacity">0.9</property>
                 <attributes>
-                    <attribute name="scale" value="0.9" />
+                    <attribute name="scale" value="1.0" />
                     <attribute name="weight" value="PANGO_WEIGHT_BOLD" />
                 </attributes>
                 </object>

@@ -1,8 +1,14 @@
 # tsukimi
-A simple third-party Jellyfin client for Linux.
+A Windows-focused fork of the third-party Jellyfin client Tsukimi.
 
-[![Telegram](https://img.shields.io/badge/-Telegram_Group-red?color=blue&logo=telegram&logoColor=white)](https://t.me/tsukimi_frying_crab) ![Commit Activity](https://img.shields.io/github/commit-activity/m/tsukinaha/Tsukimi/main) ![Top Language](https://img.shields.io/github/languages/top/tsukinaha/Tsukimi) ![Github License](https://img.shields.io/github/license/tsukinaha/Tsukimi) [![Linux CI](https://github.com/tsukinaha/tsukimi/actions/workflows/build_linux.yml/badge.svg)](https://github.com/tsukinaha/tsukimi/actions/workflows/build_linux.yml) [![Flathub Version](https://img.shields.io/flathub/v/moe.tsuna.tsukimi?color=white)](https://flathub.org/apps/details/moe.tsuna.tsukimi) [![Wiki](https://img.shields.io/badge/-Wiki-red?color=blue&logo=github&logoColor=white)](https://github.com/tsukinaha/tsukimi/wiki) [![Translate Status](https://hosted.weblate.org/widget/tsukimi/language-badge.svg)](https://hosted.weblate.org/engage/tsukimi)
+> [!IMPORTANT]
+> This fork maintains Windows portable builds only. Windows artifacts and
+> optional Windows releases are produced by
+> [`.github/workflows/windows.yml`](./.github/workflows/windows.yml). Linux and
+> macOS users should use the
+> [official upstream repository](https://github.com/tsukinaha/tsukimi).
 
+![Commit Activity](https://img.shields.io/github/commit-activity/m/tsukinaha/Tsukimi/main) ![Top Language](https://img.shields.io/github/languages/top/tsukinaha/Tsukimi) ![Github License](https://img.shields.io/github/license/tsukinaha/Tsukimi) [![Flathub Version](https://img.shields.io/flathub/v/moe.tsuna.tsukimi?color=white)](https://flathub.org/apps/details/moe.tsuna.tsukimi) [![Wiki](https://img.shields.io/badge/-Wiki-red?color=blue&logo=github&logoColor=white)](https://github.com/tsukinaha/tsukimi/wiki) [![Translate Status](https://hosted.weblate.org/widget/tsukimi/language-badge.svg)](https://hosted.weblate.org/engage/tsukimi)
 
 ![Alt](https://repobeats.axiom.co/api/embed/82b1088ba840d89c50e1b5b3c1c40f4575b321a6.svg "Repobeats analytics image")
 
@@ -26,6 +32,20 @@ You can play music and albums, as well as videos with more advanced settings.
 </div>
 
 ## Installation
+
+### Windows
+
+Run the [Windows workflow](./.github/workflows/windows.yml) manually from the
+GitHub Actions page, then download its `tsukimi-windows-x86_64` artifact. See
+[Windows portable build and data cleanup](./docs/windows.md) for extraction,
+storage, and cleanup details.
+
+### Linux and macOS
+
+This fork does not publish Linux or macOS builds. Use the
+[official upstream project](https://github.com/tsukinaha/tsukimi) for supported
+packages and platform build instructions. The package references below belong
+to the upstream Linux project.
 
 <a href="https://flathub.org/apps/details/moe.tsuna.tsukimi">
 <img
@@ -73,9 +93,9 @@ sudo emerge --ask media-video/tsukimi
 `tsukimi` is available in nixpkgs since 24.11.
 
 ### Source code
-[Build on Linux](./docs/build_on_linux.md)
-
 [Windows portable build and data cleanup](./docs/windows.md)
+
+[Upstream Tsukimi source and Linux/macOS support](https://github.com/tsukinaha/tsukimi)
 
 ## MPV Config
 [MPV-manual#files](https://mpv.io/manual/master/#files)

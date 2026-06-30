@@ -70,6 +70,10 @@ mod imp {
 
             let window = crate::Window::new(&self.obj());
             window.load_window_state();
+            window.add_tick_callback(|_, _| {
+                crate::log_startup_timing("render ready");
+                glib::ControlFlow::Break
+            });
             window.present();
         }
     }

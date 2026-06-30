@@ -30,6 +30,8 @@ use crate::{
 };
 
 pub const SHOW_BUTTON_ANIMATION_DURATION: u32 = 500;
+static FIRST_POSTER_MODEL_READY: std::sync::atomic::AtomicBool =
+    std::sync::atomic::AtomicBool::new(false);
 
 #[derive(Default, Hash, Eq, PartialEq, Clone, Copy, glib::Enum, Debug)]
 #[repr(u32)]
@@ -216,6 +218,7 @@ impl HortuScrolled {
     }
 
     pub fn set_items(&self, items: Vec<SimpleListItem>) {
+        let started = std::time::Instant::now();
         let imp = self.imp();
 
         if items.is_empty() {
@@ -258,6 +261,13 @@ impl HortuScrolled {
         imp.diffview.set_items(items);
 
         imp.revealer.set_reveal_child(true);
+        if !FIRST_POSTER_MODEL_READY.swap(true, std::sync::atomic::Ordering::Relaxed) {
+            tracing::info!(
+                elapsed_ms = started.elapsed().as_millis() as u64,
+                "Startup timing: poster model scan ready"
+            );
+            crate::log_startup_timing("poster scan ready");
+        }
     }
 
     fn set_left_opacity(&self, opacity: f64) {

@@ -9,7 +9,7 @@
         <child>
           <object class="GtkRevealer" id="revealer">
             <property name="transition-type">crossfade</property>
-            <property name="transition-duration">500</property>
+            <property name="transition-duration">180</property>
             <child>
               <object class="GtkPicture" id="picture">
                 <property name="valign">fill</property>
@@ -37,13 +37,10 @@
                 <property name="valign">center</property>
                 <property name="icon-name">image-missing-symbolic</property>
                 <property name="icon-size">GTK_ICON_SIZE_LARGE</property>
-                <style>
-                  <class name="accent" />
-                </style>
               </object>
             </child>
             <style>
-              <class name="card" />
+              <class name="poster-missing" />
             </style>
           </object>
         </child>

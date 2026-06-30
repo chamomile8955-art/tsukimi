@@ -189,9 +189,9 @@
                         <property name="name">main</property>
                         <property name="child">
                           <object class="AdwOverlaySplitView" id="split_view">
-                            <property name="min-sidebar-width">200</property>
-                            <property name="max-sidebar-width">400</property>
-                            <property name="sidebar-width-fraction">0.13</property>
+                            <property name="min-sidebar-width">260</property>
+                            <property name="max-sidebar-width">360</property>
+                            <property name="sidebar-width-fraction">0.14</property>
                             <property name="sidebar">
                               <object class="AdwNavigationPage">
                                 <property name="title">Tsukimi</property>
@@ -200,6 +200,14 @@
                                     <child type="top">
                                       <object class="AdwHeaderBar">
                                         <property name="show-start-title-buttons">false</property>
+                                        <property name="title-widget">
+                                          <object class="GtkLabel">
+                                            <property name="label" translatable="yes">Sources</property>
+                                            <style>
+                                              <class name="title-3"/>
+                                            </style>
+                                          </object>
+                                        </property>
                                         <child type="start">
                                           <object class="GtkToggleButton" id="backbutton">
                                             <property name="icon-name">system-log-out-symbolic</property>
@@ -242,23 +250,28 @@
                                     <property name="content">
                                       <object class="AdwSidebar" id="selectlist">
                                         <signal name="activated" handler="on_sidebar_activated" swapped="yes"/>
+                                        <style>
+                                          <class name="source-sidebar"/>
+                                        </style>
                                         <child>
                                           <object class="AdwSidebarSection">
-                                            <property name="title" translatable="yes">Contents</property>
                                             <child>
                                               <object class="AdwSidebarItem">
+                                                <property name="visible">False</property>
                                                 <property name="title" translatable="yes">Home</property>
                                                 <property name="icon-name">go-home-symbolic</property>
                                               </object>
                                             </child>
                                             <child>
                                               <object class="AdwSidebarItem">
-                                                <property name="title" translatable="yes">Liked</property>
+                                                <property name="visible">False</property>
+                                                <property name="title" translatable="yes">Favorites</property>
                                                 <property name="icon-name">emote-love-symbolic</property>
                                               </object>
                                             </child>
                                             <child>
                                               <object class="AdwSidebarItem">
+                                                <property name="visible">False</property>
                                                 <property name="title" translatable="yes">Search</property>
                                                 <property name="icon-name">system-search-symbolic</property>
                                               </object>
@@ -285,6 +298,45 @@
                                     <child type="top">
                                       <object class="AdwHeaderBar">
                                         <property name="show-back-button">False</property>
+                                        <property name="title-widget">
+                                          <object class="GtkBox">
+                                            <property name="orientation">horizontal</property>
+                                            <property name="spacing">8</property>
+                                            <style>
+                                              <class name="top-navigation"/>
+                                            </style>
+                                            <child>
+                                              <object class="GtkButton">
+                                                <property name="label" translatable="yes">Home</property>
+                                                <property name="action-name">win.home</property>
+                                                <style>
+                                                  <class name="flat"/>
+                                                  <class name="pill"/>
+                                                </style>
+                                              </object>
+                                            </child>
+                                            <child>
+                                              <object class="GtkButton">
+                                                <property name="label" translatable="yes">Favorites</property>
+                                                <property name="action-name">win.favorites</property>
+                                                <style>
+                                                  <class name="flat"/>
+                                                  <class name="pill"/>
+                                                </style>
+                                              </object>
+                                            </child>
+                                            <child>
+                                              <object class="GtkButton">
+                                                <property name="label" translatable="yes">Search</property>
+                                                <property name="action-name">win.search</property>
+                                                <style>
+                                                  <class name="flat"/>
+                                                  <class name="pill"/>
+                                                </style>
+                                              </object>
+                                            </child>
+                                          </object>
+                                        </property>
                                         <child type="start">
                                           <object class="GtkToggleButton" id="sidebar">
                                             <property name="icon-name">sidebar-show-symbolic</property>

@@ -69,7 +69,6 @@ pub mod imp {
     pub struct BackdropNodeCache {
         node: gsk::RenderNode,
         backdrop_y: f32,
-        backdrop_h: f32,
         widget_w: f32,
         /// Validity key: (width_px, height_px, is_dark, paintable_ptr)
         key: (i32, i32, bool, usize),
@@ -131,6 +130,7 @@ pub mod imp {
             let style_manager = adw::StyleManager::default();
             self.is_dark.set(style_manager.is_dark());
             let obj = self.obj();
+            obj.set_overflow(gtk::Overflow::Visible);
 
             style_manager.connect_dark_notify(glib::clone!(
                 #[weak]
@@ -332,7 +332,6 @@ pub mod imp {
             Some(BackdropNodeCache {
                 node,
                 backdrop_y,
-                backdrop_h,
                 widget_w,
                 key,
             })
@@ -346,15 +345,26 @@ pub mod imp {
                 return;
             }
 
-            const CR: f32 = 10.0;
+            // Keep playback progress as a quiet edge indicator. Filling the
+            // whole blurred title backdrop produced the red/colored block
+            // that could look like a poster replacement during hover.
+            const PROGRESS_HEIGHT: f32 = 4.0;
+            const CORNER_RADIUS: f32 = 2.0;
             let fill_w = (cache.widget_w * progress).min(cache.widget_w);
-            let fill_rect = graphene::Rect::new(0.0, cache.backdrop_y, fill_w, cache.backdrop_h);
+            let progress_y = cache.backdrop_y + 6.0;
+            let fill_rect =
+                graphene::Rect::new(0.0, progress_y, fill_w, PROGRESS_HEIGHT);
             let fill_clip = gsk::RoundedRect::new(
-                graphene::Rect::new(0.0, cache.backdrop_y, cache.widget_w, cache.backdrop_h),
-                graphene::Size::new(0.0, 0.0),
-                graphene::Size::new(0.0, 0.0),
-                graphene::Size::new(CR, CR),
-                graphene::Size::new(CR, CR),
+                graphene::Rect::new(
+                    0.0,
+                    progress_y,
+                    cache.widget_w,
+                    PROGRESS_HEIGHT,
+                ),
+                graphene::Size::new(CORNER_RADIUS, CORNER_RADIUS),
+                graphene::Size::new(CORNER_RADIUS, CORNER_RADIUS),
+                graphene::Size::new(CORNER_RADIUS, CORNER_RADIUS),
+                graphene::Size::new(CORNER_RADIUS, CORNER_RADIUS),
             );
 
             snapshot.push_rounded_clip(&fill_clip);
