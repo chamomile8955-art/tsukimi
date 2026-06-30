@@ -120,6 +120,9 @@ impl Default for TsukimiMPV {
             init.set_property("sub-font-size", SETTINGS.mpv_subtitle_size() as i64)?;
             init.set_property("sub-font", SETTINGS.mpv_subtitle_font())?;
             init.set_property("sub-scale", SETTINGS.mpv_subtitle_scale())?;
+            #[cfg(target_os = "windows")]
+            init.set_property("hwdec", "auto-safe")?;
+            #[cfg(not(target_os = "windows"))]
             init.set_property("hwdec", match_hwdec_interop(SETTINGS.mpv_hwdec()))?;
             init.set_property("scale", match_video_upscale(SETTINGS.mpv_video_scale()))?;
             if SETTINGS.mpv_action_after_video_end() == 1 {
@@ -632,9 +635,10 @@ fn get_modstr(state: gtk::gdk::ModifierType) -> String {
 use gtk::glib::translate::FromGlib;
 use url::Url;
 
+#[cfg(not(target_os = "windows"))]
+use super::options_matcher::match_hwdec_interop;
 use super::options_matcher::{
     match_audio_channels,
-    match_hwdec_interop,
     match_video_upscale,
 };
 use crate::{
