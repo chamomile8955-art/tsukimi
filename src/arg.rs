@@ -7,7 +7,6 @@ use std::{
 
 use clap::Parser;
 use tracing::{
-    error,
     info,
     level_filters::LevelFilter,
 };
@@ -22,8 +21,8 @@ const DEFAULT_RENDERER: &str = "ngl";
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 pub struct Args {
-    /// File to write the log to. If not specified, logs will be written to
-    /// stderr.
+    /// File to write the log to. Windows portable builds keep the file in
+    /// their local logs directory; other builds use the supplied path.
     #[clap(long, short = 'f')]
     log_file: Option<String>,
 
@@ -59,22 +58,65 @@ impl Args {
             _ => builder.with_max_level(LevelFilter::INFO),
         };
 
+        #[cfg(target_os = "windows")]
+        let log_file = {
+            let requested_name = self
+                .log_file
+                .as_deref()
+                .and_then(|path| std::path::Path::new(path).file_name());
+            if let Some(name) = requested_name {
+                Some(crate::windows_portable_paths().logs.join(name))
+            } else if cfg!(debug_assertions) || cfg!(feature = "console") {
+                None
+            } else {
+                Some(
+                    crate::windows_portable_paths()
+                        .logs
+                        .join("tsukimi.log"),
+                )
+            }
+        };
+        #[cfg(not(target_os = "windows"))]
         match &self.log_file {
             None => builder.with_writer(io::stderr).init(),
-            Some(f) => {
-                let tracing_writer = match File::create(f) {
+            Some(path) => {
+                let tracing_writer = match File::create(path) {
                     Ok(f) => f,
                     Err(e) => {
-                        error!("Failed to create tracing file {}", e);
+                        tracing::error!("Failed to create tracing file {}", e);
                         return;
                     }
                 };
 
-                info!("Logging to file {}", f);
+                info!("Logging to file {}", path);
                 builder
                     .with_ansi(false)
                     .with_writer(Mutex::new(tracing_writer))
                     .init()
+            }
+        }
+
+        #[cfg(target_os = "windows")]
+        match log_file {
+            None => builder.with_writer(io::stderr).init(),
+            Some(path) => {
+                let tracing_writer = match File::create(&path) {
+                    Ok(f) => f,
+                    Err(e) => {
+                        eprintln!(
+                            "Failed to create tracing file {}: {}",
+                            path.display(),
+                            e
+                        );
+                        return;
+                    }
+                };
+
+                builder
+                    .with_ansi(false)
+                    .with_writer(Mutex::new(tracing_writer))
+                    .init();
+                info!("Logging to file {}", path.display());
             }
         }
     }
@@ -123,6 +165,16 @@ impl Args {
 
     pub fn init(&self) {
         self.init_tracing_subscriber();
+        #[cfg(target_os = "windows")]
+        {
+            let paths = crate::windows_portable_paths();
+            info!("Windows portable mode root: {}", paths.root.display());
+            info!("Portable config directory: {}", paths.config.display());
+            info!("Portable cache directory: {}", paths.cache.display());
+            info!("Portable data directory: {}", paths.data.display());
+            info!("Portable log directory: {}", paths.logs.display());
+            info!("Portable temporary directory: {}", paths.temp.display());
+        }
         self.init_gsk_renderer();
         self.init_glib_to_tracing();
 

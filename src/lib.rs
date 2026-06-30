@@ -42,6 +42,27 @@ pub const CLIENT_ID: &str = "Tsukimi";
 const APP_RESOURCE_PATH: &str = "/moe/tsuna/tsukimi";
 const GRESOURCE_FILE: &str = "tsukimi.gresource";
 
+#[cfg(target_os = "windows")]
+#[derive(Debug)]
+pub(crate) struct WindowsPortablePaths {
+    pub root: std::path::PathBuf,
+    pub data: std::path::PathBuf,
+    pub cache: std::path::PathBuf,
+    pub config: std::path::PathBuf,
+    pub logs: std::path::PathBuf,
+    pub temp: std::path::PathBuf,
+}
+
+#[cfg(target_os = "windows")]
+static WINDOWS_PORTABLE_PATHS: OnceCell<WindowsPortablePaths> = OnceCell::new();
+
+#[cfg(target_os = "windows")]
+pub(crate) fn windows_portable_paths() -> &'static WindowsPortablePaths {
+    WINDOWS_PORTABLE_PATHS
+        .get()
+        .expect("Windows portable paths are not initialized")
+}
+
 pub fn locale_dir() -> &'static str {
     static FLOCALEDIR: OnceCell<String> = OnceCell::new();
     FLOCALEDIR
@@ -69,14 +90,60 @@ fn configure_windows_runtime() {
         .ok()
         .and_then(|executable| executable.parent().map(std::path::Path::to_path_buf))
     else {
-        return;
+        panic!("Failed to determine the directory containing tsukimi.exe");
     };
 
+    let portable_paths = WindowsPortablePaths {
+        data: directory.join("data"),
+        cache: directory.join("cache"),
+        config: directory.join("config"),
+        logs: directory.join("logs"),
+        temp: directory.join("cache/temp"),
+        root: directory.clone(),
+    };
+    let runtime_dir = portable_paths.cache.join("runtime");
+    let gstreamer_dir = portable_paths.cache.join("gstreamer-1.0");
+    for path in [
+        &portable_paths.data,
+        &portable_paths.cache,
+        &portable_paths.config,
+        &portable_paths.logs,
+        &portable_paths.temp,
+        &runtime_dir,
+        &gstreamer_dir,
+    ] {
+        std::fs::create_dir_all(path).unwrap_or_else(|error| {
+            panic!(
+                "Failed to create portable directory {}: {error}",
+                path.display()
+            )
+        });
+    }
+    WINDOWS_PORTABLE_PATHS
+        .set(portable_paths)
+        .expect("Windows portable paths were initialized twice");
+    let portable_paths = windows_portable_paths();
+
+    let set_path = |name: &str, path: &std::path::Path| {
+        unsafe { std::env::set_var(name, path) };
+    };
     let set_path_if_unset = |name: &str, path: std::path::PathBuf| {
         if std::env::var_os(name).is_none() {
             unsafe { std::env::set_var(name, path) };
         }
     };
+
+    set_path("HOME", &portable_paths.data);
+    set_path("XDG_DATA_HOME", &portable_paths.data);
+    set_path("XDG_CACHE_HOME", &portable_paths.cache);
+    set_path("XDG_CONFIG_HOME", &portable_paths.config);
+    set_path("XDG_STATE_HOME", &portable_paths.data);
+    set_path("XDG_RUNTIME_DIR", &runtime_dir);
+    set_path("TEMP", &portable_paths.temp);
+    set_path("TMP", &portable_paths.temp);
+    set_path("TMPDIR", &portable_paths.temp);
+    set_path("GST_REGISTRY", &gstreamer_dir.join("registry.bin"));
+    unsafe { std::env::set_var("GSETTINGS_BACKEND", "keyfile") };
 
     set_path_if_unset(
         "GSETTINGS_SCHEMA_DIR",

@@ -75,6 +75,8 @@ sudo emerge --ask media-video/tsukimi
 ### Source code
 [Build on Linux](./docs/build_on_linux.md)
 
+[Windows portable build and data cleanup](./docs/windows.md)
+
 ## MPV Config
 [MPV-manual#files](https://mpv.io/manual/master/#files)
 

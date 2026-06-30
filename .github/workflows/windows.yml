@@ -143,10 +143,18 @@ jobs:
         run: |
           set -euxo pipefail
 
-          dist="$PWD/dist/tsukimi-windows-x86_64"
-          mkdir -p "$dist"
+          dist="$PWD/dist/Tsukimi"
+          mkdir -p \
+            "$dist" \
+            "$dist/data" \
+            "$dist/cache" \
+            "$dist/config" \
+            "$dist/logs" \
+            "$dist/tools/windows"
           cp target/release/tsukimi.exe "$dist/"
           cp LICENSE "$dist/"
+          cp tools/windows/clean-tsukimi-data.ps1 "$dist/tools/windows/"
+          cp tools/windows/clean-tsukimi-data.bat "$dist/tools/windows/"
 
           # Tsukimi loads its GResource and GSettings schema at runtime.
           mkdir -p "$dist/share/tsukimi"
@@ -257,9 +265,32 @@ jobs:
       - name: Create ZIP
         shell: pwsh
         run: |
+          $zipPath = Join-Path $PWD "tsukimi-windows-x86_64.zip"
           Compress-Archive `
-            -Path dist/tsukimi-windows-x86_64 `
-            -DestinationPath tsukimi-windows-x86_64.zip
+            -Path dist/Tsukimi `
+            -DestinationPath $zipPath
+
+          # Compress-Archive can omit empty directories, so add the portable
+          # storage roots explicitly to guarantee the requested ZIP layout.
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $archive = [System.IO.Compression.ZipFile]::Open(
+            $zipPath,
+            [System.IO.Compression.ZipArchiveMode]::Update
+          )
+          try {
+            foreach ($entryName in @(
+              "Tsukimi/data/",
+              "Tsukimi/cache/",
+              "Tsukimi/config/",
+              "Tsukimi/logs/"
+            )) {
+              if ($null -eq $archive.GetEntry($entryName)) {
+                $null = $archive.CreateEntry($entryName)
+              }
+            }
+          } finally {
+            $archive.Dispose()
+          }
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
