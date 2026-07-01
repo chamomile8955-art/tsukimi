@@ -4,7 +4,10 @@ use std::{
         LazyLock,
         OnceLock,
     },
-    time::Instant,
+    time::{
+        Duration,
+        Instant,
+    },
 };
 
 mod app;
@@ -36,8 +39,6 @@ pub use ui::Window;
 
 pub use app::TsukimiApplication as Application;
 
-use crate::ui::widgets;
-
 pub static USER_AGENT: LazyLock<String> =
     LazyLock::new(|| format!("{}/{} - {}", CLIENT_ID, version(), env::consts::OS));
 
@@ -49,12 +50,16 @@ static STARTUP_STARTED: OnceLock<Instant> = OnceLock::new();
 
 pub(crate) fn log_startup_timing(stage: &str) {
     if let Some(started) = STARTUP_STARTED.get() {
-        tracing::info!(
-            stage = %stage,
-            elapsed_ms = started.elapsed().as_millis() as u64,
-            "Startup timing"
-        );
+        log_startup_timing_at(stage, started.elapsed());
     }
+}
+
+fn log_startup_timing_at(stage: &str, elapsed: Duration) {
+    tracing::info!(
+        stage = %stage,
+        elapsed_ms = elapsed.as_millis() as u64,
+        "Startup timing"
+    );
 }
 
 #[cfg(target_os = "windows")]
@@ -205,9 +210,16 @@ pub fn run() -> gtk::glib::ExitCode {
     STARTUP_STARTED.get_or_init(Instant::now);
 
     #[cfg(target_os = "windows")]
-    configure_windows_runtime();
+    let portable_paths_ready = {
+        configure_windows_runtime();
+        STARTUP_STARTED.get().expect("startup clock").elapsed()
+    };
 
     Args::parse().init();
+    log_startup_timing_at("process start", Duration::ZERO);
+    #[cfg(target_os = "windows")]
+    log_startup_timing_at("portable paths ready", portable_paths_ready);
+
     // Initialize gettext
     setlocale(LocaleCategory::LcAll, String::new());
     bind_textdomain_codeset(GETTEXT_PACKAGE, "UTF-8").expect("Failed to set textdomain codeset");
@@ -217,10 +229,9 @@ pub fn run() -> gtk::glib::ExitCode {
     textdomain(GETTEXT_PACKAGE).expect("Invalid string passed to textdomain");
 
     adw::init().expect("Failed to initialize Adwaita");
+    log_startup_timing("GTK initialized");
     register_gio_resources();
-
-    widgets::init();
-    log_startup_timing("init");
+    log_startup_timing("GTK resources ready");
 
     // Initialize the GTK application
     gtk::glib::set_application_name(CLIENT_ID);

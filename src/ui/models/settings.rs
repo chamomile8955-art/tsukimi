@@ -136,7 +136,43 @@ impl Settings {
     }
 
     pub fn accounts(&self) -> Vec<Account> {
-        serde_json::from_str(self.string(Self::ACCOUNTS).as_ref()).unwrap_or_default()
+        let mut accounts: Vec<Account> =
+            serde_json::from_str(self.string(Self::ACCOUNTS).as_ref()).unwrap_or_default();
+        let mut changed = false;
+
+        for account in &mut accounts {
+            let legacy_address = account.routes.is_empty() && !account.server.is_empty();
+            let selected_before = account.selected_route.clone();
+            if account.normalize_routes() {
+                changed = true;
+                if legacy_address {
+                    tracing::info!(
+                        server = %account.servername,
+                        route = %account
+                            .active_route()
+                            .map(|route| route.name.as_str())
+                            .unwrap_or(""),
+                        "Migrated legacy server address to route list"
+                    );
+                }
+                if selected_before != account.selected_route {
+                    tracing::warn!(
+                        server = %account.servername,
+                        missing_route = %selected_before.as_deref().unwrap_or("<not selected>"),
+                        fallback_route = %account.selected_route.as_deref().unwrap_or("<none>"),
+                        "Server route selection fallback"
+                    );
+                }
+            }
+        }
+
+        if changed
+            && let Err(error) = self.set_string(Self::ACCOUNTS, &accounts.to_string())
+        {
+            tracing::warn!(%error, "Failed to persist server route migration");
+        }
+
+        accounts
     }
 
     pub fn add_account(&self, account: Account) -> Result<(), glib::BoolError> {

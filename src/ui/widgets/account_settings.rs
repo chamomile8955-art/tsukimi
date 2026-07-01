@@ -226,6 +226,18 @@ impl AccountSettings {
     }
 
     #[template_callback]
+    fn on_open_shortcuts(&self) {
+        let Some(dialog) =
+            gtk::Builder::from_resource("/moe/tsuna/tsukimi/ui/mpv_shortcuts_window.ui")
+                .object::<adw::ShortcutsDialog>("shortcuts_dialog")
+        else {
+            self.toast(gettext("Failed to load shortcuts"));
+            return;
+        };
+        dialog.present(Some(self));
+    }
+
+    #[template_callback]
     async fn on_change_password(&self, _button: gtk::Button) {
         let new_password = self.imp().password_entry.text();
         let new_password_second = self.imp().password_second_entry.text();

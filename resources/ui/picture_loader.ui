@@ -29,14 +29,27 @@
         <child type="overlay">
           <object class="GtkBox" id="broken">
             <property name="hexpand">True</property>
+            <property name="orientation">vertical</property>
+            <property name="spacing">8</property>
+            <property name="halign">fill</property>
+            <property name="valign">center</property>
             <property name="visible">False</property>
             <child>
               <object class="GtkImage">
                 <property name="halign">center</property>
-                <property name="hexpand">True</property>
-                <property name="valign">center</property>
                 <property name="icon-name">image-missing-symbolic</property>
                 <property name="icon-size">GTK_ICON_SIZE_LARGE</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel" id="broken_title">
+                <property name="ellipsize">end</property>
+                <property name="justify">center</property>
+                <property name="lines">2</property>
+                <property name="margin-start">12</property>
+                <property name="margin-end">12</property>
+                <property name="visible">False</property>
+                <property name="wrap">True</property>
               </object>
             </child>
             <style>

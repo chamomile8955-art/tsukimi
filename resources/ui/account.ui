@@ -62,32 +62,6 @@
                                               </object>
                                             </child>
                                             <child>
-                                              <object class="AdwEntryRow" id="server_entry">
-                                                <property name="title" translatable="yes">Server Address</property>
-                                                <signal name="changed" handler="on_server_entry_changed" swapped="yes" />
-                                                <child type="prefix">
-                                                  <object class="GtkDropDown" id="protocol">
-                                                    <property name="valign">center</property>
-                                                    <property name="model">
-                                                      <object class="GtkStringList">
-                                                        <items>
-                                                          <item>http://</item>
-                                                          <item>https://</item>
-                                                        </items>
-                                                      </object>
-                                                    </property>
-                                                  </object>
-                                                </child>
-                                                <child type="suffix">
-                                                  <object class="GtkEntry" id="port_entry">
-                                                    <property name="halign">end</property>
-                                                    <property name="valign">center</property>
-                                                    <property name="placeholder-text" translatable="yes">Port</property>
-                                                  </object>
-                                                </child>
-                                              </object>
-                                            </child>
-                                            <child>
                                               <object class="AdwEntryRow" id="username_entry">
                                                 <property name="title" translatable="yes">Username</property>
                                               </object>
@@ -99,6 +73,22 @@
                                                 <signal name="entry-activated" handler="on_password_entry_activated" swapped="yes"/>
                                               </object>
                                             </child>
+                                          </object>
+                                        </child>
+                                        <child>
+                                          <object class="AdwPreferencesGroup" id="routes_group">
+                                            <property name="title" translatable="yes">Server Routes</property>
+                                            <property name="description" translatable="yes">Add LAN, public, reverse-proxy, or VPN addresses for this server.</property>
+                                            <property name="header-suffix">
+                                              <object class="GtkButton">
+                                                <property name="icon-name">list-add-symbolic</property>
+                                                <property name="tooltip-text" translatable="yes">Add Route</property>
+                                                <signal name="clicked" handler="on_add_route_clicked" swapped="yes"/>
+                                                <style>
+                                                  <class name="flat"/>
+                                                </style>
+                                              </object>
+                                            </property>
                                           </object>
                                         </child>
                                         <child>

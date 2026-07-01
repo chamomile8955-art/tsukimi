@@ -5,5 +5,8 @@ pub mod proxy;
 pub mod runtime;
 pub mod structs;
 
-pub use account::Account;
+pub use account::{
+    Account,
+    ServerRoute,
+};
 pub use proxy::ReqClient;

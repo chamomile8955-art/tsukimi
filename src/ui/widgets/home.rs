@@ -188,6 +188,7 @@ impl HomePage {
                 "Startup timing: home API and cached metadata ready"
             );
             crate::log_startup_timing("API ready");
+            crate::log_startup_timing("home page loaded");
         }
         fraction!(self);
     }

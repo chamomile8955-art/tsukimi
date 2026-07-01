@@ -72,7 +72,12 @@ mod imp {
             self.parent_constructed();
             let obj = self.obj();
             obj.set_title(&obj.item().servername());
-            obj.set_subtitle(&obj.item().username());
+            let account = obj.item().account();
+            let route = account
+                .active_route()
+                .map(|route| format!("{} · {}", route.name, route.url))
+                .unwrap_or_else(|| account.username.clone());
+            obj.set_subtitle(&route);
             if matches!(
                 ServerType::from_index(obj.item().server_type()),
                 ServerType::Jellyfin
@@ -127,28 +132,7 @@ impl ServerActionRow {
             .nav
             .set_title(&gettextrs::gettext("Edit Server"));
         account_window.set_action_type(ActionType::Edit);
-        account_window
-            .imp()
-            .old_account
-            .replace(Some(account.to_owned()));
-        account_window
-            .imp()
-            .username_entry
-            .set_text(&account.username);
-        account_window
-            .imp()
-            .password_entry
-            .set_text(&account.password);
-        account_window
-            .imp()
-            .servername_entry
-            .set_text(&account.servername);
-        account_window.imp().port_entry.set_text(&account.port);
-        account_window.imp().server_entry.set_text(&account.server);
-        account_window
-            .imp()
-            .server_type
-            .set_selected(account.server_type.unwrap_or_default().index());
+        account_window.load_account(&account);
         account_window.present(self.root().as_ref());
     }
 

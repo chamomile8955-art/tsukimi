@@ -13,6 +13,7 @@ use gtk::{
 
 use crate::client::{
     Account,
+    ServerRoute,
     account::ServerType,
 };
 
@@ -40,6 +41,9 @@ pub mod imp {
         access_token: RefCell<String>,
         #[property(get, set)]
         server_type: Cell<u32>,
+        pub routes: RefCell<Vec<ServerRoute>>,
+        pub default_route: RefCell<Option<String>>,
+        pub selected_route: RefCell<Option<String>>,
     }
 
     #[glib::derived_properties]
@@ -68,6 +72,9 @@ impl AccountItem {
         item.set_user_id(account.user_id);
         item.set_access_token(account.access_token);
         item.set_server_type(account.server_type.unwrap_or_default().index());
+        item.imp().routes.replace(account.routes);
+        item.imp().default_route.replace(account.default_route);
+        item.imp().selected_route.replace(account.selected_route);
         item
     }
 
@@ -81,6 +88,9 @@ impl AccountItem {
             user_id: self.user_id(),
             access_token: self.access_token(),
             server_type: Some(ServerType::from_index(self.server_type())),
+            routes: self.imp().routes.borrow().clone(),
+            default_route: self.imp().default_route.borrow().clone(),
+            selected_route: self.imp().selected_route.borrow().clone(),
         }
     }
 }

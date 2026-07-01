@@ -3,6 +3,7 @@ use std::{
     collections::HashMap,
     future,
     hash::Hasher,
+    path::Path,
     time::Duration,
 };
 
@@ -44,13 +45,17 @@ use serde_json::{
     json,
 };
 use std::sync::Arc;
-use tracing::warn;
+use tracing::{
+    debug,
+    warn,
+};
 use url::Url;
 use uuid::Uuid;
 
 use super::{
     Account,
     ReqClient,
+    ServerRoute,
     error::UserFacingError,
     structs::{
         ActivityLogs,
@@ -100,6 +105,13 @@ pub static DEVICE_ID: Lazy<String> = Lazy::new(|| {
 });
 
 const PROFILE: &str = include_str!("stream_profile.json");
+
+pub struct ImageDownloadInfo {
+    pub request_url: String,
+    pub status: u16,
+    pub content_type: Option<String>,
+    pub byte_size: usize,
+}
 
 static DEVICE_NAME: Lazy<String> = Lazy::new(|| {
     hostname::get()
@@ -203,12 +215,15 @@ impl JellyfinClient {
     }
 
     pub async fn init(&self, account: &Account) -> Result<(), Box<dyn std::error::Error>> {
-        let url = {
-            let mut url = Url::parse(&account.server)?;
-            url.set_port(Some(account.port.parse::<u16>().unwrap_or_default()))
-                .map_err(|_| anyhow!("Failed to set port"))?;
-            url.join("emby/")?
-        };
+        let mut account = account.clone();
+        account.normalize_routes();
+        let route = account
+            .active_route()
+            .ok_or_else(|| anyhow!("No valid server route is configured"))?;
+        let route = ServerRoute::validated(&route.name, &route.url).map_err(|error| anyhow!(error))?;
+        let route_name = route.name;
+        let route_url = route.url;
+        let url = Self::api_url_from_route(&route_url)?;
 
         let mut headers = reqwest::header::HeaderMap::new();
         headers.insert("Accept-Encoding", HeaderValue::from_static("gzip"));
@@ -234,6 +249,12 @@ impl JellyfinClient {
             server_name_hash: generate_hash(&account.servername),
         }));
         self.next_up_date_cache.invalidate_all();
+        tracing::info!(
+            server = %account.servername,
+            route = %route_name,
+            route_url = %route_url,
+            "Initialized active server route"
+        );
 
         crate::ui::provider::set_admin(false);
         spawn_tokio_without_await(async move {
@@ -253,13 +274,28 @@ impl JellyfinClient {
         let mut url = Url::parse(url_str)?;
         url.set_port(Some(port.parse::<u16>().unwrap_or_default()))
             .map_err(|_| anyhow!("Failed to set port"))?;
-        let url = url.join("emby/")?;
+        self.header_change_route(url.as_str())
+    }
+
+    pub fn header_change_route(&self, route_url: &str) -> Result<()> {
+        let url = Self::api_url_from_route(route_url)?;
         self.session.rcu(|current| {
             let mut session = (**current).clone();
             session.url = Some(url.clone());
             Arc::new(session)
         });
         Ok(())
+    }
+
+    fn api_url_from_route(route_url: &str) -> Result<Url> {
+        let route =
+            ServerRoute::validated("active", route_url).map_err(|error| anyhow!(error))?;
+        let mut url = Url::parse(&route.url)?;
+        if !url.path().ends_with('/') {
+            let path = format!("{}/", url.path());
+            url.set_path(&path);
+        }
+        Ok(url.join("emby/")?)
     }
 
     pub fn header_change_token(&self, token: &str) -> Result<()> {
@@ -658,6 +694,125 @@ impl JellyfinClient {
             ),
         ];
         self.request_picture(&path, &params, etag).await
+    }
+
+    pub async fn download_image_to_cache(
+        &self, id: &str, image_type: &str, index: Option<u8>, image_tag: Option<&str>,
+        max_width: &str, max_height: &str, format: Option<&str>, destination: &Path,
+    ) -> Result<ImageDownloadInfo> {
+        let mut path = format!("Items/{id}/Images/{image_type}");
+        if let Some(index) = index {
+            path.push_str(&format!("/{index}"));
+        }
+
+        let mut params = vec![
+            ("maxHeight", max_height),
+            ("maxWidth", max_width),
+            ("quality", "90"),
+        ];
+        if let Some(image_tag) = image_tag {
+            params.push(("tag", image_tag));
+        }
+        if let Some(format) = format {
+            params.push(("format", format));
+        }
+
+        let request = self.prepare_request(Method::GET, &path, &params)?;
+        let request_url = request
+            .try_clone()
+            .and_then(|request| request.build().ok())
+            .map(|request| request.url().to_string())
+            .unwrap_or_else(|| path.clone());
+        debug!(
+            media_item_id = id,
+            image_type = image_type,
+            image_index = index,
+            image_tag = image_tag.unwrap_or_default(),
+            request_url = %request_url,
+            requested_format = format.unwrap_or("original"),
+            "Poster HTTP request started"
+        );
+        let response = match request.send().await {
+            Ok(response) => response,
+            Err(error) => {
+                debug!(
+                    media_item_id = id,
+                    image_type = image_type,
+                    image_index = index,
+                    image_tag = image_tag.unwrap_or_default(),
+                    request_url = %request_url,
+                    http_status = "<no response>",
+                    content_type = "<no response>",
+                    downloaded_bytes = 0,
+                    %error,
+                    "Poster HTTP request failed"
+                );
+                return Err(error.into());
+            }
+        };
+        let request_url = response.url().to_string();
+        let status = response.status();
+        let content_type = response
+            .headers()
+            .get(reqwest::header::CONTENT_TYPE)
+            .and_then(|value| value.to_str().ok())
+            .map(str::to_string);
+        let bytes = response.bytes().await?;
+        let byte_size = bytes.len();
+
+        debug!(
+            media_item_id = id,
+            image_type = image_type,
+            image_tag = image_tag.unwrap_or_default(),
+            request_url = %request_url,
+            http_status = status.as_u16(),
+            content_type = content_type.as_deref().unwrap_or("<missing>"),
+            downloaded_bytes = byte_size,
+            requested_format = format.unwrap_or("original"),
+            "Poster HTTP response"
+        );
+
+        if !status.is_success() {
+            return Err(anyhow!(
+                "Poster request failed: status={}, content-type={}, bytes={}, url={}",
+                status,
+                content_type.as_deref().unwrap_or("<missing>"),
+                byte_size,
+                request_url
+            ));
+        }
+        if bytes.is_empty() {
+            return Err(anyhow!("Poster response was empty: url={request_url}"));
+        }
+        if let Some(content_type) = content_type.as_deref()
+            && !content_type.starts_with("image/")
+            && content_type != "application/octet-stream"
+            && content_type != "binary/octet-stream"
+        {
+            return Err(anyhow!(
+                "Poster response is not an image: content-type={}, bytes={}, url={}",
+                content_type,
+                byte_size,
+                request_url
+            ));
+        }
+
+        if let Some(parent) = destination.parent() {
+            tokio::fs::create_dir_all(parent).await?;
+        }
+        let temporary = destination.with_extension("part");
+        tokio::fs::write(&temporary, &bytes).await?;
+        if destination.exists() {
+            let _ = tokio::fs::remove_file(destination).await;
+        }
+        tokio::fs::rename(&temporary, destination).await?;
+
+        Ok(ImageDownloadInfo {
+            request_url,
+            status: status.as_u16(),
+            content_type,
+            byte_size,
+        })
     }
 
     pub async fn get_image(&self, id: &str, image_type: &str, tag: Option<u8>) -> Result<String> {
@@ -1570,6 +1725,7 @@ mod tests {
                     user_id: response.user.id,
                     access_token: response.access_token,
                     server_type: Some(ServerType::Jellyfin),
+                    ..Account::default()
                 };
                 let _ = JELLYFIN_CLIENT.init(&account).await;
             }
@@ -1619,6 +1775,7 @@ mod tests {
                     user_id: response.user.id,
                     access_token: response.access_token,
                     server_type: Some(ServerType::Jellyfin),
+                    ..Account::default()
                 };
                 let _ = JELLYFIN_CLIENT.init(&account).await;
             }

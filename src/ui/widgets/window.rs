@@ -40,7 +40,6 @@ mod imp {
                 media_viewer::MediaViewer,
                 player_toolbar::PlayerToolbarBox,
                 search::SearchPage,
-                theme_switcher::ThemeSwitcher,
                 tu_overview_item::imp::ViewGroup,
                 utils::TuItemBuildExt,
             },
@@ -70,10 +69,6 @@ mod imp {
         pub toast: TemplateChild<adw::ToastOverlay>,
         #[template_child]
         pub rootpic: TemplateChild<gtk::Picture>,
-        #[template_child]
-        pub serversbox: TemplateChild<gtk::ListBox>,
-        #[template_child]
-        pub login_stack: TemplateChild<gtk::Stack>,
         #[template_child]
         pub namerow: TemplateChild<adw::ActionRow>,
         #[template_child]
@@ -112,6 +107,8 @@ mod imp {
 
         #[template_child]
         pub avatar: TemplateChild<adw::Avatar>,
+        #[template_child]
+        pub main_menu_button: TemplateChild<gtk::MenuButton>,
 
         pub progress_bar_animation: OnceCell<adw::TimedAnimation>,
         pub progress_bar_fade_animation: OnceCell<adw::TimedAnimation>,
@@ -144,12 +141,8 @@ mod imp {
             LikedPage::ensure_type();
             MPVPage::ensure_type();
             MPVControlSidebar::ensure_type();
-            ThemeSwitcher::ensure_type();
             klass.bind_template();
             klass.bind_template_instance_callbacks();
-            klass.install_action("win.relogin", None, move |window, _action, _parameter| {
-                window.placeholder();
-            });
             klass.install_action("win.sidebar", None, move |window, _action, _parameter| {
                 window.sidebar();
             });
@@ -175,6 +168,22 @@ mod imp {
             });
             klass.install_action("win.favorites", None, |obj, _, _| {
                 obj.likedpage();
+            });
+            klass.install_action("win.cycle-theme", None, |_, _, _| {
+                let next = match SETTINGS.main_theme() {
+                    1 => 2,
+                    2 => 3,
+                    _ => 1,
+                };
+                SETTINGS
+                    .set_main_theme(next)
+                    .expect("Failed to store theme");
+                let style_manager = adw::StyleManager::default();
+                style_manager.set_color_scheme(match next {
+                    1 => adw::ColorScheme::Default,
+                    2 => adw::ColorScheme::ForceLight,
+                    _ => adw::ColorScheme::ForceDark,
+                });
             });
             klass.install_action("win.server-switch", None, |obj, _, _| {
                 obj.switch_context_server();
@@ -234,17 +243,8 @@ mod imp {
 
             obj.bind_about_action();
             obj.setup_server_context_menu();
-
-            spawn(glib::clone!(
-                #[weak(rename_to = obj)]
-                obj,
-                async move {
-                    obj.setup_rootpic();
-                    obj.set_servers().await;
-                    obj.set_nav_servers();
-                    obj.set_shortcuts();
-                },
-            ));
+            obj.setup_route_action();
+            obj.rebuild_main_menu();
         }
     }
 
@@ -274,7 +274,6 @@ use super::{
     },
     liked::LikedPage,
     search::SearchPage,
-    server_action_row,
     server_panel::ServerPanel,
     tu_item::PROGRESSBAR_ANIMATION_DURATION,
     utils::GlobalToast,
@@ -314,13 +313,28 @@ glib::wrapper! {
 }
 
 pub const PROGRESSBAR_FADE_ANIMATION_DURATION: u32 = 500;
+static STARTUP_SERVER_RESTORE_RECORDED: std::sync::atomic::AtomicBool =
+    std::sync::atomic::AtomicBool::new(false);
 
 #[template_callbacks]
 impl Window {
+    pub fn start_background_initialization(&self) {
+        self.set_shortcuts();
+
+        spawn(glib::clone!(
+            #[weak(rename_to = obj)]
+            self,
+            async move {
+                obj.set_servers().await;
+                obj.setup_rootpic();
+            },
+        ));
+    }
+
     fn setup_server_context_menu(&self) {
         let menu = gio::Menu::new();
         menu.append(
-            Some(&gettext("Switch Server")),
+            Some(&gettext("Switch to This Server")),
             Some("win.server-switch"),
         );
         menu.append(
@@ -331,6 +345,10 @@ impl Window {
         menu.append(
             Some(&gettext("Delete Server")),
             Some("win.server-delete"),
+        );
+        menu.append(
+            Some(&gettext("Add New Server")),
+            Some("win.add-server"),
         );
         self.imp().servers_section.set_menu_model(Some(&menu));
 
@@ -354,6 +372,132 @@ impl Window {
         ));
     }
 
+    fn setup_route_action(&self) {
+        let action = gio::SimpleAction::new_stateful(
+            "switch-route",
+            Some(&String::static_variant_type()),
+            &String::new().to_variant(),
+        );
+        action.connect_activate(glib::clone!(
+            #[weak(rename_to = obj)]
+            self,
+            move |_, parameter| {
+                let Some(route_name) = parameter.and_then(|value| value.get::<String>()) else {
+                    return;
+                };
+                obj.switch_active_route(route_name);
+            }
+        ));
+        self.add_action(&action);
+    }
+
+    fn rebuild_main_menu(&self) {
+        let menu = gio::Menu::new();
+        menu.append(Some("切换软件颜色"), Some("win.cycle-theme"));
+
+        let route_menu = gio::Menu::new();
+        let session = JELLYFIN_CLIENT.session();
+        let account = SETTINGS
+            .accounts()
+            .into_iter()
+            .find(|account| account.servername == session.account.servername);
+
+        if let Some(account) = account {
+            if let Some(active_route) = account.active_route()
+                && let Some(action) = self
+                    .lookup_action("switch-route")
+                    .and_downcast::<gio::SimpleAction>()
+            {
+                action.set_state(&active_route.name.to_variant());
+            }
+
+            if account.routes.len() > 1 {
+                for route in &account.routes {
+                    let item = gio::MenuItem::new(Some(&route.name), None);
+                    item.set_action_and_target_value(
+                        Some("win.switch-route"),
+                        Some(&route.name.to_variant()),
+                    );
+                    route_menu.append_item(&item);
+                }
+            } else {
+                route_menu.append(Some("暂无可切换线路"), None);
+            }
+        } else {
+            route_menu.append(Some("暂无可切换线路"), None);
+        }
+
+        menu.append_item(&gio::MenuItem::new_submenu(
+            Some("切换服务器线路"),
+            &route_menu,
+        ));
+        menu.append(Some("关于"), Some("win.about"));
+        self.imp().main_menu_button.set_menu_model(Some(&menu));
+    }
+
+    fn switch_active_route(&self, route_name: String) {
+        let current_server = JELLYFIN_CLIENT.session().account.servername.clone();
+        let Some(mut account) = SETTINGS
+            .accounts()
+            .into_iter()
+            .find(|account| account.servername == current_server)
+        else {
+            tracing::warn!(
+                route = %route_name,
+                fallback_reason = "no active saved server",
+                "Failed to switch server route"
+            );
+            self.toast(gettext("No active server"));
+            return;
+        };
+        let previous_route = account
+            .active_route()
+            .map(|route| route.name.clone())
+            .unwrap_or_default();
+        let old_account = account.clone();
+        if let Err(error) = account.select_route(&route_name) {
+            tracing::warn!(
+                server = %account.servername,
+                route = %route_name,
+                %error,
+                "Failed route validation while switching"
+            );
+            self.toast(error);
+            return;
+        }
+
+        spawn(glib::clone!(
+            #[weak(rename_to = obj)]
+            self,
+            async move {
+                match JELLYFIN_CLIENT.init(&account).await {
+                    Ok(()) => {
+                        SETTINGS
+                            .edit_account(old_account, account.clone())
+                            .expect("Failed to persist selected route");
+                        tracing::info!(
+                            server = %account.servername,
+                            previous_route = %previous_route,
+                            selected_route = %route_name,
+                            "Switched active server route"
+                        );
+                        obj.rebuild_main_menu();
+                        obj.reset();
+                    }
+                    Err(error) => {
+                        tracing::warn!(
+                            server = %account.servername,
+                            route = %route_name,
+                            %error,
+                            "Failed to switch active server route"
+                        );
+                        obj.toast(error.to_string());
+                    }
+                }
+            }
+        ));
+    }
+
     fn switch_context_server(&self) {
         let Some(account) = self.imp().context_server.borrow().clone() else {
             return;
@@ -362,11 +506,7 @@ impl Window {
             #[weak(rename_to = obj)]
             self,
             async move {
-                SETTINGS
-                    .set_preferred_server(&account.servername)
-                    .expect("Failed to set preferred server");
-                let _ = JELLYFIN_CLIENT.init(&account).await;
-                obj.reset();
+                obj.select_server(account, "context-menu").await;
             }
         ));
     }
@@ -378,6 +518,13 @@ impl Window {
         SETTINGS
             .set_preferred_server(&account.servername)
             .expect("Failed to set preferred server");
+        SETTINGS
+            .set_boolean("is-auto-select-server", true)
+            .expect("Failed to enable default server selection");
+        tracing::info!(
+            server = %account.servername,
+            "Set default startup server"
+        );
     }
 
     fn edit_context_server(&self) {
@@ -389,16 +536,7 @@ impl Window {
         let dialog = crate::ui::widgets::account_add::AccountWindow::new();
         dialog.imp().nav.set_title(&gettext("Edit Server"));
         dialog.set_action_type(ActionType::Edit);
-        dialog.imp().old_account.replace(Some(account.clone()));
-        dialog.imp().username_entry.set_text(&account.username);
-        dialog.imp().password_entry.set_text(&account.password);
-        dialog.imp().servername_entry.set_text(&account.servername);
-        dialog.imp().port_entry.set_text(&account.port);
-        dialog.imp().server_entry.set_text(&account.server);
-        dialog
-            .imp()
-            .server_type
-            .set_selected(account.server_type.unwrap_or_default().index());
+        dialog.load_account(&account);
         dialog.present(Some(self));
     }
 
@@ -419,7 +557,75 @@ impl Window {
         ));
     }
 
+    fn has_active_server(&self) -> bool {
+        let session = JELLYFIN_CLIENT.session();
+        !session.account.user_id.is_empty()
+            && SETTINGS
+                .accounts()
+                .iter()
+                .any(|account| account.servername == session.account.servername)
+    }
+
+    fn show_no_server_state(&self) {
+        self.mainpage();
+        self.imp().insidestack.set_visible_child_name("no-server");
+        self.imp().navipage.set_title("");
+        self.imp().last_content_list_selection.replace(None);
+    }
+
+    async fn select_server(&self, mut account: Account, selection_reason: &'static str) -> bool {
+        account.normalize_routes();
+        let route_name = account
+            .active_route()
+            .map(|route| route.name.clone())
+            .unwrap_or_default();
+        if route_name.is_empty() {
+            tracing::warn!(
+                server = %account.servername,
+                fallback_reason = "no valid route, default route, or first route available",
+                "Server route fallback failed"
+            );
+        }
+        match JELLYFIN_CLIENT.init(&account).await {
+            Ok(()) => {
+                SETTINGS
+                    .set_preferred_server(&account.servername)
+                    .expect("Failed to store last-used server");
+                tracing::info!(
+                    server = %account.servername,
+                    route = %route_name,
+                    reason = selection_reason,
+                    "Selected media server"
+                );
+                self.rebuild_main_menu();
+                self.reset();
+                true
+            }
+            Err(error) => {
+                tracing::warn!(
+                    server = %account.servername,
+                    reason = selection_reason,
+                    %error,
+                    "Failed to select media server"
+                );
+                if self.has_active_server() {
+                    self.homepage();
+                } else {
+                    self.show_no_server_state();
+                }
+                self.set_nav_servers();
+                self.toast(error.to_string());
+                false
+            }
+        }
+    }
+
     pub fn homepage(&self) {
+        if !self.has_active_server() {
+            self.show_no_server_state();
+            return;
+        }
+
         let imp = self.imp();
         if imp.homepage.child().is_none() {
             imp.homepage.set_child(Some(&HomePage::new()));
@@ -432,6 +638,11 @@ impl Window {
     }
 
     pub fn likedpage(&self) {
+        if !self.has_active_server() {
+            self.show_no_server_state();
+            return;
+        }
+
         let imp = self.imp();
         if imp.likedpage.child().is_none() {
             imp.likedpage.set_child(Some(&LikedPage::new()));
@@ -444,6 +655,11 @@ impl Window {
     }
 
     pub fn searchpage(&self) {
+        if !self.has_active_server() {
+            self.show_no_server_state();
+            return;
+        }
+
         let imp = self.imp();
         if imp.searchpage.child().is_none() {
             imp.searchpage.set_child(Some(&SearchPage::new()));
@@ -482,106 +698,86 @@ impl Window {
     }
 
     pub async fn set_servers(&self) {
-        let imp = self.imp();
-        let listbox = &imp.serversbox;
-        listbox.remove_all();
+        let track_startup = !STARTUP_SERVER_RESTORE_RECORDED.swap(
+            true,
+            std::sync::atomic::Ordering::Relaxed,
+        );
+        if track_startup {
+            crate::log_startup_timing("server restore started");
+        }
+
         let accounts = SETTINGS.accounts();
-        for account in &accounts {
-            if SETTINGS.auto_select_server()
-                && account.servername == SETTINGS.preferred_server()
-                && JELLYFIN_CLIENT.session().account.user_id.is_empty()
-            {
-                let started = std::time::Instant::now();
-                let _ = JELLYFIN_CLIENT.init(account).await;
-                tracing::info!(
-                    elapsed_ms = started.elapsed().as_millis() as u64,
-                    "Startup timing: server API initialized"
-                );
-                self.reset();
-            }
-        }
+        self.set_nav_servers();
+        self.rebuild_main_menu();
+
         if accounts.is_empty() {
-            imp.login_stack.set_visible_child_name("no-server");
+            tracing::warn!(
+                fallback_reason = "no saved servers",
+                "No startup server selected"
+            );
+            self.show_no_server_state();
+            if track_startup {
+                crate::log_startup_timing("server restore completed");
+            }
             return;
-        } else {
-            imp.login_stack.set_visible_child_name("servers");
         }
-        for (index, account) in accounts.iter().enumerate() {
-            let server_action_row = server_action_row::ServerActionRow::new(account.to_owned());
 
-            let drag_source = gtk::DragSource::builder()
-                .name("descriptor-drag-format")
-                .actions(gtk::gdk::DragAction::MOVE)
-                .build();
+        let session_account = JELLYFIN_CLIENT.session().account.clone();
+        let current_account = (!session_account.user_id.is_empty())
+            .then(|| {
+                accounts
+                    .iter()
+                    .find(|account| account.servername == session_account.servername)
+                    .cloned()
+            })
+            .flatten();
 
-            drag_source.connect_prepare(glib::clone!(
-                #[weak(rename_to = widget)]
-                server_action_row,
-                #[weak]
-                listbox,
-                #[strong]
-                account,
-                #[upgrade_or]
-                None,
-                move |drag_context, _x, _y| {
-                    listbox.drag_highlight_row(&widget);
-                    let icon = gtk::WidgetPaintable::new(Some(&widget));
-                    drag_context.set_icon(Some(&icon), 0, 0);
-                    let object = glib::BoxedAnyObject::new(account.to_owned());
-                    Some(gtk::gdk::ContentProvider::for_value(&object.to_value()))
-                }
-            ));
+        let preferred_server = SETTINGS.preferred_server();
+        let preferred_account = accounts
+            .iter()
+            .find(|account| account.servername == preferred_server)
+            .cloned();
 
-            let drop_target = gtk::DropTarget::builder()
-                .name("descriptor-drag-format")
-                .propagation_phase(gtk::PropagationPhase::Capture)
-                .actions(gtk::gdk::DragAction::MOVE)
-                .build();
+        let (account, selection_reason) = if let Some(account) = current_account {
+            (account, "current-session")
+        } else if let Some(account) = preferred_account {
+            let reason = if SETTINGS.auto_select_server() {
+                "default"
+            } else {
+                "last-used"
+            };
+            (account, reason)
+        } else {
+            tracing::warn!(
+                preferred_server = %preferred_server,
+                fallback_reason = "preferred server missing; using first saved server",
+                "Startup server fallback"
+            );
+            (accounts[0].clone(), "first-saved-fallback")
+        };
 
-            drop_target.set_types(&[glib::BoxedAnyObject::static_type()]);
+        if track_startup {
+            tracing::info!(
+                selected_startup_server = %account.servername,
+                selected_route = %account
+                    .active_route()
+                    .map(|route| route.name.as_str())
+                    .unwrap_or(""),
+                selection_reason,
+                "Selected startup server"
+            );
+        }
 
-            drop_target.connect_drop(glib::clone!(
-                #[weak(rename_to = obj)]
-                self,
-                #[strong]
-                account,
-                #[upgrade_or]
-                false,
-                move |_drop_target, value, _y, _data| {
-                    let lr_account = value
-                        .get::<glib::BoxedAnyObject>()
-                        .expect("Failed to get descriptor from drop data");
-                    let lr_account: std::cell::Ref<Account> = lr_account.borrow();
+        let started = std::time::Instant::now();
+        let selected = self.select_server(account, selection_reason).await;
+        tracing::info!(
+            elapsed_ms = started.elapsed().as_millis() as u64,
+            success = selected,
+            "Startup timing: server session restore"
+        );
 
-                    if account == *lr_account {
-                        return false;
-                    }
-
-                    let mut accounts = SETTINGS.accounts();
-                    let lr_index = accounts.iter().position(|d| *d == *lr_account).unwrap();
-                    accounts.remove(lr_index);
-                    accounts.insert(index, lr_account.to_owned());
-                    SETTINGS
-                        .set_accounts(accounts)
-                        .expect("Failed to set accounts");
-
-                    spawn(glib::clone!(
-                        #[weak]
-                        obj,
-                        async move {
-                            obj.set_servers().await;
-                            obj.set_nav_servers();
-                        }
-                    ));
-
-                    true
-                }
-            ));
-
-            server_action_row.add_controller(drag_source);
-            server_action_row.add_controller(drop_target);
-
-            listbox.append(&server_action_row);
+        if track_startup {
+            crate::log_startup_timing("server restore completed");
         }
     }
 
@@ -589,25 +785,46 @@ impl Window {
         let imp = self.imp();
         imp.servers_section.remove_all();
         let accounts = SETTINGS.accounts();
-        for account in accounts {
+        let session = JELLYFIN_CLIENT.session();
+        let selected_server = if !session.account.user_id.is_empty()
+            && accounts
+                .iter()
+                .any(|account| account.servername == session.account.servername)
+        {
+            session.account.servername.clone()
+        } else {
+            SETTINGS.preferred_server()
+        };
+        let mut selected_index = None;
+
+        for (index, account) in accounts.iter().enumerate() {
             let item = adw::SidebarItem::new(&account.servername);
             item.set_icon_name(Some("network-server-symbolic"));
-            item.set_subtitle(Some(&format!("{}:{}", account.server, account.port)));
+            item.set_subtitle(account.active_route().map(|route| {
+                format!("{} · {}", route.name, route.url)
+            }).as_deref());
             imp.servers_section.append(item);
+            if account.servername == selected_server {
+                selected_index = Some(index as u32);
+            }
+        }
+
+        if let Some(index) = selected_index {
+            imp.selectlist.set_selected(index);
         }
     }
 
     pub fn reset(&self) {
         self.mainpage();
-        self.imp().selectlist.set_selected(0);
+        self.set_nav_servers();
+        self.remove_all();
+        self.homepage();
 
         spawn(glib::clone!(
             #[weak(rename_to = obj)]
             self,
             async move {
                 obj.account_setup().await;
-                obj.remove_all();
-                obj.homepage();
 
                 let avatar =
                     match spawn_tokio(async move { JELLYFIN_CLIENT.get_user_avatar().await }).await
@@ -706,10 +923,6 @@ impl Window {
         {
             homepage.update(false);
         }
-    }
-
-    fn placeholder(&self) {
-        self.imp().stack.set_visible_child_name("placeholder");
     }
 
     fn sidebar(&self) {
@@ -870,11 +1083,6 @@ impl Window {
         self.imp().media_viewer.view_image(paintable);
     }
 
-    #[template_callback]
-    fn on_add_server(&self) {
-        self.new_account();
-    }
-
     pub async fn bind_song_model(&self, active_model: gio::ListStore, active_core_song: CoreSong) {
         self.imp()
             .player_toolbar_box
@@ -988,38 +1196,10 @@ impl Window {
                     #[weak(rename_to = obj)]
                     self,
                     async move {
-                        SETTINGS.set_preferred_server(&account.servername).unwrap();
-                        let _ = JELLYFIN_CLIENT.init(&account).await;
-                        obj.reset();
+                        obj.select_server(account, "sidebar-click").await;
                     }
                 ));
             }
-            return;
-        }
-
-        let pos = item.section_index() as i32;
-        let last_pos = *imp.last_content_list_selection.borrow();
-        if last_pos == Some(pos) {
-            self.update_view(pos);
-            return;
-        }
-        self.select_view(pos);
-    }
-
-    fn select_view(&self, pos: i32) {
-        match pos {
-            0 => self.homepage(),
-            1 => self.likedpage(),
-            2 => self.searchpage(),
-            _ => {}
-        }
-    }
-
-    fn update_view(&self, pos: i32) {
-        match pos {
-            0 => self.on_home_update(),
-            1 => self.on_liked_update(),
-            _ => {}
         }
     }
 

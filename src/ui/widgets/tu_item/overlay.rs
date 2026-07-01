@@ -16,25 +16,37 @@ use crate::ui::{
 use super::TuItemBasic;
 
 pub trait TuItemOverlayPrelude {
-    fn get_image_type_and_tag(&self, item: &TuItem) -> (&str, Option<String>, String) {
+    fn get_image_request(
+        &self, item: &TuItem,
+    ) -> (&str, Option<String>, Option<String>, String) {
         if self.poster_type_ext() != PosterType::Poster
             && let Some(imag_tags) = item.image_tags()
         {
             match self.poster_type_ext() {
                 PosterType::Banner => {
-                    if imag_tags.banner().is_some() {
-                        return ("Banner", None, item.id());
-                    } else if imag_tags.thumb().is_some() {
-                        return ("Thumb", None, item.id());
-                    } else if imag_tags.backdrop().is_some() {
-                        return ("Backdrop", Some(0.to_string()), item.id());
+                    if let Some(image_tag) = imag_tags.banner() {
+                        return ("Banner", None, Some(image_tag), item.id());
+                    } else if let Some(image_tag) = imag_tags.thumb() {
+                        return ("Thumb", None, Some(image_tag), item.id());
+                    } else if let Some(image_tag) = imag_tags.backdrop() {
+                        return (
+                            "Backdrop",
+                            Some(0.to_string()),
+                            Some(image_tag),
+                            item.id(),
+                        );
                     }
                 }
                 PosterType::Backdrop => {
-                    if imag_tags.backdrop().is_some() {
-                        return ("Backdrop", Some(0.to_string()), item.id());
-                    } else if imag_tags.thumb().is_some() {
-                        return ("Thumb", None, item.id());
+                    if let Some(image_tag) = imag_tags.backdrop() {
+                        return (
+                            "Backdrop",
+                            Some(0.to_string()),
+                            Some(image_tag),
+                            item.id(),
+                        );
+                    } else if let Some(image_tag) = imag_tags.thumb() {
+                        return ("Thumb", None, Some(image_tag), item.id());
                     }
                 }
                 _ => {}
@@ -44,32 +56,52 @@ pub trait TuItemOverlayPrelude {
             // Continue Watching, use parent video poster if possible
             PreferPoster::ParentVideo => {
                 if let Some(parent_thumb_item_id) = item.parent_thumb_item_id() {
-                    ("Thumb", None, parent_thumb_item_id)
+                    ("Thumb", None, None, parent_thumb_item_id)
                 } else if let Some(parent_backdrop_item_id) = item.parent_backdrop_item_id() {
-                    ("Backdrop", Some(0.to_string()), parent_backdrop_item_id)
+                    (
+                        "Backdrop",
+                        Some(0.to_string()),
+                        None,
+                        parent_backdrop_item_id,
+                    )
                 } else {
-                    ("Backdrop", Some(0.to_string()), item.id())
+                    (
+                        "Backdrop",
+                        Some(0.to_string()),
+                        item.image_tags().and_then(|tags| tags.backdrop()),
+                        item.id(),
+                    )
                 }
             }
             // Latest, use parent primary image if possible, this is for latest episodes
             PreferPoster::ParentPost
                 if let Some(parent_backdrop_item_id) = item.parent_backdrop_item_id() =>
             {
-                ("Primary", None, parent_backdrop_item_id)
+                ("Primary", None, None, parent_backdrop_item_id)
             }
             _ => {
                 if let Some(img_tags) = item.primary_image_item_id() {
                     // use primary image if possible
-                    ("Primary", None, img_tags)
+                    (
+                        "Primary",
+                        None,
+                        item.image_tags().and_then(|tags| tags.primary()),
+                        img_tags,
+                    )
                 } else if item.image_tags().is_none_or(|t| t.all_none())
                     && let Some(parent_backdrop_item_id) = item.parent_backdrop_item_id()
                 {
                     // fallback to parent backdrop if no image tags and parent backdrop exists, this
                     // is for some season items that don't have image tags
-                    ("Primary", None, parent_backdrop_item_id)
+                    ("Primary", None, None, parent_backdrop_item_id)
                 } else {
                     // finally fallback to primary image with item id
-                    ("Primary", None, item.id())
+                    (
+                        "Primary",
+                        None,
+                        item.image_tags().and_then(|tags| tags.primary()),
+                        item.id(),
+                    )
                 }
             }
         }
@@ -94,32 +126,38 @@ where
 {
     fn set_picture(&self) {
         let item = self.item();
-        let (image_type, tag, id) = self.get_image_type_and_tag(&item);
+        let (image_type, index, image_tag, id) = self.get_image_request(&item);
         let overlay = self.overlay();
 
         if let Some(picture_loader) = overlay.child().and_downcast::<PictureLoader>() {
-            picture_loader.reload(&id, image_type, tag, false);
+            picture_loader.set_fallback_title(item.name());
+            picture_loader.reload_with_image_tag(&id, image_type, index, image_tag, false);
             return;
         }
 
-        let picture_loader = PictureLoader::new(&id, image_type, tag);
+        let picture_loader =
+            PictureLoader::new_with_image_tag(&id, image_type, index, image_tag);
+        picture_loader.set_fallback_title(item.name());
         picture_loader.add_css_class("inbox");
         overlay.set_child(Some(&picture_loader));
     }
 
     fn set_picture_with_hover_scale(&self) {
         let item = self.item();
-        let (image_type, tag, id) = self.get_image_type_and_tag(&item);
+        let (image_type, index, image_tag, id) = self.get_image_request(&item);
         let overlay = self.overlay();
 
         if let Some(hover_scale) = overlay.child().and_downcast::<HoverScale>()
             && let Some(picture_loader) = hover_scale.child().and_downcast::<PictureLoader>()
         {
-            picture_loader.reload(&id, image_type, tag, false);
+            picture_loader.set_fallback_title(item.name());
+            picture_loader.reload_with_image_tag(&id, image_type, index, image_tag, false);
             return;
         }
 
-        let picture_loader = PictureLoader::new(&id, image_type, tag);
+        let picture_loader =
+            PictureLoader::new_with_image_tag(&id, image_type, index, image_tag);
+        picture_loader.set_fallback_title(item.name());
         let hover_scale = HoverScale::new();
         hover_scale.set_child(Some(&picture_loader));
         overlay.set_child(Some(&hover_scale));
@@ -127,15 +165,19 @@ where
 
     fn set_animated_picture(&self) {
         let item = self.item();
-        let (image_type, tag, id) = self.get_image_type_and_tag(&item);
+        let (image_type, index, image_tag, id) = self.get_image_request(&item);
         let overlay = self.overlay();
 
         if let Some(picture_loader) = overlay.child().and_downcast::<PictureLoader>() {
-            picture_loader.reload(&id, image_type, tag, true);
+            picture_loader.set_fallback_title(item.name());
+            picture_loader.reload_with_image_tag(&id, image_type, index, image_tag, true);
             return;
         }
 
-        let picture_loader = PictureLoader::new_animated(&id, image_type, tag);
+        let picture_loader = PictureLoader::new_animated_with_image_tag(
+            &id, image_type, index, image_tag,
+        );
+        picture_loader.set_fallback_title(item.name());
         picture_loader.add_css_class("inbox");
         overlay.set_child(Some(&picture_loader));
     }

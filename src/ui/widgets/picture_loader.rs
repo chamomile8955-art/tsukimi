@@ -35,6 +35,7 @@ use tracing::{
     debug,
     warn,
 };
+use xxhash_rust::xxh3::xxh3_64;
 
 use super::{
     image_paintable::{
@@ -60,6 +61,10 @@ const IMAGE_DECODE_RETRY_DELAY: std::time::Duration = std::time::Duration::from_
 const IMAGE_RESULT_BATCH_DELAY: std::time::Duration = std::time::Duration::from_millis(16);
 const IMAGE_NETWORK_RETRY_DELAY: std::time::Duration = std::time::Duration::from_millis(180);
 const DECODED_IMAGE_CACHE_CAPACITY: usize = 300;
+const POSTER_MAX_WIDTH: &str = "300";
+const POSTER_MAX_HEIGHT: &str = "300";
+const BACKDROP_MAX_WIDTH: &str = "1280";
+const BACKDROP_MAX_HEIGHT: &str = "800";
 static MAX_IMAGE_DECODE_TASKS: LazyLock<usize> = LazyLock::new(rayon::current_num_threads);
 static IMAGE_DECODE_TASKS: AtomicUsize = AtomicUsize::new(0);
 static FIRST_POSTER_RENDERED: AtomicBool = AtomicBool::new(false);
@@ -77,12 +82,38 @@ enum LoadedImage {
     Decoded(DecodedPaintable),
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum ImageRequestProfile {
+    Original,
+    Jpeg,
+}
+
+impl ImageRequestProfile {
+    fn format(self) -> Option<&'static str> {
+        match self {
+            Self::Original => None,
+            Self::Jpeg => Some("jpg"),
+        }
+    }
+
+    fn label(self) -> &'static str {
+        self.format().unwrap_or("original")
+    }
+}
+
+#[derive(Clone)]
+enum ImageLoadError {
+    Read(String),
+    Decode(String),
+}
+
 struct DecodeWaiter {
     loader: glib::WeakRef<PictureLoader>,
     cancellable: gio::Cancellable,
     generation: u64,
     cache_file_path: Option<PathBuf>,
     fetch_on_error: bool,
+    profile: ImageRequestProfile,
 }
 
 #[derive(Default)]
@@ -112,7 +143,7 @@ impl DecodedImageCache {
     }
 }
 
-type DecodeResult = Result<LoadedImage, String>;
+type DecodeResult = Result<LoadedImage, ImageLoadError>;
 
 thread_local! {
     static DECODED_IMAGE_CACHE: RefCell<DecodedImageCache> =
@@ -172,6 +203,10 @@ pub(crate) mod imp {
         #[property(get, set, nullable)]
         pub tag: RefCell<Option<String>>,
         #[property(get, set, nullable)]
+        pub image_tag: RefCell<Option<String>>,
+        #[property(get, set)]
+        pub fallback_title: RefCell<String>,
+        #[property(get, set, nullable)]
         pub url: RefCell<Option<String>>,
         #[template_child]
         pub revealer: TemplateChild<gtk::Revealer>,
@@ -181,6 +216,8 @@ pub(crate) mod imp {
         pub spinner: TemplateChild<adw::Spinner>,
         #[template_child]
         pub broken: TemplateChild<gtk::Box>,
+        #[template_child]
+        pub broken_title: TemplateChild<gtk::Label>,
         #[property(get, set, default = false)]
         pub animated: Cell<bool>,
         pub cancellable: RefCell<Option<gio::Cancellable>>,
@@ -256,18 +293,32 @@ glib::wrapper! {
 
 impl PictureLoader {
     pub fn new(id: &str, image_type: &str, tag: Option<String>) -> Self {
+        Self::new_with_image_tag(id, image_type, tag, None)
+    }
+
+    pub fn new_with_image_tag(
+        id: &str, image_type: &str, tag: Option<String>, image_tag: Option<String>,
+    ) -> Self {
         glib::Object::builder()
             .property("id", id)
             .property("imagetype", image_type)
             .property("tag", tag)
+            .property("image-tag", image_tag)
             .build()
     }
 
     pub fn new_animated(id: &str, image_type: &str, tag: Option<String>) -> Self {
+        Self::new_animated_with_image_tag(id, image_type, tag, None)
+    }
+
+    pub fn new_animated_with_image_tag(
+        id: &str, image_type: &str, tag: Option<String>, image_tag: Option<String>,
+    ) -> Self {
         glib::Object::builder()
             .property("id", id)
             .property("imagetype", image_type)
             .property("tag", tag)
+            .property("image-tag", image_tag)
             .property("animated", true)
             .build()
     }
@@ -281,10 +332,18 @@ impl PictureLoader {
     }
 
     pub fn reload(&self, id: &str, image_type: &str, tag: Option<String>, animated: bool) {
+        self.reload_with_image_tag(id, image_type, tag, None, animated);
+    }
+
+    pub fn reload_with_image_tag(
+        &self, id: &str, image_type: &str, tag: Option<String>, image_tag: Option<String>,
+        animated: bool,
+    ) {
         self.reset();
         self.set_id(id);
         self.set_imagetype(image_type);
         self.set_tag(tag);
+        self.set_image_tag(image_tag);
         self.set_url(None::<String>);
         self.set_animated(animated);
         if self.is_mapped() {
@@ -383,6 +442,7 @@ impl PictureLoader {
             cancellable,
             generation,
             false,
+            ImageRequestProfile::Original,
         );
     }
 
@@ -391,13 +451,43 @@ impl PictureLoader {
             return;
         }
 
-        let cache_file_path = self.cache_file().await;
-        self.reveal_picture(cache_file_path, cancellable, generation, true);
+        let original_path = self.cache_file(ImageRequestProfile::Original).await;
+        #[cfg(target_os = "windows")]
+        let (cache_file_path, profile) = if original_path.is_file() {
+            (original_path, ImageRequestProfile::Original)
+        } else {
+            let jpeg_path = self.cache_file(ImageRequestProfile::Jpeg).await;
+            if jpeg_path.is_file() {
+                (jpeg_path, ImageRequestProfile::Jpeg)
+            } else {
+                (original_path, ImageRequestProfile::Original)
+            }
+        };
+        #[cfg(not(target_os = "windows"))]
+        let (cache_file_path, profile) = (original_path, ImageRequestProfile::Original);
+
+        debug!(
+            media_item_id = self.id(),
+            image_type = self.imagetype(),
+            image_index = self.tag().as_deref().unwrap_or_default(),
+            image_tag = self.image_tag().as_deref().unwrap_or_default(),
+            cache_path = %cache_file_path.display(),
+            cache = if cache_file_path.is_file() { "hit" } else { "miss" },
+            requested_format = profile.label(),
+            "Poster cache lookup"
+        );
+        self.reveal_picture(
+            cache_file_path,
+            cancellable,
+            generation,
+            true,
+            profile,
+        );
     }
 
-    pub fn reveal_picture(
+    fn reveal_picture(
         &self, cache_file_path: PathBuf, cancellable: gio::Cancellable, generation: u64,
-        fetch_on_error: bool,
+        fetch_on_error: bool, profile: ImageRequestProfile,
     ) {
         let file = gio::File::for_path(&cache_file_path);
         let cache_key = format!(
@@ -412,6 +502,7 @@ impl PictureLoader {
             cancellable,
             generation,
             fetch_on_error,
+            profile,
         );
     }
 
@@ -458,7 +549,13 @@ impl PictureLoader {
         }
 
         let imp = self.imp();
+        // Do not retain a negative cache state. A later remap or explicit
+        // reload may start a fresh request after the server/image changes.
+        imp.cancellable.borrow_mut().take();
         self.add_css_class("no-cover");
+        let title = self.fallback_title();
+        imp.broken_title.set_label(&title);
+        imp.broken_title.set_visible(!title.is_empty());
         imp.broken.set_visible(true);
         imp.spinner.set_visible(false);
         imp.revealer.set_reveal_child(true);
@@ -469,6 +566,7 @@ impl PictureLoader {
     fn load_file_bytes(
         &self, file: gio::File, cache_key: String, cache_file_path: Option<PathBuf>,
         cancellable: gio::Cancellable, generation: u64, fetch_on_error: bool,
+        profile: ImageRequestProfile,
     ) {
         if !self.is_current(&cancellable, generation) {
             return;
@@ -488,6 +586,7 @@ impl PictureLoader {
             generation,
             cache_file_path,
             fetch_on_error,
+            profile,
         };
         let is_leader = IN_FLIGHT_DECODES.with(|in_flight| {
             let mut in_flight = in_flight.borrow_mut();
@@ -510,7 +609,11 @@ impl PictureLoader {
             }
             Err(error) => {
                 debug!("Failed to read poster {cache_key}: {error}");
-                Self::finish_decode(cache_key, Err(error.to_string()), animated);
+                Self::finish_decode(
+                    cache_key,
+                    Err(ImageLoadError::Read(error.to_string())),
+                    animated,
+                );
             }
         });
     }
@@ -524,7 +627,8 @@ impl PictureLoader {
         };
 
         rayon::spawn(move || {
-            let decoded = Self::decode_bytes(bytes, animated).map_err(|error| error.to_string());
+            let decoded = Self::decode_bytes(bytes, animated)
+                .map_err(|error| ImageLoadError::Decode(error.to_string()));
             drop(decode_permit);
 
             // Use the application's GLib main context explicitly. Decode work
@@ -567,6 +671,11 @@ impl PictureLoader {
                 .unwrap_or_default()
         });
 
+        let decoder = decoded.as_ref().ok().map(|loaded| match loaded {
+            LoadedImage::Texture(_) => "gdk-texture",
+            LoadedImage::Decoded(_) => "image-crate",
+        });
+        let load_error = decoded.as_ref().err().cloned();
         let paintable = decoded.map(|loaded| match loaded {
             LoadedImage::Texture(texture) => texture.upcast::<gtk::gdk::Paintable>(),
             LoadedImage::Decoded(decoded) => {
@@ -594,6 +703,16 @@ impl PictureLoader {
 
             match &paintable {
                 Ok(paintable) => {
+                    debug!(
+                        media_item_id = obj.id(),
+                        image_type = obj.imagetype(),
+                        image_index = obj.tag().as_deref().unwrap_or_default(),
+                        image_tag = obj.image_tag().as_deref().unwrap_or_default(),
+                        decoder = decoder.unwrap_or("unknown"),
+                        texture_creation = "success",
+                        requested_format = waiter.profile.label(),
+                        "Poster decode completed"
+                    );
                     obj.apply_paintable(
                         paintable,
                         &cache_key,
@@ -601,14 +720,63 @@ impl PictureLoader {
                         waiter.generation,
                     );
                 }
-                Err(_) if waiter.fetch_on_error => {
-                    if let Some(path) = waiter.cache_file_path {
-                        obj.get_file(path, waiter.cancellable, waiter.generation);
-                    } else {
-                        obj.set_broken(waiter.cancellable, waiter.generation);
+                Err(_) => {
+                    let (failure_stage, error) = match load_error.as_ref() {
+                        Some(ImageLoadError::Read(error)) => ("cache-read", error.as_str()),
+                        Some(ImageLoadError::Decode(error)) => ("decode", error.as_str()),
+                        None => ("unknown", "unknown image load error"),
+                    };
+                    debug!(
+                        media_item_id = obj.id(),
+                        image_type = obj.imagetype(),
+                        image_index = obj.tag().as_deref().unwrap_or_default(),
+                        image_tag = obj.image_tag().as_deref().unwrap_or_default(),
+                        requested_format = waiter.profile.label(),
+                        failure_stage = failure_stage,
+                        %error,
+                        texture_creation = "failed",
+                        "Poster image load failed"
+                    );
+
+                    match load_error.as_ref() {
+                        Some(ImageLoadError::Read(_)) if waiter.fetch_on_error => {
+                            if let Some(path) = waiter.cache_file_path {
+                                obj.get_file(
+                                    path,
+                                    waiter.cancellable,
+                                    waiter.generation,
+                                    waiter.profile,
+                                );
+                            } else {
+                                obj.set_broken(waiter.cancellable, waiter.generation);
+                            }
+                        }
+                        Some(ImageLoadError::Decode(_)) => {
+                            if let Some(path) = waiter.cache_file_path {
+                                Self::remove_bad_cache(path);
+                            }
+                            #[cfg(target_os = "windows")]
+                            if waiter.profile == ImageRequestProfile::Original {
+                                obj.start_jpeg_fallback(
+                                    waiter.cancellable,
+                                    waiter.generation,
+                                    "original image decode failed",
+                                );
+                                continue;
+                            }
+                            debug!(
+                                media_item_id = obj.id(),
+                                image_type = obj.imagetype(),
+                                fallback_reason = "all supported decoders and JPEG fallback failed",
+                                "Showing no-cover poster fallback"
+                            );
+                            obj.set_broken(waiter.cancellable, waiter.generation);
+                        }
+                        _ => {
+                            obj.set_broken(waiter.cancellable, waiter.generation);
+                        }
                     }
                 }
-                Err(_) => obj.set_broken(waiter.cancellable, waiter.generation),
             }
         }
     }
@@ -622,40 +790,134 @@ impl PictureLoader {
 
         match gtk::gdk::Texture::from_bytes(&bytes) {
             Ok(texture) => Ok(LoadedImage::Texture(texture)),
-            Err(_) => ImagePaintable::decode_bytes(bytes).map(LoadedImage::Decoded),
+            Err(gdk_error) => ImagePaintable::decode_bytes(bytes)
+                .map(LoadedImage::Decoded)
+                .map_err(|fallback_error| {
+                    std::io::Error::new(
+                        std::io::ErrorKind::InvalidData,
+                        format!(
+                            "GDK texture decode failed: {gdk_error}; image crate decode failed: {fallback_error}"
+                        ),
+                    )
+                    .into()
+                }),
         }
     }
 
-    pub async fn cache_file(&self) -> PathBuf {
+    async fn cache_file(&self, profile: ImageRequestProfile) -> PathBuf {
         let cache_path = jellyfin_cache_path().await;
-        let path = format!(
-            "{}-{}-{}",
+        let session = JELLYFIN_CLIENT.session();
+        let server_url = session
+            .url
+            .as_ref()
+            .map(ToString::to_string)
+            .unwrap_or_default();
+        let (max_width, max_height) = self.image_dimensions();
+        let identity = format!(
+            "{}|{}|{}|{}|{}|{}|{}x{}|{}",
+            session.server_name_hash,
+            server_url,
             self.id(),
             self.imagetype(),
-            self.tag().as_deref().unwrap_or("0")
+            self.tag().as_deref().unwrap_or("0"),
+            self.image_tag().as_deref().unwrap_or("untagged"),
+            max_width,
+            max_height,
+            profile.label(),
         );
-        cache_path.join(path)
+        cache_path.join(format!("poster-v2-{:016x}", xxh3_64(identity.as_bytes())))
     }
 
-    pub fn get_file(&self, pathbuf: PathBuf, cancellable: gio::Cancellable, generation: u64) {
-        self.get_file_attempt(pathbuf, cancellable, generation, 0);
+    fn image_dimensions(&self) -> (&'static str, &'static str) {
+        if self.imagetype() == "Backdrop" {
+            (BACKDROP_MAX_WIDTH, BACKDROP_MAX_HEIGHT)
+        } else {
+            (POSTER_MAX_WIDTH, POSTER_MAX_HEIGHT)
+        }
+    }
+
+    fn remove_bad_cache(path: PathBuf) {
+        debug!(cache_path = %path.display(), "Removing invalid poster cache entry");
+        crate::utils::spawn_tokio_without_await(async move {
+            if let Err(error) = tokio::fs::remove_file(&path).await
+                && error.kind() != std::io::ErrorKind::NotFound
+            {
+                warn!(
+                    cache_path = %path.display(),
+                    %error,
+                    "Failed to remove invalid poster cache entry"
+                );
+            }
+        });
+    }
+
+    #[cfg(target_os = "windows")]
+    fn start_jpeg_fallback(
+        &self, cancellable: gio::Cancellable, generation: u64, reason: &'static str,
+    ) {
+        spawn(clone!(
+            #[weak(rename_to = obj)]
+            self,
+            async move {
+                let path = obj.cache_file(ImageRequestProfile::Jpeg).await;
+                if !obj.is_current(&cancellable, generation) {
+                    return;
+                }
+                debug!(
+                    media_item_id = obj.id(),
+                    image_type = obj.imagetype(),
+                    image_tag = obj.image_tag().as_deref().unwrap_or_default(),
+                    fallback_reason = reason,
+                    fallback_format = "jpg",
+                    "Retrying poster with Windows-compatible format"
+                );
+                obj.get_file(
+                    path,
+                    cancellable,
+                    generation,
+                    ImageRequestProfile::Jpeg,
+                );
+            }
+        ));
+    }
+
+    fn get_file(
+        &self, pathbuf: PathBuf, cancellable: gio::Cancellable, generation: u64,
+        profile: ImageRequestProfile,
+    ) {
+        self.get_file_attempt(pathbuf, cancellable, generation, 0, profile);
     }
 
     fn get_file_attempt(
         &self, pathbuf: PathBuf, cancellable: gio::Cancellable, generation: u64, attempt: u8,
+        profile: ImageRequestProfile,
     ) {
         let id = self.id();
         let image_type = self.imagetype();
-        let tag = self.tag();
+        let index = self.tag();
+        let image_tag = self.image_tag();
+        let (max_width, max_height) = self.image_dimensions();
         let weak_self = self.downgrade();
         let request_key = pathbuf.to_string_lossy().into_owned();
+        let destination = pathbuf.clone();
         spawn(async move {
             if cancellable.is_cancelled() {
                 return;
             }
 
             let result = spawn_tokio(async move {
-                Self::download_once(request_key, id, image_type, tag).await
+                Self::download_once(
+                    request_key,
+                    destination,
+                    id,
+                    image_type,
+                    index,
+                    image_tag,
+                    max_width,
+                    max_height,
+                    profile,
+                )
+                .await
             })
             .await;
 
@@ -670,16 +932,43 @@ impl PictureLoader {
             match result {
                 Ok(()) => {
                     debug!("Setting image: {}", &pathbuf.display());
-                    obj.reveal_picture(pathbuf, cancellable, generation, false);
+                    obj.reveal_picture(
+                        pathbuf,
+                        cancellable,
+                        generation,
+                        false,
+                        profile,
+                    );
                 }
                 Err(error) => {
                     warn!("{error}");
                     if attempt == 0 {
                         glib::timeout_future(IMAGE_NETWORK_RETRY_DELAY).await;
                         if obj.is_current(&cancellable, generation) {
-                            obj.get_file_attempt(pathbuf, cancellable, generation, 1);
+                            obj.get_file_attempt(
+                                pathbuf,
+                                cancellable,
+                                generation,
+                                1,
+                                profile,
+                            );
                         }
                     } else {
+                        #[cfg(target_os = "windows")]
+                        if profile == ImageRequestProfile::Original {
+                            obj.start_jpeg_fallback(
+                                cancellable,
+                                generation,
+                                "original image request failed",
+                            );
+                            return;
+                        }
+                        debug!(
+                            media_item_id = obj.id(),
+                            image_type = obj.imagetype(),
+                            fallback_reason = "poster request retries exhausted",
+                            "Showing no-cover poster fallback"
+                        );
                         obj.set_broken(cancellable, generation);
                     }
                 }
@@ -688,7 +977,9 @@ impl PictureLoader {
     }
 
     async fn download_once(
-        request_key: String, id: String, image_type: String, tag: Option<String>,
+        request_key: String, destination: PathBuf, id: String, image_type: String,
+        index: Option<String>, image_tag: Option<String>, max_width: &'static str,
+        max_height: &'static str, profile: ImageRequestProfile,
     ) -> Result<(), String> {
         let receiver = {
             let mut in_flight = IN_FLIGHT_DOWNLOADS
@@ -711,19 +1002,41 @@ impl PictureLoader {
         }
 
         let result = JELLYFIN_CLIENT
-            .get_image(
+            .download_image_to_cache(
                 &id,
                 &image_type,
-                tag.and_then(|value| value.parse::<u8>().ok()),
+                index.and_then(|value| value.parse::<u8>().ok()),
+                image_tag.as_deref(),
+                max_width,
+                max_height,
+                profile.format(),
+                &destination,
             )
             .await
-            .map(|_| ())
+            .map(|info| {
+                debug!(
+                    media_item_id = id,
+                    image_type = image_type,
+                    image_tag = image_tag.as_deref().unwrap_or_default(),
+                    request_url = %info.request_url,
+                    http_status = info.status,
+                    content_type = info.content_type.as_deref().unwrap_or("<missing>"),
+                    downloaded_bytes = info.byte_size,
+                    cache_path = %destination.display(),
+                    cache_write = "success",
+                    "Poster download completed"
+                );
+            })
             .map_err(|error| format!("{error}: {id}-{image_type}"));
 
         match &result {
-            Ok(()) => debug!(poster = %request_key, "Poster download completed"),
+            Ok(()) => {}
             Err(error) => debug!(
                 poster = %request_key,
+                media_item_id = id,
+                image_type = image_type,
+                image_tag = image_tag.as_deref().unwrap_or_default(),
+                requested_format = profile.label(),
                 %error,
                 "Poster download failed"
             ),
