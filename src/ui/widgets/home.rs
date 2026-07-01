@@ -116,6 +116,7 @@ mod imp {
             self.parent_constructed();
             let obj = self.obj();
             obj.setup_next_up_morebutton();
+            crate::log_startup_timing("Home mounted");
             obj.init_load();
         }
     }

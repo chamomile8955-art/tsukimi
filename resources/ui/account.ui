@@ -4,6 +4,9 @@
     <property name="content-width">800</property>
     <property name="content-height">1000</property>
     <property name="title" translatable="yes">Add a New Server</property>
+    <style>
+      <class name="glass-dialog"/>
+    </style>
     <child>
       <object class="AdwToastOverlay" id="toast">
         <child>
@@ -86,6 +89,8 @@
                                                 <signal name="clicked" handler="on_add_route_clicked" swapped="yes"/>
                                                 <style>
                                                   <class name="flat"/>
+                                                  <class name="circular"/>
+                                                  <class name="glass-button"/>
                                                 </style>
                                               </object>
                                             </property>

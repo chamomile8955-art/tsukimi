@@ -8,6 +8,25 @@ use gtk::{
 
 use crate::ui::models::SETTINGS;
 
+pub const THEME_LIGHT: i32 = 2;
+pub const THEME_DARK: i32 = 3;
+
+pub fn normalized_theme(theme: i32) -> i32 {
+    if theme == THEME_LIGHT {
+        THEME_LIGHT
+    } else {
+        THEME_DARK
+    }
+}
+
+pub fn apply_theme(theme: i32) {
+    adw::StyleManager::default().set_color_scheme(if normalized_theme(theme) == THEME_LIGHT {
+        adw::ColorScheme::ForceLight
+    } else {
+        adw::ColorScheme::ForceDark
+    });
+}
+
 mod imp {
 
     use glib::subclass::InitializingObject;
@@ -57,11 +76,15 @@ impl ThemeSwitcher {
     }
 
     pub fn init(&self) {
-        self.set_theme(SETTINGS.main_theme());
+        let theme = normalized_theme(SETTINGS.main_theme());
+        if SETTINGS.main_theme() != theme {
+            SETTINGS.set_main_theme(theme).unwrap();
+        }
+        self.set_theme(theme);
         let action_group = gio::SimpleActionGroup::new();
         let action_vo = gio::ActionEntry::builder("color-scheme")
             .parameter_type(Some(&i32::static_variant_type()))
-            .state(SETTINGS.main_theme().to_variant())
+            .state(theme.to_variant())
             .activate(glib::clone!(
                 #[weak(rename_to = obj)]
                 self,
@@ -84,19 +107,7 @@ impl ThemeSwitcher {
     }
 
     pub fn set_theme(&self, theme: i32) {
-        let style_manager = adw::StyleManager::default();
-
-        match theme {
-            1 => {
-                style_manager.set_color_scheme(adw::ColorScheme::Default);
-            }
-            2 => {
-                style_manager.set_color_scheme(adw::ColorScheme::ForceLight);
-            }
-            _ => {
-                style_manager.set_color_scheme(adw::ColorScheme::ForceDark);
-            }
-        }
+        apply_theme(theme);
     }
 }
 

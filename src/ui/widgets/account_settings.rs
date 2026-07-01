@@ -25,10 +25,7 @@ use adw::{
 use gettextrs::gettext;
 use gtk::{
     CompositeTemplate,
-    gdk::{
-        DragAction,
-        RGBA,
-    },
+    gdk::DragAction,
     gio,
     glib,
     template_callbacks,
@@ -73,15 +70,11 @@ mod imp {
         #[template_child]
         pub selectlastcontrol: TemplateChild<adw::SwitchRow>,
         #[template_child]
-        pub custom_accent_color_control: TemplateChild<adw::SwitchRow>,
-        #[template_child]
         pub backgroundblurspinrow: TemplateChild<adw::SpinRow>,
         #[template_child]
         pub backgroundblurcontrol: TemplateChild<adw::SwitchRow>,
         #[template_child]
         pub backgroundcontrol: TemplateChild<gtk::Switch>,
-        #[template_child]
-        pub color: TemplateChild<gtk::ColorDialogButton>,
         #[template_child]
         pub config_switchrow: TemplateChild<adw::SwitchRow>,
 
@@ -199,7 +192,6 @@ mod imp {
             obj.set_sidebar();
             obj.set_picopactiy();
             obj.set_pic();
-            obj.set_color();
             obj.bind_settings();
             obj.refersh_descriptors();
         }
@@ -235,6 +227,22 @@ impl AccountSettings {
             return;
         };
         dialog.present(Some(self));
+    }
+
+    #[template_callback]
+    fn on_manage_servers(&self) {
+        self.window()
+            .activate_action("win.show-sidebar", None)
+            .unwrap();
+        self.close();
+    }
+
+    #[template_callback]
+    fn on_open_server_panel(&self) {
+        self.window()
+            .activate_action("win.server-panel", None)
+            .unwrap();
+        self.close();
     }
 
     #[template_callback]
@@ -274,18 +282,6 @@ impl AccountSettings {
                 SETTINGS.set_overlay(control.is_active()).unwrap();
             }
         ));
-    }
-
-    pub fn set_color(&self) {
-        let imp = self.imp();
-        use std::str::FromStr;
-        imp.color
-            .set_rgba(&RGBA::from_str(&SETTINGS.accent_color_code()).unwrap());
-        imp.color.connect_rgba_notify(move |control| {
-            SETTINGS
-                .set_accent_color_code(&control.rgba().to_string())
-                .unwrap();
-        });
     }
 
     pub async fn cacheclear(&self) {
@@ -395,16 +391,6 @@ impl AccountSettings {
                 &imp.selectlastcontrol.get(),
                 "active",
             )
-            .build();
-        SETTINGS
-            .bind(
-                "use-custom-accent-color",
-                &imp.custom_accent_color_control.get(),
-                "active",
-            )
-            .build();
-        SETTINGS
-            .bind("use-custom-accent-color", &imp.color.get(), "sensitive")
             .build();
         SETTINGS
             .bind("mpv-config-path", &imp.folder_button_content.get(), "label")

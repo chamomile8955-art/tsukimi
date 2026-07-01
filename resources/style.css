@@ -1,4 +1,14 @@
 @define-color transparent #00000000;
+@define-color glass_fill alpha(@window_fg_color, 0.045);
+@define-color glass_fill_soft alpha(@window_fg_color, 0.025);
+@define-color glass_hover alpha(@window_fg_color, 0.085);
+@define-color glass_pressed alpha(@window_fg_color, 0.065);
+@define-color glass_selected alpha(@window_fg_color, 0.13);
+@define-color glass_border alpha(@window_fg_color, 0.08);
+@define-color glass_highlight alpha(@window_fg_color, 0.065);
+@define-color glass_surface alpha(@window_bg_color, 0.96);
+@define-color glass_shadow rgba(0, 0, 0, 0.16);
+@define-color glass_shadow_strong rgba(0, 0, 0, 0.24);
 
 .sbackground {
   background: rgba(0, 0, 0, 0.15);
@@ -107,14 +117,14 @@ button.pill.ultrasmall {
 }
 
 .home-carousel {
-  border-radius: 10px;
+  border-radius: 16px;
   margin: 0px;
   box-shadow: none;
 }
 
 .boxshadow {
-  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-  border-radius: 10px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
+  border-radius: 14px;
 }
 
 .tu-listview>row {
@@ -160,31 +170,79 @@ button.star.interacted:not(.starred) image {
 }
 
 .serverrow {
-  margin: 6px;
-  border-radius: 10px;
+  margin: 7px 8px;
+  border-radius: 12px;
 }
 
 .top-navigation {
-  padding: 2px 8px;
+  padding: 4px;
+  border: 1px solid @glass_border;
+  border-radius: 999px;
+  background-color: @glass_fill;
+  box-shadow: inset 0 1px @glass_highlight,
+              0 8px 24px @glass_shadow;
 }
 
-.top-navigation button {
+.top-navigation button.segment-button {
+  min-height: 34px;
+  margin: 0;
+  padding: 5px 21px;
+  border: 0;
+  border-radius: 999px;
+  background-color: transparent;
+  box-shadow: none;
   font-size: 1.08em;
-  padding: 6px 18px;
+  font-weight: 600;
+}
+
+.top-navigation button.segment-button:hover {
+  background-color: @glass_hover;
+}
+
+.top-navigation button.segment-button:checked {
+  background-color: @glass_selected;
+  box-shadow: inset 0 0 0 1px @glass_border,
+              0 3px 12px @glass_shadow;
+}
+
+.top-navigation button.segment-button:active {
+  background-color: @glass_pressed;
 }
 
 .source-sidebar {
-  padding: 10px;
+  padding: 10px 8px 14px;
+  background-color: transparent;
+}
+
+.source-sidebar row {
+  min-height: 48px;
+  margin: 3px 0;
+  border-radius: 12px;
+  background-color: transparent;
+}
+
+.source-sidebar row:hover {
+  background-color: @glass_hover;
+}
+
+.source-sidebar row:selected {
+  background-color: alpha(@accent_bg_color, 0.2);
+  box-shadow: inset 0 0 0 1px alpha(@accent_color, 0.28);
+}
+
+.source-sidebar row:selected label {
+  font-weight: 600;
 }
 
 .poster-section-title {
-  font-size: 1.12em;
+  font-size: 1.22em;
+  font-weight: 700;
 }
 
 .horizontal-listview>row {
-  margin-left: 9px;
-  margin-right: 9px;
-  border-radius: 10px;
+  margin-left: 12px;
+  margin-right: 12px;
+  border-radius: 14px;
 }
 
 .vertical-listview>row {
@@ -193,31 +251,32 @@ button.star.interacted:not(.starred) image {
 }
 
 picture {
-  border-radius: 10px;
+  border-radius: 14px;
 }
 
 .picture-loader {
   background-image: linear-gradient(135deg,
-      rgba(128, 128, 128, 0.08),
-      rgba(128, 128, 128, 0.16),
-      rgba(128, 128, 128, 0.08));
-  border-radius: 10px;
+      @glass_fill_soft,
+      @glass_hover,
+      @glass_fill_soft);
+  border: 1px solid @glass_border;
+  border-radius: 14px;
 }
 
 .poster-missing {
   background-image: linear-gradient(145deg,
-      rgba(94, 101, 113, 0.42),
-      rgba(46, 50, 59, 0.52) 48%,
-      rgba(25, 28, 34, 0.64));
-  color: rgba(128, 128, 128, 0.75);
-  border-radius: 10px;
+      @glass_hover,
+      @glass_fill 48%,
+      alpha(@window_bg_color, 0.86));
+  color: alpha(@window_fg_color, 0.72);
+  border-radius: 14px;
 }
 
 .picture-loader.no-cover {
   background-image: linear-gradient(145deg,
-      rgba(82, 89, 101, 0.44),
-      rgba(39, 43, 51, 0.54) 48%,
-      rgba(23, 26, 32, 0.68));
+      @glass_hover,
+      @glass_fill 48%,
+      alpha(@window_bg_color, 0.88));
 }
 
 listview {
@@ -229,7 +288,7 @@ gridview {
 }
 
 gridview > child {
-  margin: 14px;
+  margin: 16px;
 }
 
 gridview > child:hover,
@@ -282,8 +341,8 @@ placessidebar {
 }
 
 .sidebar-pane {
-  background-color: transparent;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+  background-color: @glass_fill;
+  box-shadow: 0 10px 30px @glass_shadow;
 }
 
 /* Expanding */
@@ -296,17 +355,18 @@ row image {
 }
 
 .themeselector {
-  margin: 9px;
+  margin: 6px 2px 2px;
 }
 
 .themeselector checkbutton {
   padding: 0;
-  min-height: 44px;
-  min-width: 44px;
-  padding: 1px;
+  min-height: 48px;
+  min-width: 48px;
+  padding: 2px;
   background-clip: content-box;
   border-radius: 9999px;
-  box-shadow: inset 0 0 0 1px @borders;
+  box-shadow: inset 0 0 0 1px alpha(@window_fg_color, 0.16),
+              0 5px 14px rgba(0, 0, 0, 0.16);
 }
 
 .scroll-spinner {
@@ -315,16 +375,11 @@ row image {
   border-radius: 99px;
 }
 
-.themeselector checkbutton.follow:checked,
 .themeselector checkbutton.light:checked,
 .themeselector checkbutton.dark:checked {
-  box-shadow: inset 0 0 0 2px @theme_selected_bg_color;
-}
-
-.themeselector checkbutton.follow {
-  background-image: linear-gradient(to bottom right,
-      #fff 49.99%,
-      #202020 50.01%);
+  box-shadow: inset 0 0 0 3px @accent_bg_color,
+              0 0 0 2px alpha(@window_fg_color, 0.1),
+              0 7px 18px rgba(0, 0, 0, 0.22);
 }
 
 .themeselector checkbutton.light {
@@ -350,6 +405,30 @@ checkbutton.theme-selector radio:checked {
   -gtk-icon-source: -gtk-icontheme("object-select-symbolic");
   background-color: @theme_selected_bg_color;
   color: @theme_selected_fg_color;
+}
+
+.startup-content-skeleton {
+  background-image: linear-gradient(to bottom right,
+      rgba(21, 24, 31, 0.98),
+      rgba(12, 14, 19, 0.99));
+  color: white;
+}
+
+.poster-skeleton {
+  background-image: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.06),
+      rgba(255, 255, 255, 0.13),
+      rgba(255, 255, 255, 0.06));
+  border: 1px solid rgba(255, 255, 255, 0.055);
+  border-radius: 14px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+}
+
+.ai-recommendation-slot {
+  padding: 14px 16px;
+  border-radius: 14px;
+  background-color: @glass_fill;
+  box-shadow: inset 0 0 0 1px @glass_border;
 }
 
 .filter-label {
@@ -412,6 +491,265 @@ progressbar.accent > trough {
 }
 
 .tulistitem {
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-    border-radius: 10px;
+  padding: 0;
+  border: 1px solid @glass_border;
+  border-radius: 14px;
+  background-color: @glass_fill_soft;
+  box-shadow: 0 9px 24px @glass_shadow;
+}
+
+.tulistitem:hover {
+  border-color: alpha(@window_fg_color, 0.12);
+  background-color: @glass_fill;
+  box-shadow: 0 12px 30px @glass_shadow_strong;
+}
+
+.app-window {
+  background-color: transparent;
+}
+
+.window-frame {
+  border: 1px solid @glass_border;
+  border-radius: 18px;
+  background-color: @window_bg_color;
+  box-shadow: inset 0 1px @glass_highlight,
+              inset 0 -1px rgba(0, 0, 0, 0.18);
+}
+
+.app-window.maximized .window-frame,
+.app-window.fullscreen .window-frame,
+.app-window.tiled .window-frame {
+  border-color: transparent;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.app-shell {
+  background-image: linear-gradient(to bottom right,
+      alpha(@accent_bg_color, 0.035),
+      alpha(@window_bg_color, 0.98) 34%,
+      @window_bg_color);
+}
+
+.source-panel {
+  border: 1px solid @glass_border;
+  border-radius: 22px;
+  background-color: @glass_fill;
+  box-shadow: inset 0 1px @glass_highlight,
+              0 18px 42px @glass_shadow_strong;
+}
+
+.source-toolbar,
+.source-header {
+  background-color: transparent;
+}
+
+.source-header {
+  min-height: 54px;
+  border-bottom: 1px solid @glass_border;
+}
+
+.main-surface,
+.main-toolbar,
+.content-stack {
+  background-color: transparent;
+}
+
+.main-header {
+  min-height: 58px;
+  border-bottom: 1px solid @glass_border;
+  background-color: alpha(@window_bg_color, 0.82);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.window-titlebar {
+  padding: 3px 8px;
+  background-image: linear-gradient(to bottom,
+      @glass_fill,
+      alpha(@window_bg_color, 0.88));
+}
+
+.macos-window-controls,
+.app-window windowcontrols {
+  margin-left: 8px;
+  margin-right: 4px;
+}
+
+.macos-window-controls button,
+.app-window windowcontrols button {
+  min-height: 28px;
+  min-width: 28px;
+  margin: 0 3px;
+  padding: 0;
+  border: 1px solid @glass_border;
+  border-radius: 999px;
+  background-color: @glass_fill;
+  box-shadow: inset 0 1px @glass_highlight,
+              0 4px 12px @glass_shadow;
+}
+
+.macos-window-controls button image,
+.app-window windowcontrols button image {
+  -gtk-icon-transform: scale(0.72);
+}
+
+.macos-window-controls button:hover,
+.app-window windowcontrols button:hover {
+  background-color: @glass_hover;
+}
+
+.macos-window-controls button.close:hover,
+.app-window windowcontrols button.close:hover {
+  color: white;
+  background-color: rgba(214, 73, 69, 0.82);
+}
+
+.macos-window-controls button.minimize:hover,
+.app-window windowcontrols button.minimize:hover {
+  color: rgba(20, 20, 20, 0.9);
+  background-color: rgba(222, 171, 58, 0.82);
+}
+
+.macos-window-controls button.maximize:hover,
+.app-window windowcontrols button.maximize:hover {
+  color: rgba(20, 20, 20, 0.9);
+  background-color: rgba(72, 178, 94, 0.78);
+}
+
+.macos-window-controls button:active,
+.app-window windowcontrols button:active {
+  background-color: @glass_pressed;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.macos-window-controls button:focus-visible,
+.app-window windowcontrols button:focus-visible {
+  outline: 2px solid alpha(@accent_color, 0.72);
+  outline-offset: 2px;
+}
+
+.media-library-scroll,
+.media-library-content {
+  background-color: transparent;
+}
+
+.media-library-content {
+  padding-top: 8px;
+  padding-bottom: 28px;
+}
+
+.media-section {
+  border-radius: 18px;
+}
+
+.media-card-title {
+  font-size: 1.02em;
+  font-weight: 600;
+}
+
+.media-card-image {
+  border-radius: 14px;
+}
+
+button.glass-button,
+menubutton.glass-button > button {
+  min-height: 38px;
+  min-width: 38px;
+  border: 1px solid @glass_border;
+  border-radius: 999px;
+  background-color: @glass_fill;
+  box-shadow: inset 0 1px @glass_highlight,
+              0 5px 16px @glass_shadow;
+}
+
+button.glass-button:hover,
+menubutton.glass-button > button:hover {
+  background-color: @glass_hover;
+}
+
+button.glass-button:active,
+button.glass-button:checked,
+menubutton.glass-button > button:active {
+  background-color: @glass_pressed;
+  box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.14);
+}
+
+button.glass-button:disabled,
+menubutton.glass-button:disabled > button {
+  opacity: 0.42;
+}
+
+button.glass-button:focus-visible,
+menubutton.glass-button > button:focus-visible,
+.top-navigation button.segment-button:focus-visible {
+  outline: 2px solid alpha(@accent_color, 0.72);
+  outline-offset: 2px;
+}
+
+.glass-popover contents {
+  border: 1px solid @glass_border;
+  border-radius: 16px;
+  background-color: @glass_surface;
+  box-shadow: inset 0 1px @glass_highlight,
+              0 18px 42px @glass_shadow_strong;
+}
+
+popover.menu contents {
+  border: 1px solid @glass_border;
+  border-radius: 16px;
+  background-color: @glass_surface;
+  box-shadow: inset 0 1px @glass_highlight,
+              0 18px 42px @glass_shadow_strong;
+}
+
+popover.menu modelbutton {
+  margin: 2px;
+  border-radius: 10px;
+}
+
+popover.menu modelbutton:hover {
+  background-color: @glass_hover;
+}
+
+.theme-menu-panel {
+  min-width: 190px;
+}
+
+.account-settings,
+.glass-dialog {
+  background-image: linear-gradient(to bottom right,
+      @glass_fill_soft,
+      @window_bg_color 36%);
+}
+
+.account-settings .boxed-list,
+.glass-dialog .boxed-list {
+  border: 1px solid @glass_border;
+  border-radius: 14px;
+  background-color: @glass_fill_soft;
+  box-shadow: inset 0 1px @glass_highlight,
+              0 7px 22px @glass_shadow;
+}
+
+.account-settings button.flat,
+.glass-dialog button.flat {
+  border: 1px solid @glass_border;
+  border-radius: 10px;
+  background-color: @glass_fill;
+}
+
+.account-settings button.flat:hover,
+.glass-dialog button.flat:hover {
+  background-color: @glass_hover;
+}
+
+.account-settings button.flat:active,
+.glass-dialog button.flat:active {
+  background-color: @glass_pressed;
+}
+
+.account-settings button.suggested-action,
+.glass-dialog button.suggested-action {
+  border-radius: 12px;
+  box-shadow: 0 6px 18px alpha(@accent_bg_color, 0.18);
 }

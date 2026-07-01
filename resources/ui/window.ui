@@ -2,9 +2,12 @@
 <interface>
   <template class="AppWindow" parent="AdwApplicationWindow">
     <property name="title">Tsukimi</property>
-    <property name="width-request">500</property>
-    <property name="height-request">350</property>
+    <property name="default-width">1360</property>
+    <property name="default-height">860</property>
     <property name="icon-name">moe.tsuna.tsukimi</property>
+    <style>
+      <class name="app-window"/>
+    </style>
     <child>
       <object class="GtkEventControllerKey">
         <property name="propagation-phase">capture</property>
@@ -19,7 +22,11 @@
       </object>
     </child>
     <property name="content">
-      <object class="GtkOverlay">
+      <object class="GtkOverlay" id="window_frame">
+        <property name="overflow">hidden</property>
+        <style>
+          <class name="window-frame"/>
+        </style>
         <child type="overlay">
           <object class="MediaViewer" id="media_viewer">
             <property name="visible">False</property>
@@ -39,17 +46,37 @@
                         <property name="name">main</property>
                         <property name="child">
                           <object class="AdwOverlaySplitView" id="split_view">
-                            <property name="min-sidebar-width">260</property>
-                            <property name="max-sidebar-width">360</property>
-                            <property name="sidebar-width-fraction">0.14</property>
+                            <property name="min-sidebar-width">280</property>
+                            <property name="max-sidebar-width">380</property>
+                            <property name="sidebar-width-fraction">0.15</property>
+                            <style>
+                              <class name="app-shell"/>
+                            </style>
                             <property name="sidebar">
                               <object class="AdwNavigationPage">
                                 <property name="title">Tsukimi</property>
+                                <property name="margin-top">12</property>
+                                <property name="margin-bottom">12</property>
+                                <property name="margin-start">12</property>
+                                <property name="margin-end">10</property>
+                                <property name="overflow">hidden</property>
+                                <style>
+                                  <class name="source-panel"/>
+                                </style>
                                 <property name="child">
                                   <object class="AdwToolbarView">
+                                    <style>
+                                      <class name="source-toolbar"/>
+                                    </style>
                                     <child type="top">
                                       <object class="AdwHeaderBar">
                                         <property name="show-start-title-buttons">false</property>
+                                        <property name="show-end-title-buttons">false</property>
+                                        <style>
+                                          <class name="flat"/>
+                                          <class name="source-header"/>
+                                          <class name="window-titlebar"/>
+                                        </style>
                                         <property name="title-widget">
                                           <object class="GtkLabel">
                                             <property name="label" translatable="yes">Sources</property>
@@ -65,36 +92,29 @@
                                             <property name="action-name">win.add-server</property>
                                             <style>
                                               <class name="flat"/>
+                                              <class name="circular"/>
+                                              <class name="glass-button"/>
                                             </style>
                                           </object>
                                         </child>
                                       </object>
                                     </child>
                                     <child type="bottom">
-                                      <object class="AdwActionRow" id="namerow">
-                                        <property name="halign">fill</property>
-                                        <property name="title-lines">1</property>
-                                        <property name="subtitle-lines">1</property>
-                                        <child type="prefix">
-                                          <object class="AdwAvatar" id="avatar">
-                                            <property name="size">30</property>
-                                            <property name="margin-start">12</property>
-                                            <property name="halign">start</property>
-                                            <child>
-                                              <object class="GtkGestureClick">
-                                                <property name="button">2</property>
-                                                <signal name="released" handler="avatar_pressed_cb" swapped="true" />
-                                              </object>
-                                            </child>
-                                          </object>
-                                        </child>
-                                        <child type="suffix">
-                                          <object class="GtkToggleButton">
-                                            <property name="valign">center</property>
+                                      <object class="GtkBox">
+                                        <property name="halign">end</property>
+                                        <property name="margin-end">12</property>
+                                        <property name="margin-top">6</property>
+                                        <property name="margin-bottom">6</property>
+                                        <child>
+                                          <object class="GtkButton">
                                             <property name="icon-name">applications-system-symbolic</property>
+                                            <property name="tooltip-text">设置</property>
                                             <property name="action-name">setting.account</property>
                                             <style>
-                                              <class name="flat" />
+                                              <class name="flat"/>
+                                              <class name="circular"/>
+                                              <class name="glass-button"/>
+                                              <class name="sidebar-settings-button"/>
                                             </style>
                                           </object>
                                         </child>
@@ -120,12 +140,25 @@
                             <property name="content">
                               <object class="AdwNavigationPage" id="navipage">
                                 <property name="title" translatable="yes"></property>
+                                <style>
+                                  <class name="main-surface"/>
+                                </style>
                                 <property name="child">
                                   <object class="AdwToolbarView">
                                     <property name="bottom-bar-style">raised</property>
+                                    <style>
+                                      <class name="main-toolbar"/>
+                                    </style>
                                     <child type="top">
                                       <object class="AdwHeaderBar">
                                         <property name="show-back-button">False</property>
+                                        <property name="show-start-title-buttons">False</property>
+                                        <property name="show-end-title-buttons">False</property>
+                                        <style>
+                                          <class name="flat"/>
+                                          <class name="main-header"/>
+                                          <class name="window-titlebar"/>
+                                        </style>
                                         <property name="title-widget">
                                           <object class="GtkBox">
                                             <property name="orientation">horizontal</property>
@@ -134,32 +167,38 @@
                                               <class name="top-navigation"/>
                                             </style>
                                             <child>
-                                              <object class="GtkButton">
+                                              <object class="GtkToggleButton" id="home_nav">
                                                 <property name="label" translatable="yes">Home</property>
                                                 <property name="action-name">win.home</property>
+                                                <property name="active">True</property>
                                                 <style>
                                                   <class name="flat"/>
                                                   <class name="pill"/>
+                                                  <class name="segment-button"/>
                                                 </style>
                                               </object>
                                             </child>
                                             <child>
-                                              <object class="GtkButton">
+                                              <object class="GtkToggleButton" id="favorites_nav">
                                                 <property name="label" translatable="yes">Favorites</property>
                                                 <property name="action-name">win.favorites</property>
+                                                <property name="group">home_nav</property>
                                                 <style>
                                                   <class name="flat"/>
                                                   <class name="pill"/>
+                                                  <class name="segment-button"/>
                                                 </style>
                                               </object>
                                             </child>
                                             <child>
-                                              <object class="GtkButton">
+                                              <object class="GtkToggleButton" id="search_nav">
                                                 <property name="label" translatable="yes">Search</property>
                                                 <property name="action-name">win.search</property>
+                                                <property name="group">home_nav</property>
                                                 <style>
                                                   <class name="flat"/>
                                                   <class name="pill"/>
+                                                  <class name="segment-button"/>
                                                 </style>
                                               </object>
                                             </child>
@@ -169,6 +208,11 @@
                                           <object class="GtkToggleButton" id="sidebar">
                                             <property name="icon-name">sidebar-show-symbolic</property>
                                             <property name="action-name">win.sidebar</property>
+                                            <style>
+                                              <class name="flat"/>
+                                              <class name="circular"/>
+                                              <class name="glass-button"/>
+                                            </style>
                                           </object>
                                         </child>
                                         <child type="start">
@@ -176,11 +220,30 @@
                                             <property name="icon-name">go-previous-symbolic</property>
                                             <property name="visible">False</property>
                                             <signal name="clicked" handler="on_pop" swapped="yes"/>
+                                            <style>
+                                              <class name="flat"/>
+                                              <class name="circular"/>
+                                              <class name="glass-button"/>
+                                            </style>
                                           </object>
                                         </child>
                                         <child type="end">
                                           <object class="GtkMenuButton" id="main_menu_button">
                                             <property name="icon-name">open-menu-symbolic</property>
+                                            <style>
+                                              <class name="flat"/>
+                                              <class name="circular"/>
+                                              <class name="glass-button"/>
+                                            </style>
+                                          </object>
+                                        </child>
+                                        <child type="end">
+                                          <object class="GtkWindowControls">
+                                            <property name="side">end</property>
+                                            <property name="decoration-layout">:minimize,maximize,close</property>
+                                            <style>
+                                              <class name="macos-window-controls"/>
+                                            </style>
                                           </object>
                                         </child>
                                       </object>
@@ -210,7 +273,69 @@
                                                     <property name="hexpand">True</property>
                                                     <property name="transition-type">crossfade</property>
                                                     <property name="transition-duration">100</property>
-                                                    <property name="visible-child-name">no-server</property>
+                                                    <property name="visible-child-name">loading</property>
+                                                    <style>
+                                                      <class name="content-stack"/>
+                                                    </style>
+                                                    <child>
+                                                      <object class="GtkStackPage">
+                                                        <property name="name">loading</property>
+                                                        <property name="child">
+                                                          <object class="GtkBox">
+                                                            <property name="orientation">vertical</property>
+                                                            <property name="spacing">24</property>
+                                                            <property name="margin-top">42</property>
+                                                            <property name="margin-start">36</property>
+                                                            <property name="margin-end">36</property>
+                                                            <style>
+                                                              <class name="startup-content-skeleton"/>
+                                                            </style>
+                                                            <child>
+                                                              <object class="GtkBox">
+                                                                <property name="spacing">12</property>
+                                                                <child>
+                                                                  <object class="AdwSpinner"/>
+                                                                </child>
+                                                                <child>
+                                                                  <object class="GtkLabel">
+                                                                    <property name="label">正在准备媒体库...</property>
+                                                                    <style>
+                                                                      <class name="title-3"/>
+                                                                    </style>
+                                                                  </object>
+                                                                </child>
+                                                              </object>
+                                                            </child>
+                                                            <child>
+                                                              <object class="GtkFlowBox">
+                                                                <property name="column-spacing">22</property>
+                                                                <property name="row-spacing">22</property>
+                                                                <property name="selection-mode">none</property>
+                                                                <property name="homogeneous">True</property>
+                                                                <child>
+                                                                  <object class="GtkBox"><property name="width-request">220</property><property name="height-request">330</property><style><class name="poster-skeleton"/></style></object>
+                                                                </child>
+                                                                <child>
+                                                                  <object class="GtkBox"><property name="width-request">220</property><property name="height-request">330</property><style><class name="poster-skeleton"/></style></object>
+                                                                </child>
+                                                                <child>
+                                                                  <object class="GtkBox"><property name="width-request">220</property><property name="height-request">330</property><style><class name="poster-skeleton"/></style></object>
+                                                                </child>
+                                                                <child>
+                                                                  <object class="GtkBox"><property name="width-request">220</property><property name="height-request">330</property><style><class name="poster-skeleton"/></style></object>
+                                                                </child>
+                                                                <child>
+                                                                  <object class="GtkBox"><property name="width-request">220</property><property name="height-request">330</property><style><class name="poster-skeleton"/></style></object>
+                                                                </child>
+                                                                <child>
+                                                                  <object class="GtkBox"><property name="width-request">220</property><property name="height-request">330</property><style><class name="poster-skeleton"/></style></object>
+                                                                </child>
+                                                              </object>
+                                                            </child>
+                                                          </object>
+                                                        </property>
+                                                      </object>
+                                                    </child>
                                                     <child>
                                                       <object class="GtkStackPage">
                                                         <property name="name">homepage</property>
@@ -253,6 +378,7 @@
                                                                 <style>
                                                                   <class name="suggested-action"/>
                                                                   <class name="pill"/>
+                                                                  <class name="glass-button"/>
                                                                 </style>
                                                               </object>
                                                             </property>

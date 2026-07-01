@@ -70,8 +70,6 @@ mod imp {
         #[template_child]
         pub rootpic: TemplateChild<gtk::Picture>,
         #[template_child]
-        pub namerow: TemplateChild<adw::ActionRow>,
-        #[template_child]
         pub player_toolbar_box: TemplateChild<PlayerToolbarBox>,
         #[template_child]
         pub progressbar: TemplateChild<gtk::ProgressBar>,
@@ -106,9 +104,13 @@ mod imp {
         pub mpv_view_stack: TemplateChild<adw::ViewStack>,
 
         #[template_child]
-        pub avatar: TemplateChild<adw::Avatar>,
-        #[template_child]
         pub main_menu_button: TemplateChild<gtk::MenuButton>,
+        #[template_child]
+        pub home_nav: TemplateChild<gtk::ToggleButton>,
+        #[template_child]
+        pub favorites_nav: TemplateChild<gtk::ToggleButton>,
+        #[template_child]
+        pub search_nav: TemplateChild<gtk::ToggleButton>,
 
         pub progress_bar_animation: OnceCell<adw::TimedAnimation>,
         pub progress_bar_fade_animation: OnceCell<adw::TimedAnimation>,
@@ -146,6 +148,9 @@ mod imp {
             klass.install_action("win.sidebar", None, move |window, _action, _parameter| {
                 window.sidebar();
             });
+            klass.install_action("win.show-sidebar", None, |window, _, _| {
+                window.imp().split_view.set_show_sidebar(true);
+            });
             klass.install_action(
                 "setting.account",
                 None,
@@ -153,6 +158,9 @@ mod imp {
                     window.account_settings();
                 },
             );
+            klass.install_action("win.settings", None, |window, _, _| {
+                window.account_settings();
+            });
             klass.install_action("win.toggle-fullscreen", None, |obj, _, _| {
                 if obj.is_fullscreen() {
                     obj.unfullscreen();
@@ -169,22 +177,6 @@ mod imp {
             klass.install_action("win.favorites", None, |obj, _, _| {
                 obj.likedpage();
             });
-            klass.install_action("win.cycle-theme", None, |_, _, _| {
-                let next = match SETTINGS.main_theme() {
-                    1 => 2,
-                    2 => 3,
-                    _ => 1,
-                };
-                SETTINGS
-                    .set_main_theme(next)
-                    .expect("Failed to store theme");
-                let style_manager = adw::StyleManager::default();
-                style_manager.set_color_scheme(match next {
-                    1 => adw::ColorScheme::Default,
-                    2 => adw::ColorScheme::ForceLight,
-                    _ => adw::ColorScheme::ForceDark,
-                });
-            });
             klass.install_action("win.server-switch", None, |obj, _, _| {
                 obj.switch_context_server();
             });
@@ -199,6 +191,12 @@ mod imp {
             });
             klass.install_action("win.add-server", None, |obj, _, _| {
                 obj.new_account();
+            });
+            klass.install_action("win.server-panel", None, |obj, _, _| {
+                obj.open_server_panel();
+            });
+            klass.install_action("win.next-server", None, |obj, _, _| {
+                obj.select_next_server();
             });
         }
 
@@ -295,7 +293,6 @@ use crate::{
     },
     utils::{
         spawn,
-        spawn_tokio,
     },
 };
 use glib::Object;
@@ -393,7 +390,9 @@ impl Window {
 
     fn rebuild_main_menu(&self) {
         let menu = gio::Menu::new();
-        menu.append(Some("切换软件颜色"), Some("win.cycle-theme"));
+        let theme_item = gio::MenuItem::new(None, None);
+        theme_item.set_attribute_value("custom", Some(&"theme-switcher".to_variant()));
+        menu.append_item(&theme_item);
 
         let route_menu = gio::Menu::new();
         let session = JELLYFIN_CLIENT.session();
@@ -432,7 +431,27 @@ impl Window {
             &route_menu,
         ));
         menu.append(Some("关于"), Some("win.about"));
-        self.imp().main_menu_button.set_menu_model(Some(&menu));
+
+        let popover = gtk::PopoverMenu::from_model(Some(&menu));
+        popover.add_css_class("glass-popover");
+        let theme_box = gtk::Box::builder()
+            .orientation(gtk::Orientation::Vertical)
+            .spacing(10)
+            .margin_top(10)
+            .margin_bottom(10)
+            .margin_start(14)
+            .margin_end(14)
+            .build();
+        theme_box.add_css_class("theme-menu-panel");
+        let theme_title = gtk::Label::builder()
+            .label("切换软件颜色")
+            .halign(gtk::Align::Start)
+            .build();
+        theme_title.add_css_class("heading");
+        theme_box.append(&theme_title);
+        theme_box.append(&crate::ui::widgets::theme_switcher::ThemeSwitcher::new());
+        popover.add_child(&theme_box, "theme-switcher");
+        self.imp().main_menu_button.set_popover(Some(&popover));
     }
 
     fn switch_active_route(&self, route_name: String) {
@@ -511,6 +530,27 @@ impl Window {
         ));
     }
 
+    fn select_next_server(&self) {
+        let accounts = SETTINGS.accounts();
+        if accounts.len() < 2 {
+            self.toast(gettext("No alternate server"));
+            return;
+        }
+        let current = JELLYFIN_CLIENT.session().account.servername.clone();
+        let current_index = accounts
+            .iter()
+            .position(|account| account.servername == current)
+            .unwrap_or(0);
+        let account = accounts[(current_index + 1) % accounts.len()].clone();
+        spawn(glib::clone!(
+            #[weak(rename_to = obj)]
+            self,
+            async move {
+                obj.select_server(account, "keyboard-shortcut").await;
+            }
+        ));
+    }
+
     fn set_context_server_default(&self) {
         let Some(account) = self.imp().context_server.borrow().clone() else {
             return;
@@ -568,6 +608,7 @@ impl Window {
 
     fn show_no_server_state(&self) {
         self.mainpage();
+        self.imp().home_nav.set_active(true);
         self.imp().insidestack.set_visible_child_name("no-server");
         self.imp().navipage.set_title("");
         self.imp().last_content_list_selection.replace(None);
@@ -627,6 +668,7 @@ impl Window {
         }
 
         let imp = self.imp();
+        imp.home_nav.set_active(true);
         if imp.homepage.child().is_none() {
             imp.homepage.set_child(Some(&HomePage::new()));
         }
@@ -644,6 +686,7 @@ impl Window {
         }
 
         let imp = self.imp();
+        imp.favorites_nav.set_active(true);
         if imp.likedpage.child().is_none() {
             imp.likedpage.set_child(Some(&LikedPage::new()));
         }
@@ -661,6 +704,7 @@ impl Window {
         }
 
         let imp = self.imp();
+        imp.search_nav.set_active(true);
         if imp.searchpage.child().is_none() {
             imp.searchpage.set_child(Some(&SearchPage::new()));
         }
@@ -819,47 +863,13 @@ impl Window {
         self.set_nav_servers();
         self.remove_all();
         self.homepage();
-
-        spawn(glib::clone!(
-            #[weak(rename_to = obj)]
-            self,
-            async move {
-                obj.account_setup().await;
-
-                let avatar =
-                    match spawn_tokio(async move { JELLYFIN_CLIENT.get_user_avatar().await }).await
-                    {
-                        Ok(avatar) => avatar,
-                        Err(e) => {
-                            obj.toast(e.to_string());
-                            return;
-                        }
-                    };
-
-                let Some(texture) = gtk::gdk::Texture::from_file(&gio::File::for_path(avatar)).ok()
-                else {
-                    obj.imp()
-                        .avatar
-                        .set_custom_image(None::<&gtk::gdk::Paintable>);
-                    return;
-                };
-
-                obj.imp().avatar.set_custom_image(Some(&texture));
-            }
-        ));
+        self.recalculate_layout("home mounted");
     }
 
     pub fn hard_set_fraction(&self, to_value: f64) {
         let progressbar = &self.imp().progressbar;
         self.progressbar_animation().pause();
         progressbar.set_fraction(to_value);
-    }
-
-    pub async fn account_setup(&self) {
-        let imp = self.imp();
-        let s = JELLYFIN_CLIENT.session();
-        imp.namerow.set_title(&s.account.username);
-        imp.namerow.set_subtitle(&s.account.servername);
     }
 
     pub fn account_settings(&self) {
@@ -880,7 +890,17 @@ impl Window {
     }
 
     pub fn save_window_state(&self) -> Result<(), glib::BoolError> {
-        let (width, height) = self.default_size();
+        let (default_width, default_height) = self.default_size();
+        let width = if self.width() > 0 {
+            self.width()
+        } else {
+            default_width
+        };
+        let height = if self.height() > 0 {
+            self.height()
+        } else {
+            default_height
+        };
         SETTINGS.set_window_dismension(width, height)?;
 
         SETTINGS.set_is_maximized(self.is_maximized())?;
@@ -890,8 +910,21 @@ impl Window {
     }
 
     pub fn load_window_state(&self) {
-        let (width, height) = SETTINGS.window_dismension();
+        let (saved_width, saved_height) = SETTINGS.window_dismension();
+        let (width, height) = if saved_width >= 900 && saved_height >= 600 {
+            (saved_width, saved_height)
+        } else {
+            (1360, 860)
+        };
         self.set_default_size(width, height);
+        tracing::info!(
+            saved_width,
+            saved_height,
+            width,
+            height,
+            "Startup window size restored"
+        );
+        crate::log_startup_timing("window restored");
 
         if SETTINGS.is_maximized() {
             self.maximize();
@@ -905,7 +938,49 @@ impl Window {
     }
 
     pub fn new(app: &crate::Application) -> Self {
-        Object::builder().property("application", app).build()
+        let (saved_width, saved_height) = SETTINGS.window_dismension();
+        let (width, height) = if saved_width >= 900 && saved_height >= 600 {
+            (saved_width, saved_height)
+        } else {
+            (1360, 860)
+        };
+        Object::builder()
+            .property("application", app)
+            .property("default-width", width)
+            .property("default-height", height)
+            .build()
+    }
+
+    pub fn recalculate_layout(&self, stage: &str) {
+        let stage = stage.to_string();
+        let (default_width, default_height) = self.default_size();
+        let width = self.width().max(default_width);
+        let height = self.height().max(default_height);
+        tracing::info!(
+            stage = %stage,
+            width,
+            height,
+            "Layout recalculation requested"
+        );
+        self.queue_allocate();
+        self.queue_draw();
+        self.imp().split_view.queue_allocate();
+        self.imp().insidestack.queue_allocate();
+        glib::idle_add_local_once(glib::clone!(
+            #[weak(rename_to = obj)]
+            self,
+            move || {
+                obj.queue_allocate();
+                obj.imp().split_view.queue_allocate();
+                obj.imp().insidestack.queue_allocate();
+                tracing::info!(
+                    stage = %stage,
+                    width = obj.width(),
+                    height = obj.height(),
+                    "Layout initialization size"
+                );
+            }
+        ));
     }
 
     pub fn set_title(&self, title: &str) {
@@ -1141,9 +1216,9 @@ impl Window {
         self.imp().player_toolbar_box.on_stop_button_clicked();
     }
 
-    #[template_callback]
-    fn avatar_pressed_cb(&self) {
+    fn open_server_panel(&self) {
         if !IS_ADMIN.load(std::sync::atomic::Ordering::Relaxed) {
+            self.toast(gettext("Administrator permission is required"));
             return;
         }
 

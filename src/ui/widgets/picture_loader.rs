@@ -86,6 +86,7 @@ enum LoadedImage {
 enum ImageRequestProfile {
     Original,
     Jpeg,
+    Png,
 }
 
 impl ImageRequestProfile {
@@ -93,11 +94,21 @@ impl ImageRequestProfile {
         match self {
             Self::Original => None,
             Self::Jpeg => Some("jpg"),
+            Self::Png => Some("png"),
         }
     }
 
     fn label(self) -> &'static str {
         self.format().unwrap_or("original")
+    }
+
+    #[cfg(target_os = "windows")]
+    fn fallback(self) -> Option<Self> {
+        match self {
+            Self::Original => Some(Self::Jpeg),
+            Self::Jpeg => Some(Self::Png),
+            Self::Png => None,
+        }
     }
 }
 
@@ -453,14 +464,17 @@ impl PictureLoader {
 
         let original_path = self.cache_file(ImageRequestProfile::Original).await;
         #[cfg(target_os = "windows")]
-        let (cache_file_path, profile) = if original_path.is_file() {
-            (original_path, ImageRequestProfile::Original)
-        } else {
+        let (cache_file_path, profile) = {
             let jpeg_path = self.cache_file(ImageRequestProfile::Jpeg).await;
+            let png_path = self.cache_file(ImageRequestProfile::Png).await;
             if jpeg_path.is_file() {
                 (jpeg_path, ImageRequestProfile::Jpeg)
-            } else {
+            } else if png_path.is_file() {
+                (png_path, ImageRequestProfile::Png)
+            } else if original_path.is_file() {
                 (original_path, ImageRequestProfile::Original)
+            } else {
+                (jpeg_path, ImageRequestProfile::Jpeg)
             }
         };
         #[cfg(not(target_os = "windows"))]
@@ -756,18 +770,19 @@ impl PictureLoader {
                                 Self::remove_bad_cache(path);
                             }
                             #[cfg(target_os = "windows")]
-                            if waiter.profile == ImageRequestProfile::Original {
-                                obj.start_jpeg_fallback(
+                            if let Some(profile) = waiter.profile.fallback() {
+                                obj.start_windows_format_fallback(
                                     waiter.cancellable,
                                     waiter.generation,
-                                    "original image decode failed",
+                                    profile,
+                                    "image decode failed",
                                 );
                                 continue;
                             }
                             debug!(
                                 media_item_id = obj.id(),
                                 image_type = obj.imagetype(),
-                                fallback_reason = "all supported decoders and JPEG fallback failed",
+                                fallback_reason = "all supported decoders and Windows format fallbacks failed",
                                 "Showing no-cover poster fallback"
                             );
                             obj.set_broken(waiter.cancellable, waiter.generation);
@@ -852,14 +867,15 @@ impl PictureLoader {
     }
 
     #[cfg(target_os = "windows")]
-    fn start_jpeg_fallback(
-        &self, cancellable: gio::Cancellable, generation: u64, reason: &'static str,
+    fn start_windows_format_fallback(
+        &self, cancellable: gio::Cancellable, generation: u64,
+        profile: ImageRequestProfile, reason: &'static str,
     ) {
         spawn(clone!(
             #[weak(rename_to = obj)]
             self,
             async move {
-                let path = obj.cache_file(ImageRequestProfile::Jpeg).await;
+                let path = obj.cache_file(profile).await;
                 if !obj.is_current(&cancellable, generation) {
                     return;
                 }
@@ -868,15 +884,10 @@ impl PictureLoader {
                     image_type = obj.imagetype(),
                     image_tag = obj.image_tag().as_deref().unwrap_or_default(),
                     fallback_reason = reason,
-                    fallback_format = "jpg",
+                    fallback_format = profile.label(),
                     "Retrying poster with Windows-compatible format"
                 );
-                obj.get_file(
-                    path,
-                    cancellable,
-                    generation,
-                    ImageRequestProfile::Jpeg,
-                );
+                obj.get_file(path, cancellable, generation, profile);
             }
         ));
     }
@@ -955,11 +966,12 @@ impl PictureLoader {
                         }
                     } else {
                         #[cfg(target_os = "windows")]
-                        if profile == ImageRequestProfile::Original {
-                            obj.start_jpeg_fallback(
+                        if let Some(fallback_profile) = profile.fallback() {
+                            obj.start_windows_format_fallback(
                                 cancellable,
                                 generation,
-                                "original image request failed",
+                                fallback_profile,
+                                "image request failed",
                             );
                             return;
                         }

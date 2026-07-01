@@ -12,20 +12,21 @@ mod imp {
 
     use gtk::{
         CssProvider,
-        gdk::{
-            Display,
-            RGBA,
-        },
+        gdk::Display,
     };
 
-    use crate::ui::SETTINGS;
+    use crate::ui::{
+        SETTINGS,
+        widgets::theme_switcher::{
+            apply_theme,
+            normalized_theme,
+        },
+    };
 
     use super::*;
 
     #[derive(Debug, Default)]
     pub struct TsukimiApplication {
-        accent_provider: OnceCell<CssProvider>,
-        accent_provider_added: Cell<bool>,
         startup_provider: OnceCell<CssProvider>,
         settings_initialized: Cell<bool>,
         startup_started: Cell<bool>,
@@ -46,6 +47,11 @@ mod imp {
             obj.set_resource_base_path(Some(crate::APP_RESOURCE_PATH));
 
             obj.set_accels_for_action("win.about", &["<Ctrl>N"]);
+            obj.set_accels_for_action("win.search", &["<Ctrl>F"]);
+            obj.set_accels_for_action("win.home", &["<Alt>Home"]);
+            obj.set_accels_for_action("win.toggle-fullscreen", &["F11"]);
+            obj.set_accels_for_action("win.settings", &["<Ctrl>comma"]);
+            obj.set_accels_for_action("win.next-server", &["<Ctrl>Page_Down"]);
         }
     }
 
@@ -92,24 +98,11 @@ mod imp {
                 return;
             }
 
-            self.update_accent_provider();
-
-            SETTINGS.connect_changed(
-                Some("use-custom-accent-color"),
-                glib::clone!(
-                    #[weak(rename_to = obj)]
-                    self.obj(),
-                    move |_, _| obj.imp().update_accent_provider()
-                ),
-            );
-            SETTINGS.connect_changed(
-                Some("accent-color-code"),
-                glib::clone!(
-                    #[weak(rename_to = obj)]
-                    self.obj(),
-                    move |_, _| obj.imp().update_accent_provider()
-                ),
-            );
+            let theme = normalized_theme(SETTINGS.main_theme());
+            if SETTINGS.main_theme() != theme {
+                SETTINGS.set_main_theme(theme).unwrap();
+            }
+            apply_theme(theme);
 
             crate::log_startup_timing("settings loaded");
         }
@@ -175,11 +168,17 @@ mod imp {
             status.add_css_class("startup-status");
             content.append(&status);
 
+            let (width, height) = restored_window_size();
+            tracing::info!(
+                width,
+                height,
+                "Startup splash using restored window size"
+            );
             let splash = adw::ApplicationWindow::builder()
                 .application(&*self.obj())
                 .content(&content)
-                .default_width(460)
-                .default_height(280)
+                .default_width(width)
+                .default_height(height)
                 .decorated(false)
                 .resizable(false)
                 .title("Tsukimi")
@@ -212,6 +211,7 @@ mod imp {
                 );
                 crate::log_startup_timing("main window created");
                 window.load_window_state();
+                window.recalculate_layout("window restored");
 
                 status.set_text("正在连接服务器...");
                 splash.set_transient_for(Some(&window));
@@ -223,6 +223,7 @@ mod imp {
                     glib::ControlFlow::Break,
                     move |window, _| {
                         crate::log_startup_timing("main window first frame shown");
+                        window.recalculate_layout("app ready");
                         window.start_background_initialization();
                         Self::fade_out_splash(&splash);
                         glib::ControlFlow::Break
@@ -250,70 +251,14 @@ mod imp {
             });
         }
 
-        fn update_accent_provider(&self) {
-            let display = Display::default().expect("Could not connect to a display.");
-
-            if !SETTINGS.use_custom_accent_color() {
-                if let Some(provider) = self.accent_provider.get()
-                    && self.accent_provider_added.get()
-                {
-                    gtk::style_context_remove_provider_for_display(&display, provider);
-                    self.accent_provider_added.set(false);
-                }
-                return;
-            }
-
-            let provider = self.accent_provider.get_or_init(CssProvider::new);
-            let accent_color = SETTINGS.accent_color_code();
-            let accent_fg_color = readable_foreground_color(&accent_color);
-
-            provider.load_from_string(&format!(
-                "
-                @define-color accent_color {accent_color};
-                @define-color accent_bg_color {accent_color};
-                @define-color accent_fg_color {accent_fg_color};
-
-                :root {{
-                    --accent-color:{accent_color};
-                    --accent-bg-color:{accent_color};
-                    --accent-fg-color:{accent_fg_color};
-                }}",
-            ));
-
-            if !self.accent_provider_added.get() {
-                gtk::style_context_add_provider_for_display(
-                    &display,
-                    provider,
-                    gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
-                );
-                self.accent_provider_added.set(true);
-            }
-        }
     }
 
-    fn readable_foreground_color(color: &str) -> &'static str {
-        let Ok(color) = color.parse::<RGBA>() else {
-            return "#000000";
-        };
-
-        // Calculate WCAG relative luminance from sRGB channels.
-        let srgb_to_linear = |channel: f32| {
-            if channel <= 0.04045 {
-                channel / 12.92
-            } else {
-                ((channel + 0.055) / 1.055).powf(2.4)
-            }
-        };
-
-        let luminance = 0.2126 * srgb_to_linear(color.red())
-            + 0.7152 * srgb_to_linear(color.green())
-            + 0.0722 * srgb_to_linear(color.blue());
-
-        // 0.179 is the contrast crossover where black becomes more readable than white.
-        if luminance >= 0.179 {
-            "#000000"
+    fn restored_window_size() -> (i32, i32) {
+        let (width, height) = SETTINGS.window_dismension();
+        if width >= 900 && height >= 600 {
+            (width, height)
         } else {
-            "#ffffff"
+            (1360, 860)
         }
     }
 }

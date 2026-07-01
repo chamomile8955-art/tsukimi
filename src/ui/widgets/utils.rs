@@ -70,10 +70,10 @@ impl TuItemBuildExt for SignalListItemFactory {
     }
 }
 
-pub const TU_ITEM_POST_SIZE: (i32, i32) = (205, 307);
-pub const TU_ITEM_VIDEO_SIZE: (i32, i32) = (300, 169);
-pub const TU_ITEM_SQUARE_SIZE: (i32, i32) = (220, 220);
-pub const TU_ITEM_BANNER_SIZE: (i32, i32) = (420, 78);
+pub const TU_ITEM_POST_SIZE: (i32, i32) = (220, 330);
+pub const TU_ITEM_VIDEO_SIZE: (i32, i32) = (320, 180);
+pub const TU_ITEM_SQUARE_SIZE: (i32, i32) = (232, 232);
+pub const TU_ITEM_BANNER_SIZE: (i32, i32) = (440, 82);
 
 pub trait GlobalToast {
     fn toast(&self, message: impl Into<String>);

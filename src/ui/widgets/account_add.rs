@@ -206,7 +206,7 @@ impl AccountWindow {
             .icon_name("user-trash-symbolic")
             .tooltip_text(gettext("Delete Route"))
             .valign(gtk::Align::Center)
-            .css_classes(["flat"])
+            .css_classes(["flat", "circular", "glass-button"])
             .build();
         let row = adw::ExpanderRow::builder()
             .expanded(route.is_none())

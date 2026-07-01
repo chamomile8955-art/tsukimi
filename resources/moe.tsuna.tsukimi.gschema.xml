@@ -165,8 +165,8 @@
     </key>
     <key name="main-theme" type="i">
       <summary>Theme</summary>
-      <description>0: Auto, 1: Light, 2. Dark</description>
-      <default>0</default>
+      <description>2: Light, 3: Dark</description>
+      <default>3</default>
     </key>
     <key name="mpv-video-scale" type="i">
       <summary>Video Upscale Method</summary>

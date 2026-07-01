@@ -46,7 +46,6 @@ pub mod imp {
     };
 
     use crate::ui::{
-        SETTINGS,
         provider::tu_item::TuItem,
         widgets::{
             hover_scale::HoverScale,
@@ -149,28 +148,6 @@ pub mod imp {
                 }
             ));
 
-            SETTINGS.connect_changed(
-                Some("use-custom-accent-color"),
-                glib::clone!(
-                    #[weak]
-                    obj,
-                    move |_, _| {
-                        obj.queue_draw();
-                    }
-                ),
-            );
-
-            SETTINGS.connect_changed(
-                Some("accent-color-code"),
-                glib::clone!(
-                    #[weak]
-                    obj,
-                    move |_, _| {
-                        obj.queue_draw();
-                    }
-                ),
-            );
-
             self.hover_scale.set_underlay(glib::clone!(
                 #[weak]
                 obj,
@@ -240,11 +217,7 @@ pub mod imp {
         }
 
         fn progress_fill_color(&self) -> Option<gdk::RGBA> {
-            if SETTINGS.use_custom_accent_color() {
-                gdk::RGBA::parse(SETTINGS.accent_color_code()).ok()
-            } else {
-                Some(adw::StyleManager::default().accent_color_rgba())
-            }
+            Some(adw::StyleManager::default().accent_color_rgba())
         }
 
         fn compute_blur_info(&self) -> Option<(gdk::Paintable, graphene::Rect)> {

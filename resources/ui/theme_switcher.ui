@@ -9,39 +9,21 @@
       <object class="GtkBox" id="box">
         <property name="hexpand">true</property>
         <property name="orientation">0</property>
-        <property name="spacing">12</property>
+        <property name="spacing">18</property>
         <child>
-          <object class="GtkCheckButton" id="follow">
-            <style>
-              <class name="theme-selector"/>
-              <class name="follow"/>
-            </style>
-            <property name="hexpand">true</property>
-            <property name="halign">3</property>
-            <property name="focus-on-click">false</property>
-            <property name="action-name">app.color-scheme</property>
-            <property name="action-target">1</property>
-            <property name="tooltip-text" translatable="true">Follow system style</property>
-            <accessibility>
-              <property name="label" translatable="true">Follow system style</property>
-            </accessibility>
-          </object>
-        </child>
-        <child>
-          <object class="GtkCheckButton">
+          <object class="GtkCheckButton" id="light">
             <style>
               <class name="theme-selector"/>
               <class name="light"/>
             </style>
             <property name="hexpand">true</property>
             <property name="halign">3</property>
-            <property name="group">follow</property>
             <property name="focus-on-click">false</property>
             <property name="action-name">app.color-scheme</property>
             <property name="action-target">2</property>
-            <property name="tooltip-text" translatable="true">Light style</property>
+            <property name="tooltip-text">白色模式</property>
             <accessibility>
-              <property name="label" translatable="true">Light style</property>
+              <property name="label">白色模式</property>
             </accessibility>
           </object>
         </child>
@@ -53,13 +35,13 @@
             </style>
             <property name="hexpand">true</property>
             <property name="halign">3</property>
-            <property name="group">follow</property>
+            <property name="group">light</property>
             <property name="focus-on-click">false</property>
             <property name="action-name">app.color-scheme</property>
             <property name="action-target">3</property>
-            <property name="tooltip-text" translatable="true">Dark style</property>
+            <property name="tooltip-text">黑色模式</property>
             <accessibility>
-              <property name="label" translatable="true">Dark style</property>
+              <property name="label">黑色模式</property>
             </accessibility>
           </object>
         </child>

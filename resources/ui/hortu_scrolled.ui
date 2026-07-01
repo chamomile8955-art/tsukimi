@@ -2,10 +2,13 @@
 <interface>
   <template parent="AdwBin" class="HortuScrolled">
     <property name="visible">False</property>
-    <property name="margin-start">28</property>
-    <property name="margin-end">28</property>
-    <property name="margin-top">16</property>
-    <property name="margin-bottom">16</property>
+    <property name="margin-start">32</property>
+    <property name="margin-end">32</property>
+    <property name="margin-top">18</property>
+    <property name="margin-bottom">18</property>
+    <style>
+      <class name="media-section"/>
+    </style>
     <child>
       <object class="GtkEventControllerMotion">
         <signal name="enter" handler="on_enter_focus" swapped="yes"/>
@@ -18,7 +21,7 @@
         <child>
           <object class="GtkBox">
             <property name="orientation">vertical</property>
-            <property name="spacing">5</property>
+            <property name="spacing">10</property>
             <child>
               <object class="GtkBox">
                 <property name="orientation">horizontal</property>
@@ -49,6 +52,7 @@
                     <style>
                       <class name="circular" />
                       <class name="flat" />
+                      <class name="glass-button" />
                     </style>
                   </object>
                 </child>
@@ -56,12 +60,12 @@
             </child>
             <child>
               <object class="GtkOverlay">
-                <property name="margin-top">6</property>
+                <property name="margin-top">8</property>
                 <property name="margin-start">12</property>
                 <property name="margin-end">12</property>
                 <child>
                   <object class="LazyDiffView" id="diffview">
-                    <property name="spacing">26</property>
+                    <property name="spacing">30</property>
                   </object>
                 </child>
                 <child type="overlay">
@@ -77,6 +81,7 @@
                     <signal name="clicked" handler="on_rightbutton_clicked" swapped="yes" />
                     <style>
                       <class name="osd" />
+                      <class name="glass-button" />
                     </style>
                   </object>
                 </child>
@@ -93,6 +98,7 @@
                     <signal name="clicked" handler="on_leftbutton_clicked" swapped="yes" />
                     <style>
                       <class name="osd" />
+                      <class name="glass-button" />
                     </style>
                   </object>
                 </child>
