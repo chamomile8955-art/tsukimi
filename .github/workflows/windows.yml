@@ -16,6 +16,9 @@ env:
   CARGO_TERM_COLOR: always
   CARGO_REGISTRIES_CRATES_IO_PROTOCOL: sparse
   CARGO_HOME: ${{ github.workspace }}\.cargo-home
+  SCCACHE_DIR: ${{ github.workspace }}\.sccache
+  SCCACHE_CACHE_SIZE: 1G
+  RUSTC_WRAPPER: sccache
 
 jobs:
   build:
@@ -30,6 +33,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Start dependency setup timer
+        id: dependency-timer
+        shell: pwsh
+        run: |
+          "started=$([DateTimeOffset]::UtcNow.ToUnixTimeSeconds())" |
+            Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
       - name: Set up MSYS2 UCRT64
         id: msys2
         uses: msys2/setup-msys2@v2
@@ -41,6 +51,7 @@ jobs:
             git
             mingw-w64-ucrt-x86_64-toolchain
             mingw-w64-ucrt-x86_64-rust
+            mingw-w64-ucrt-x86_64-sccache
             mingw-w64-ucrt-x86_64-pkgconf
             mingw-w64-ucrt-x86_64-meson
             mingw-w64-ucrt-x86_64-ninja
@@ -59,16 +70,64 @@ jobs:
             mingw-w64-ucrt-x86_64-gst-plugins-bad
             mingw-w64-ucrt-x86_64-gst-libav
 
+      - name: Log dependency setup timing
+        shell: pwsh
+        run: |
+          $started = [int64]"${{ steps.dependency-timer.outputs.started }}"
+          $elapsed = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds() - $started
+          Write-Host "::notice title=Dependency setup timing::MSYS2 UCRT64 setup completed in ${elapsed}s"
+
+      - name: Resolve Rust cache identity
+        id: rust-cache-key
+        shell: msys2 {0}
+        run: |
+          set -euo pipefail
+
+          rust_release="$(rustc -vV | sed -n 's/^release: //p')"
+          rust_host="$(rustc -vV | sed -n 's/^host: //p')"
+          test -n "$rust_release"
+          test -n "$rust_host"
+
+          echo "toolchain=${rust_host}-rust-${rust_release}" >> "$GITHUB_OUTPUT"
+          echo "Rust cache identity: ${rust_host}-rust-${rust_release}"
+
+      - name: Start cache restore timer
+        id: cache-timer
+        shell: pwsh
+        run: |
+          "started=$([DateTimeOffset]::UtcNow.ToUnixTimeSeconds())" |
+            Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
       - name: Restore Cargo cache
+        id: cargo-cache
         uses: actions/cache@v4
         with:
           path: |
             ${{ env.CARGO_HOME }}\registry
             ${{ env.CARGO_HOME }}\git
             ${{ github.workspace }}\target
-          key: windows-ucrt64-cargo-${{ hashFiles('Cargo.lock', '.github/workflows/windows.yml') }}
+          key: ${{ runner.os }}-ucrt64-cargo-${{ steps.rust-cache-key.outputs.toolchain }}-${{ hashFiles('Cargo.lock', '.github/workflows/windows.yml') }}
           restore-keys: |
-            windows-ucrt64-cargo-
+            ${{ runner.os }}-ucrt64-cargo-${{ steps.rust-cache-key.outputs.toolchain }}-
+
+      - name: Restore sccache cache
+        id: sccache-cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.SCCACHE_DIR }}
+          key: ${{ runner.os }}-ucrt64-sccache-${{ steps.rust-cache-key.outputs.toolchain }}-${{ hashFiles('Cargo.lock', '.github/workflows/windows.yml') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-ucrt64-sccache-${{ steps.rust-cache-key.outputs.toolchain }}-${{ hashFiles('Cargo.lock', '.github/workflows/windows.yml') }}-
+            ${{ runner.os }}-ucrt64-sccache-${{ steps.rust-cache-key.outputs.toolchain }}-
+
+      - name: Log cache restore timing
+        shell: pwsh
+        run: |
+          $started = [int64]"${{ steps.cache-timer.outputs.started }}"
+          $elapsed = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds() - $started
+          $cargoHit = "${{ steps.cargo-cache.outputs.cache-hit }}"
+          $sccacheHit = "${{ steps.sccache-cache.outputs.cache-hit }}"
+          Write-Host "::notice title=Cache restore timing::Cargo hit=${cargoHit}; sccache hit=${sccacheHit}; completed in ${elapsed}s"
 
       - name: Verify UCRT64 toolchain and dependencies
         shell: msys2 {0}
@@ -78,7 +137,7 @@ jobs:
         run: |
           set -euxo pipefail
 
-          for tool in cargo rustc pkgconf meson; do
+          for tool in cargo rustc sccache pkgconf meson; do
             case "$(command -v "$tool")" in
               /ucrt64/bin/*) ;;
               *)
@@ -91,6 +150,7 @@ jobs:
           cargo --version
           rustc -vV
           rustc -vV | grep -F 'host: x86_64-pc-windows-gnu'
+          sccache --version
           pkgconf --version
           meson --version
 
@@ -119,6 +179,11 @@ jobs:
           RUSTFLAGS: -Lnative=${{ steps.msys2.outputs.msys2-location }}\ucrt64\lib
         run: |
           set -euxo pipefail
+          build_started=$SECONDS
+          trap 'echo "::notice title=Build timing::Meson configure and Cargo build finished after $((SECONDS - build_started))s"' EXIT
+
+          sccache --start-server
+          sccache --zero-stats
 
           # This performs the project's Meson dependency and version checks.
           # src/meson.build delegates compilation to Cargo, but its final copy
@@ -138,10 +203,19 @@ jobs:
           cargo build --release --locked
           test -f target/release/tsukimi.exe
 
+      - name: Print sccache statistics
+        if: always()
+        shell: msys2 {0}
+        run: |
+          sccache --show-stats || true
+          sccache --stop-server || true
+
       - name: Assemble portable runtime
         shell: msys2 {0}
         run: |
           set -euxo pipefail
+          packaging_started=$SECONDS
+          trap 'echo "::notice title=Packaging timing::Portable runtime assembly finished after $((SECONDS - packaging_started))s"' EXIT
 
           dist="$PWD/dist/Tsukimi"
           mkdir -p \
@@ -265,6 +339,7 @@ jobs:
       - name: Create ZIP
         shell: pwsh
         run: |
+          $timer = [Diagnostics.Stopwatch]::StartNew()
           $zipPath = Join-Path $PWD "tsukimi-windows-x86_64.zip"
           Compress-Archive `
             -Path dist/Tsukimi `
@@ -291,6 +366,15 @@ jobs:
           } finally {
             $archive.Dispose()
           }
+          $timer.Stop()
+          Write-Host "::notice title=ZIP timing::Portable ZIP created in $([math]::Round($timer.Elapsed.TotalSeconds, 1))s"
+
+      - name: Start artifact upload timer
+        id: artifact-upload-timer
+        shell: pwsh
+        run: |
+          "started=$([DateTimeOffset]::UtcNow.ToUnixTimeSeconds())" |
+            Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
@@ -298,6 +382,14 @@ jobs:
           name: tsukimi-windows-x86_64
           path: tsukimi-windows-x86_64.zip
           archive: false
+
+      - name: Log artifact upload timing
+        if: always()
+        shell: pwsh
+        run: |
+          $started = [int64]"${{ steps.artifact-upload-timer.outputs.started }}"
+          $elapsed = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds() - $started
+          Write-Host "::notice title=Artifact upload timing::Artifact upload step finished after ${elapsed}s"
 
   release:
     name: Publish GitHub Release
@@ -315,6 +407,10 @@ jobs:
           skip-decompress: true
           merge-multiple: true
 
+      - name: Start release upload timer
+        id: release-upload-timer
+        run: echo "started=$(date +%s)" >> "$GITHUB_OUTPUT"
+
       - name: Create or update release
         uses: softprops/action-gh-release@v3
         with:
@@ -324,3 +420,11 @@ jobs:
           overwrite_files: true
           fail_on_unmatched_files: true
           files: release-assets/tsukimi-windows-x86_64.zip
+
+      - name: Log release upload timing
+        if: always()
+        env:
+          STARTED: ${{ steps.release-upload-timer.outputs.started }}
+        run: |
+          elapsed=$(($(date +%s) - STARTED))
+          echo "::notice title=Release upload timing::Release upload step finished after ${elapsed}s"

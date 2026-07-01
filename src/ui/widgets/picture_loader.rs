@@ -185,6 +185,8 @@ pub(crate) mod imp {
         pub animated: Cell<bool>,
         pub cancellable: RefCell<Option<gio::Cancellable>>,
         pub generation: Cell<u64>,
+        pub render_pending: Cell<bool>,
+        pub render_key: RefCell<Option<String>>,
     }
 
     #[glib::object_subclass]
@@ -231,6 +233,17 @@ pub(crate) mod imp {
         fn unmap(&self) {
             self.obj().cancel_loading();
             self.parent_unmap();
+        }
+
+        fn snapshot(&self, snapshot: &gtk::Snapshot) {
+            self.parent_snapshot(snapshot);
+
+            if self.render_pending.replace(false) {
+                debug!(
+                    poster = self.render_key.borrow().as_deref().unwrap_or_default(),
+                    "Poster render executed"
+                );
+            }
         }
     }
     impl BinImpl for PictureLoader {}
@@ -402,29 +415,41 @@ impl PictureLoader {
         );
     }
 
-    fn set_picture_visible(&self, cancellable: gio::Cancellable, generation: u64) {
+    fn apply_paintable(
+        &self, paintable: &gtk::gdk::Paintable, cache_key: &str,
+        cancellable: gio::Cancellable, generation: u64,
+    ) {
         if !self.is_current(&cancellable, generation) {
             return;
         }
 
+        debug_assert!(glib::MainContext::default().is_owner());
+
         let imp = self.imp();
+        imp.picture.set_paintable(Some(paintable));
         self.remove_css_class("no-cover");
         imp.spinner.set_visible(false);
+        imp.broken.set_visible(false);
+        imp.revealer.set_reveal_child(true);
+
+        // GtkPicture emits notify::paintable from set_paintable(). Explicitly
+        // invalidate this custom widget's snapshot as well so HoverScale and
+        // virtualized poster rows repaint without waiting for navigation.
+        imp.render_key.replace(Some(cache_key.to_string()));
+        imp.render_pending.set(true);
+        imp.picture.queue_draw();
+        imp.revealer.queue_draw();
+        self.queue_draw();
+
+        debug!(
+            poster = cache_key,
+            generation,
+            "Poster UI update triggered on GLib main context"
+        );
+
         if !FIRST_POSTER_RENDERED.swap(true, Ordering::Relaxed) {
             crate::log_startup_timing("first poster render ready");
         }
-        spawn(clone!(
-            #[weak]
-            imp,
-            #[strong]
-            cancellable,
-            async move {
-                if cancellable.is_cancelled() {
-                    return;
-                }
-                imp.revealer.set_reveal_child(true);
-            }
-        ));
     }
 
     fn set_broken(&self, cancellable: gio::Cancellable, generation: u64) {
@@ -436,18 +461,9 @@ impl PictureLoader {
         self.add_css_class("no-cover");
         imp.broken.set_visible(true);
         imp.spinner.set_visible(false);
-        spawn(clone!(
-            #[weak]
-            imp,
-            #[strong]
-            cancellable,
-            async move {
-                if cancellable.is_cancelled() {
-                    return;
-                }
-                imp.revealer.set_reveal_child(true);
-            }
-        ));
+        imp.revealer.set_reveal_child(true);
+        imp.revealer.queue_draw();
+        self.queue_draw();
     }
 
     fn load_file_bytes(
@@ -462,8 +478,7 @@ impl PictureLoader {
             && let Some(paintable) =
                 DECODED_IMAGE_CACHE.with(|cache| cache.borrow_mut().get(&cache_key))
         {
-            self.imp().picture.set_paintable(Some(&paintable));
-            self.set_picture_visible(cancellable, generation);
+            self.apply_paintable(&paintable, &cache_key, cancellable, generation);
             return;
         }
 
@@ -511,13 +526,18 @@ impl PictureLoader {
         rayon::spawn(move || {
             let decoded = Self::decode_bytes(bytes, animated).map_err(|error| error.to_string());
             drop(decode_permit);
-            glib::idle_add_once(move || {
+
+            // Use the application's GLib main context explicitly. Decode work
+            // stays on Rayon; all GTK state below is applied by the UI thread.
+            let _ = glib::MainContext::default().spawn(async move {
                 Self::queue_decode_result(cache_key, decoded, animated);
             });
         });
     }
 
     fn queue_decode_result(cache_key: String, decoded: DecodeResult, animated: bool) {
+        debug_assert!(glib::MainContext::default().is_owner());
+
         PENDING_DECODE_RESULTS.with(|pending| {
             pending.borrow_mut().push((cache_key, decoded, animated));
         });
@@ -538,6 +558,8 @@ impl PictureLoader {
     }
 
     fn finish_decode(cache_key: String, decoded: DecodeResult, animated: bool) {
+        debug_assert!(glib::MainContext::default().is_owner());
+
         let waiters = IN_FLIGHT_DECODES.with(|in_flight| {
             in_flight
                 .borrow_mut()
@@ -558,7 +580,7 @@ impl PictureLoader {
             DECODED_IMAGE_CACHE.with(|cache| {
                 cache
                     .borrow_mut()
-                    .insert(cache_key, paintable.clone());
+                    .insert(cache_key.clone(), paintable.clone());
             });
         }
 
@@ -572,8 +594,12 @@ impl PictureLoader {
 
             match &paintable {
                 Ok(paintable) => {
-                    obj.imp().picture.set_paintable(Some(paintable));
-                    obj.set_picture_visible(waiter.cancellable, waiter.generation);
+                    obj.apply_paintable(
+                        paintable,
+                        &cache_key,
+                        waiter.cancellable,
+                        waiter.generation,
+                    );
                 }
                 Err(_) if waiter.fetch_on_error => {
                     if let Some(path) = waiter.cache_file_path {
@@ -693,6 +719,15 @@ impl PictureLoader {
             .await
             .map(|_| ())
             .map_err(|error| format!("{error}: {id}-{image_type}"));
+
+        match &result {
+            Ok(()) => debug!(poster = %request_key, "Poster download completed"),
+            Err(error) => debug!(
+                poster = %request_key,
+                %error,
+                "Poster download failed"
+            ),
+        }
 
         let waiters = IN_FLIGHT_DOWNLOADS
             .lock()
