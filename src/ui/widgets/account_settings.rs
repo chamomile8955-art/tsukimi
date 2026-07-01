@@ -231,17 +231,23 @@ impl AccountSettings {
 
     #[template_callback]
     fn on_manage_servers(&self) {
-        self.window()
-            .activate_action("win.show-sidebar", None)
-            .unwrap();
+        gtk::prelude::WidgetExt::activate_action(
+            &self.window(),
+            "win.show-sidebar",
+            None,
+        )
+        .unwrap();
         self.close();
     }
 
     #[template_callback]
     fn on_open_server_panel(&self) {
-        self.window()
-            .activate_action("win.server-panel", None)
-            .unwrap();
+        gtk::prelude::WidgetExt::activate_action(
+            &self.window(),
+            "win.server-panel",
+            None,
+        )
+        .unwrap();
         self.close();
     }
 
