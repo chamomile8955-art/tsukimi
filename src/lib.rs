@@ -1,5 +1,6 @@
 use std::{
     env,
+    path::Path,
     sync::{
         LazyLock,
         OnceLock,
@@ -7,6 +8,7 @@ use std::{
     time::{
         Duration,
         Instant,
+        UNIX_EPOCH,
     },
 };
 
@@ -47,6 +49,10 @@ pub const UI_PREVIEW_APP_ID: &str = "moe.tsuna.tsukimi.UiPreview";
 pub const CLIENT_ID: &str = "Tsukimi";
 const APP_RESOURCE_PATH: &str = "/moe/tsuna/tsukimi";
 const GRESOURCE_FILE: &str = "tsukimi.gresource";
+const WINDOW_UI_RESOURCE: &str = "/moe/tsuna/tsukimi/ui/window.ui";
+const STYLE_CSS_RESOURCE: &str = "/moe/tsuna/tsukimi/style.css";
+const BUILD_WINDOW_UI: &[u8] = include_bytes!("../resources/ui/window.ui");
+const BUILD_STYLE_CSS: &[u8] = include_bytes!("../resources/style.css");
 static STARTUP_STARTED: OnceLock<Instant> = OnceLock::new();
 static UI_PREVIEW_MODE: OnceLock<bool> = OnceLock::new();
 
@@ -266,6 +272,118 @@ pub fn run() -> gtk::glib::ExitCode {
 
 fn register_gio_resources() {
     let path = installation_path(PKGDATADIR).join(GRESOURCE_FILE);
-    let resources = gtk::gio::Resource::load(path).expect("Failed to load resources.");
+    let executable = std::env::current_exe().expect("Failed to resolve current executable");
+    let executable_modified = log_runtime_file("executable", &executable);
+    let resource_modified = log_runtime_file("gresource", &path);
+
+    tracing::info!(
+        executable = %executable.display(),
+        build_profile = if cfg!(debug_assertions) { "debug" } else { "release" },
+        cargo_target_profile_path = executable
+            .components()
+            .any(|component| component.as_os_str() == "target"),
+        configured_pkgdatadir = PKGDATADIR,
+        gresource_file = %path.display(),
+        window_ui_source = concat!(env!("CARGO_MANIFEST_DIR"), "/resources/ui/window.ui"),
+        window_ui_runtime = WINDOW_UI_RESOURCE,
+        style_css_source = concat!(env!("CARGO_MANIFEST_DIR"), "/resources/style.css"),
+        style_css_runtime = STYLE_CSS_RESOURCE,
+        resource_older_than_executable = executable_modified
+            .zip(resource_modified)
+            .map(|(executable, resource)| resource < executable),
+        "Runtime resource path diagnostics"
+    );
+
+    let resources =
+        gtk::gio::Resource::load(&path).expect("Failed to load resources.");
+    log_resource_entry(&resources, WINDOW_UI_RESOURCE, BUILD_WINDOW_UI);
+    log_resource_entry(&resources, STYLE_CSS_RESOURCE, BUILD_STYLE_CSS);
     gtk::gio::resources_register(&resources);
+    tracing::info!(
+        resource_base_path = APP_RESOURCE_PATH,
+        style_resource = STYLE_CSS_RESOURCE,
+        "AdwApplication will load application CSS from the registered resource base"
+    );
+}
+
+fn log_runtime_file(kind: &str, path: &Path) -> Option<std::time::SystemTime> {
+    match std::fs::metadata(path) {
+        Ok(metadata) => {
+            let modified = metadata.modified().ok();
+            let modified_unix_seconds = modified
+                .and_then(|value| value.duration_since(UNIX_EPOCH).ok())
+                .map(|duration| duration.as_secs());
+            tracing::info!(
+                kind,
+                path = %path.display(),
+                size_bytes = metadata.len(),
+                modified_unix_seconds,
+                "Runtime file diagnostics"
+            );
+            modified
+        }
+        Err(error) => {
+            tracing::error!(
+                kind,
+                path = %path.display(),
+                %error,
+                "Runtime file metadata unavailable"
+            );
+            None
+        }
+    }
+}
+
+fn log_resource_entry(
+    resources: &gtk::gio::Resource, resource_path: &str, build_source: &[u8],
+) {
+    match resources.lookup_data(resource_path, gtk::gio::ResourceLookupFlags::NONE) {
+        Ok(data) => {
+            let runtime_data = data.as_ref();
+            let runtime_fingerprint = resource_fingerprint(runtime_data);
+            let build_fingerprint = resource_fingerprint(build_source);
+            let matches_build_source = runtime_data == build_source;
+            let circular_icon_button_occurrences =
+                (resource_path == WINDOW_UI_RESOURCE).then(|| {
+                    runtime_data
+                        .windows(b"circular-icon-button".len())
+                        .filter(|candidate| *candidate == b"circular-icon-button")
+                        .count()
+                });
+            if matches_build_source {
+                tracing::info!(
+                    resource = resource_path,
+                    size_bytes = runtime_data.len(),
+                    fingerprint = %format_args!("{runtime_fingerprint:016x}"),
+                    matches_build_source,
+                    circular_icon_button_occurrences,
+                    "GResource entry matches the source used to build this executable"
+                );
+            } else {
+                tracing::error!(
+                    resource = resource_path,
+                    runtime_size_bytes = runtime_data.len(),
+                    build_size_bytes = build_source.len(),
+                    runtime_fingerprint = %format_args!("{runtime_fingerprint:016x}"),
+                    build_fingerprint = %format_args!("{build_fingerprint:016x}"),
+                    matches_build_source,
+                    circular_icon_button_occurrences,
+                    "Stale or mismatched GResource entry detected"
+                );
+            }
+        }
+        Err(error) => {
+            tracing::error!(
+                resource = resource_path,
+                %error,
+                "GResource entry lookup failed"
+            );
+        }
+    }
+}
+
+fn resource_fingerprint(bytes: &[u8]) -> u64 {
+    bytes.iter().fold(0xcbf29ce484222325, |hash, byte| {
+        (hash ^ u64::from(*byte)).wrapping_mul(0x100000001b3)
+    })
 }

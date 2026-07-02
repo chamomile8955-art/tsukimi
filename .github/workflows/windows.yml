@@ -49,6 +49,7 @@ jobs:
           path-type: minimal
           install: >-
             git
+            unzip
             mingw-w64-ucrt-x86_64-toolchain
             mingw-w64-ucrt-x86_64-rust
             mingw-w64-ucrt-x86_64-sccache
@@ -137,7 +138,15 @@ jobs:
         run: |
           set -euxo pipefail
 
-          for tool in cargo rustc sccache pkgconf meson; do
+          for tool in \
+            cargo \
+            rustc \
+            sccache \
+            pkgconf \
+            meson \
+            glib-compile-resources \
+            gresource
+          do
             case "$(command -v "$tool")" in
               /ucrt64/bin/*) ;;
               *)
@@ -145,6 +154,9 @@ jobs:
                 exit 1
                 ;;
             esac
+          done
+          for tool in sha256sum stat unzip; do
+            command -v "$tool"
           done
 
           cargo --version
@@ -232,9 +244,67 @@ jobs:
 
           # Tsukimi loads its GResource and GSettings schema at runtime.
           mkdir -p "$dist/share/tsukimi"
+          resource_file="$dist/share/tsukimi/tsukimi.gresource"
+          rm -f "$resource_file"
+
+          echo "GitHub SHA: $GITHUB_SHA"
+          echo "Checked out commit: $(git rev-parse HEAD)"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git diff --exit-code -- \
+            resources/resources.gresource.xml \
+            resources/ui/window.ui \
+            resources/style.css
+          echo "GResource source dependencies:"
           glib-compile-resources resources/resources.gresource.xml \
             --sourcedir=resources \
-            --target="$dist/share/tsukimi/tsukimi.gresource"
+            --generate-dependencies
+          glib-compile-resources resources/resources.gresource.xml \
+            --sourcedir=resources \
+            --target="$resource_file"
+
+          verify_gresource_content() {
+            local source_file="$1"
+            local resource_path="$2"
+            local extracted_file="$3"
+            local source_hash embedded_hash
+
+            gresource extract \
+              "$resource_file" \
+              "$resource_path" > "$extracted_file"
+            source_hash="$(sha256sum "$source_file" | awk '{print $1}')"
+            embedded_hash="$(sha256sum "$extracted_file" | awk '{print $1}')"
+
+            echo "Source hash   [$source_file]: $source_hash"
+            echo "Embedded hash [$resource_path]: $embedded_hash"
+            if test "$source_hash" != "$embedded_hash"; then
+              echo "GResource content does not match the checked-out source" >&2
+              exit 1
+            fi
+          }
+
+          resource_verify_dir="$PWD/dist/resource-verify"
+          rm -rf "$resource_verify_dir"
+          mkdir -p "$resource_verify_dir"
+
+          echo "Executable selected for packaging:"
+          stat -c 'path=%n size=%s modified=%y' "$dist/tsukimi.exe"
+          echo "GResource generated for packaging:"
+          stat -c 'path=%n size=%s modified=%y' "$resource_file"
+          echo "GResource contents:"
+          gresource list "$resource_file"
+          gresource list "$resource_file" |
+            grep -Fx '/moe/tsuna/tsukimi/ui/window.ui'
+          gresource list "$resource_file" |
+            grep -Fx '/moe/tsuna/tsukimi/style.css'
+
+          verify_gresource_content \
+            resources/ui/window.ui \
+            /moe/tsuna/tsukimi/ui/window.ui \
+            "$resource_verify_dir/window.ui"
+          verify_gresource_content \
+            resources/style.css \
+            /moe/tsuna/tsukimi/style.css \
+            "$resource_verify_dir/style.css"
 
           schema_dir="$dist/share/glib-2.0/schemas"
           mkdir -p "$schema_dir"
@@ -368,6 +438,78 @@ jobs:
           }
           $timer.Stop()
           Write-Host "::notice title=ZIP timing::Portable ZIP created in $([math]::Round($timer.Elapsed.TotalSeconds, 1))s"
+
+      - name: Verify final ZIP resource payload
+        shell: msys2 {0}
+        run: |
+          set -euxo pipefail
+
+          zip_file="$PWD/tsukimi-windows-x86_64.zip"
+          verify_dir="$PWD/dist/zip-verify"
+          package_root="$verify_dir/Tsukimi"
+          resource_file="$package_root/share/tsukimi/tsukimi.gresource"
+          assembled_resource="$PWD/dist/Tsukimi/share/tsukimi/tsukimi.gresource"
+
+          rm -rf "$verify_dir"
+          mkdir -p "$verify_dir"
+          unzip -q "$zip_file" -d "$verify_dir"
+
+          test -f "$package_root/tsukimi.exe"
+          test -f "$resource_file"
+          assembled_hash="$(sha256sum "$assembled_resource" | awk '{print $1}')"
+          zip_resource_hash="$(sha256sum "$resource_file" | awk '{print $1}')"
+          echo "Assembled GResource hash: $assembled_hash"
+          echo "ZIP GResource hash:       $zip_resource_hash"
+          test "$assembled_hash" = "$zip_resource_hash"
+
+          resource_count="$(
+            find "$verify_dir" -type f -name tsukimi.gresource | wc -l |
+              tr -d '[:space:]'
+          )"
+          test "$resource_count" = "1"
+
+          echo "Required ZIP entries:"
+          unzip -l "$zip_file" |
+            grep -E 'Tsukimi/(tsukimi\.exe|share/tsukimi/tsukimi\.gresource)$'
+          echo "Executable extracted from final ZIP:"
+          stat -c 'path=%n size=%s modified=%y' "$package_root/tsukimi.exe"
+          echo "GResource extracted from final ZIP:"
+          stat -c 'path=%n size=%s modified=%y' "$resource_file"
+          echo "Final ZIP GResource contents:"
+          gresource list "$resource_file"
+          gresource list "$resource_file" |
+            grep -Fx '/moe/tsuna/tsukimi/ui/window.ui'
+          gresource list "$resource_file" |
+            grep -Fx '/moe/tsuna/tsukimi/style.css'
+
+          verify_zip_resource() {
+            local source_file="$1"
+            local resource_path="$2"
+            local extracted_file="$3"
+            local source_hash zip_hash
+
+            gresource extract \
+              "$resource_file" \
+              "$resource_path" > "$extracted_file"
+            source_hash="$(sha256sum "$source_file" | awk '{print $1}')"
+            zip_hash="$(sha256sum "$extracted_file" | awk '{print $1}')"
+
+            echo "Source hash [$source_file]: $source_hash"
+            echo "ZIP hash    [$resource_path]: $zip_hash"
+            if test "$source_hash" != "$zip_hash"; then
+              echo "Final ZIP contains a stale or mismatched GResource" >&2
+              exit 1
+            fi
+          }
+
+          verify_zip_resource \
+            resources/ui/window.ui \
+            /moe/tsuna/tsukimi/ui/window.ui \
+            "$verify_dir/window.ui"
+          verify_zip_resource \
+            resources/style.css \
+            /moe/tsuna/tsukimi/style.css \
+            "$verify_dir/style.css"
 
       - name: Start artifact upload timer
         id: artifact-upload-timer

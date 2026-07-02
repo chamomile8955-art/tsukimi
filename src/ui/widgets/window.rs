@@ -210,6 +210,9 @@ mod imp {
             // Call "constructed" on parent
             self.parent_constructed();
 
+            let obj = self.obj();
+            obj.log_ui_runtime_diagnostics();
+
             let store = gtk::gio::ListStore::new::<TuObject>();
             self.mpv_playlist_selection.set_model(Some(&store));
             self.mpv_playlist
@@ -219,8 +222,6 @@ mod imp {
             ));
             self.mpv_control_sidebar
                 .set_player(Some(&self.mpvnav.imp().video.get()));
-
-            let obj = self.obj();
 
             self.sidebar_breakpoint.connect_apply(glib::clone!(
                 #[weak]
@@ -315,6 +316,46 @@ static STARTUP_SERVER_RESTORE_RECORDED: std::sync::atomic::AtomicBool =
 
 #[template_callbacks]
 impl Window {
+    pub fn log_ui_runtime_diagnostics(&self) {
+        fn visit(widget: &gtk::Widget, circular_count: &mut usize) {
+            let is_button =
+                widget.is::<gtk::Button>() || widget.is::<gtk::MenuButton>();
+            let is_circular = widget.has_css_class("circular-icon-button");
+
+            if is_circular {
+                *circular_count += 1;
+            }
+            if is_button || is_circular {
+                tracing::info!(
+                    widget_type = %widget.type_().name(),
+                    widget_name = %widget.widget_name(),
+                    css_classes = ?widget.css_classes(),
+                    visible = widget.is_visible(),
+                    circular_icon_button = is_circular,
+                    "Runtime button CSS class list"
+                );
+            }
+
+            let mut child = widget.first_child();
+            while let Some(current) = child {
+                child = current.next_sibling();
+                visit(&current, circular_count);
+            }
+        }
+
+        let mut circular_count = 0;
+        visit(self.upcast_ref::<gtk::Widget>(), &mut circular_count);
+        tracing::info!(
+            template_resource = crate::WINDOW_UI_RESOURCE,
+            circular_icon_button_count = circular_count,
+            main_menu_classes = ?self.imp().main_menu_button.css_classes(),
+            home_nav_classes = ?self.imp().home_nav.css_classes(),
+            favorites_nav_classes = ?self.imp().favorites_nav.css_classes(),
+            search_nav_classes = ?self.imp().search_nav.css_classes(),
+            "Runtime window template diagnostics"
+        );
+    }
+
     pub fn start_ui_preview(&self) {
         self.set_shortcuts();
         self.show_no_server_state();
