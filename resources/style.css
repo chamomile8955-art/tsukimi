@@ -799,3 +799,65 @@ popover.menu modelbutton:hover {
   border-radius: 12px;
   box-shadow: 0 6px 18px alpha(@accent_bg_color, 0.18);
 }
+
+/* Windows floating shell polish */
+.app-window .source-panel,
+.app-window .main-surface {
+  background: alpha(@window_bg_color, 0.92);
+  border: 1px solid alpha(@window_fg_color, 0.08);
+  border-radius: 22px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.16);
+  overflow: hidden;
+}
+
+.app-window .main-surface {
+  margin-left: 0;
+}
+
+.app-window .main-toolbar,
+.app-window .source-toolbar,
+.app-window .main-content-pane,
+.app-window .main-navigation,
+.app-window .main-page,
+.app-window .content-stack,
+.app-window .window-stack,
+.app-window .window-root-overlay,
+.app-window .window-toast-overlay {
+  border-radius: 22px;
+  overflow: hidden;
+}
+
+.app-window .window-frame,
+.app-window .app-shell {
+  background: transparent;
+}
+
+.app-window .window-titlebar,
+.app-window headerbar.window-titlebar,
+.app-window .main-header,
+.app-window .source-header {
+  background: transparent;
+  background-image: none;
+  box-shadow: none;
+  border: none;
+}
+
+.app-window button.circular-icon-button,
+.app-window togglebutton.circular-icon-button,
+.app-window menubutton.circular-icon-button > button {
+  min-width: 36px;
+  min-height: 36px;
+  padding: 0;
+  border-radius: 999px;
+  -gtk-icon-size: 16px;
+}
+
+.app-window button.circular-icon-button image,
+.app-window togglebutton.circular-icon-button image,
+.app-window menubutton.circular-icon-button > button image {
+  margin: 0;
+}
+
+.app-window .top-navigation {
+  margin-top: 10px;
+}

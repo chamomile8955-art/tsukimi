@@ -99,6 +99,8 @@
                                         </property>
                                         <child type="start">
                                           <object class="GtkButton">
+                                            <property name="width-request">36</property>
+                                            <property name="height-request">36</property>
                                             <property name="icon-name">list-add-symbolic</property>
                                             <property name="tooltip-text" translatable="yes">Add Server</property>
                                             <property name="action-name">win.add-server</property>
@@ -120,6 +122,8 @@
                                         <property name="margin-bottom">6</property>
                                         <child>
                                           <object class="GtkButton">
+                                            <property name="width-request">36</property>
+                                            <property name="height-request">36</property>
                                             <property name="icon-name">applications-system-symbolic</property>
                                             <property name="tooltip-text">设置</property>
                                             <property name="action-name">setting.account</property>
@@ -153,6 +157,10 @@
                             </property>
                             <property name="content">
                               <object class="AdwNavigationPage" id="navipage">
+                                <property name="margin-top">12</property>
+                                <property name="margin-bottom">12</property>
+                                <property name="margin-start">2</property>
+                                <property name="margin-end">12</property>
                                 <property name="title" translatable="yes"></property>
                                 <property name="overflow">hidden</property>
                                 <style>
@@ -180,7 +188,8 @@
                                             <property name="orientation">horizontal</property>
                                             <property name="spacing">8</property>
                                             <property name="valign">end</property>
-                                            <property name="margin-bottom">4</property>
+                                            <property name="margin-top">10</property>
+                                            <property name="margin-bottom">0</property>
                                             <style>
                                               <class name="top-navigation"/>
                                             </style>
@@ -224,6 +233,8 @@
                                         </property>
                                         <child type="start">
                                           <object class="GtkToggleButton" id="sidebar">
+                                            <property name="width-request">36</property>
+                                            <property name="height-request">36</property>
                                             <property name="icon-name">sidebar-show-symbolic</property>
                                             <property name="action-name">win.sidebar</property>
                                             <style>
@@ -236,6 +247,8 @@
                                         </child>
                                         <child type="start">
                                           <object class="GtkButton" id="popbutton">
+                                            <property name="width-request">36</property>
+                                            <property name="height-request">36</property>
                                             <property name="icon-name">go-previous-symbolic</property>
                                             <property name="visible">False</property>
                                             <signal name="clicked" handler="on_pop" swapped="yes"/>
@@ -249,6 +262,8 @@
                                         </child>
                                         <child type="end">
                                           <object class="GtkMenuButton" id="main_menu_button">
+                                            <property name="width-request">36</property>
+                                            <property name="height-request">36</property>
                                             <property name="icon-name">open-menu-symbolic</property>
                                             <style>
                                               <class name="flat"/>
@@ -402,7 +417,7 @@
                                                             <property name="valign">center</property>
                                                             <property name="vexpand">True</property>
                                                             <property name="icon-name">network-server-symbolic</property>
-                                                            <property name="title" translatable="yes">No Server Selected DEBUG 123</property>
+                                                            <property name="title" translatable="yes">No Server Selected</property>
                                                             <property name="description" translatable="yes">Add a server from the Sources sidebar to begin.</property>
                                                             <property name="child">
                                                               <object class="GtkButton">
