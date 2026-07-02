@@ -147,6 +147,7 @@ jobs:
             sccache \
             pkgconf \
             meson \
+            python \
             glib-compile-resources \
             gresource \
             xmllint
@@ -159,7 +160,7 @@ jobs:
                 ;;
             esac
           done
-          for tool in cmp diff file head realpath sha256sum stat unzip; do
+          for tool in cmp diff file head realpath sha256sum stat tail unzip; do
             command -v "$tool"
           done
 
@@ -297,6 +298,18 @@ jobs:
             head -n 10 "$source_file"
             echo "First 10 extracted lines:"
             head -n 10 "$extracted_file"
+            echo "Last 10 source lines:"
+            tail -n 10 "$source_file"
+            echo "Last 10 extracted lines:"
+            tail -n 10 "$extracted_file"
+          }
+
+          normalize_text_hash() {
+            local input_file="$1"
+
+            python -c \
+              'import hashlib, pathlib, sys; data = pathlib.Path(sys.argv[1]).read_bytes(); data = data.replace(b"\r\n", b"\n").replace(b"\r", b"\n"); sys.stdout.write(hashlib.sha256(data).hexdigest())' \
+              "$input_file"
           }
 
           verify_normalized_window_xml() {
@@ -322,7 +335,7 @@ jobs:
               return 1
             fi
 
-            echo "window.ui byte hash differs only by XML formatting or line endings; canonical XML matches"
+            echo "XML C14N diagnostic matches, but it cannot override a normalized-text hash mismatch"
           }
 
           verify_gresource_content() {
@@ -330,7 +343,9 @@ jobs:
             local resource_path="$2"
             local extracted_file="$3"
             local verification_mode="$4"
-            local extract_status extracted_size source_hash embedded_hash
+            local extract_status extracted_size resource_name
+            local source_hash embedded_hash
+            local source_normalized_hash embedded_normalized_hash
 
             echo "Extracting GResource member:"
             echo "MSYS2_ARG_CONV_EXCL='*' gresource extract '$resource_file' '$resource_path' > '$extracted_file'"
@@ -358,21 +373,37 @@ jobs:
 
             source_hash="$(sha256sum "$source_file" | awk '{print $1}')"
             embedded_hash="$(sha256sum "$extracted_file" | awk '{print $1}')"
+            resource_name="$(basename "$source_file")"
 
             echo "Source hash   [$source_file]: $source_hash"
             echo "Embedded hash [$resource_path]: $embedded_hash"
             if test "$source_hash" != "$embedded_hash"; then
               diagnose_resource_difference "$source_file" "$extracted_file"
-              if test "$verification_mode" = "normalized-window-xml" &&
-                verify_normalized_window_xml \
-                  "$source_file" \
-                  "$extracted_file" \
-                  "$resource_verify_dir"
-              then
-                return 0
+            fi
+
+            source_normalized_hash="$(normalize_text_hash "$source_file")"
+            embedded_normalized_hash="$(normalize_text_hash "$extracted_file")"
+            echo "Source normalized-text hash   [$source_file]: $source_normalized_hash"
+            echo "Embedded normalized-text hash [$resource_path]: $embedded_normalized_hash"
+
+            if test "$source_normalized_hash" != "$embedded_normalized_hash"; then
+              if test "$verification_mode" = "window-with-xml-diagnostic"; then
+                if verify_normalized_window_xml \
+                    "$source_file" \
+                    "$extracted_file" \
+                    "$resource_verify_dir"
+                then
+                  echo "XML C14N matched, but validation still fails because only line-ending normalization is allowed" >&2
+                fi
               fi
               echo "GResource content does not match the checked-out source" >&2
               exit 1
+            fi
+
+            if test "$source_hash" != "$embedded_hash"; then
+              echo "$resource_name byte hash differs only by line endings; normalized text hash matches"
+            else
+              echo "$resource_name byte hash and normalized text hash match"
             fi
           }
 
@@ -395,12 +426,12 @@ jobs:
             resources/ui/window.ui \
             /moe/tsuna/tsukimi/ui/window.ui \
             "$resource_verify_dir/window.ui" \
-            normalized-window-xml
+            window-with-xml-diagnostic
           verify_gresource_content \
             resources/style.css \
             /moe/tsuna/tsukimi/style.css \
             "$resource_verify_dir/style.css" \
-            strict-byte
+            normalized-text
 
           echo "Extracted GResource debug output:"
           ls -lh "$resource_verify_dir/"
@@ -606,6 +637,18 @@ jobs:
             head -n 10 "$source_file"
             echo "First 10 extracted lines:"
             head -n 10 "$extracted_file"
+            echo "Last 10 source lines:"
+            tail -n 10 "$source_file"
+            echo "Last 10 extracted lines:"
+            tail -n 10 "$extracted_file"
+          }
+
+          normalize_zip_text_hash() {
+            local input_file="$1"
+
+            python -c \
+              'import hashlib, pathlib, sys; data = pathlib.Path(sys.argv[1]).read_bytes(); data = data.replace(b"\r\n", b"\n").replace(b"\r", b"\n"); sys.stdout.write(hashlib.sha256(data).hexdigest())' \
+              "$input_file"
           }
 
           verify_normalized_zip_window_xml() {
@@ -631,7 +674,7 @@ jobs:
               return 1
             fi
 
-            echo "ZIP window.ui byte hash differs only by XML formatting or line endings; canonical XML matches"
+            echo "ZIP XML C14N diagnostic matches, but it cannot override a normalized-text hash mismatch"
           }
 
           verify_zip_resource() {
@@ -639,7 +682,9 @@ jobs:
             local resource_path="$2"
             local extracted_file="$3"
             local verification_mode="$4"
-            local extract_status extracted_size source_hash zip_hash
+            local extract_status extracted_size resource_name
+            local source_hash zip_hash
+            local source_normalized_hash zip_normalized_hash
 
             echo "Extracting final ZIP GResource member:"
             echo "MSYS2_ARG_CONV_EXCL='*' gresource extract '$resource_file' '$resource_path' > '$extracted_file'"
@@ -667,21 +712,37 @@ jobs:
 
             source_hash="$(sha256sum "$source_file" | awk '{print $1}')"
             zip_hash="$(sha256sum "$extracted_file" | awk '{print $1}')"
+            resource_name="$(basename "$source_file")"
 
             echo "Source hash [$source_file]: $source_hash"
             echo "ZIP hash    [$resource_path]: $zip_hash"
             if test "$source_hash" != "$zip_hash"; then
               diagnose_zip_resource_difference "$source_file" "$extracted_file"
-              if test "$verification_mode" = "normalized-window-xml" &&
-                verify_normalized_zip_window_xml \
-                  "$source_file" \
-                  "$extracted_file" \
-                  "$verify_dir"
-              then
-                return 0
+            fi
+
+            source_normalized_hash="$(normalize_zip_text_hash "$source_file")"
+            zip_normalized_hash="$(normalize_zip_text_hash "$extracted_file")"
+            echo "Source normalized-text hash [$source_file]: $source_normalized_hash"
+            echo "ZIP normalized-text hash    [$resource_path]: $zip_normalized_hash"
+
+            if test "$source_normalized_hash" != "$zip_normalized_hash"; then
+              if test "$verification_mode" = "window-with-xml-diagnostic"; then
+                if verify_normalized_zip_window_xml \
+                    "$source_file" \
+                    "$extracted_file" \
+                    "$verify_dir"
+                then
+                  echo "ZIP XML C14N matched, but validation still fails because only line-ending normalization is allowed" >&2
+                fi
               fi
               echo "Final ZIP contains a stale or mismatched GResource" >&2
               exit 1
+            fi
+
+            if test "$source_hash" != "$zip_hash"; then
+              echo "ZIP $resource_name byte hash differs only by line endings; normalized text hash matches"
+            else
+              echo "ZIP $resource_name byte hash and normalized text hash match"
             fi
           }
 
@@ -689,12 +750,12 @@ jobs:
             resources/ui/window.ui \
             /moe/tsuna/tsukimi/ui/window.ui \
             "$verify_dir/window.ui" \
-            normalized-window-xml
+            window-with-xml-diagnostic
           verify_zip_resource \
             resources/style.css \
             /moe/tsuna/tsukimi/style.css \
             "$verify_dir/style.css" \
-            strict-byte
+            normalized-text
 
           echo "Final ZIP extracted GResource debug output:"
           ls -lh "$verify_dir/window.ui" "$verify_dir/style.css"
