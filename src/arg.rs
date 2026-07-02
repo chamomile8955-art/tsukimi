@@ -21,6 +21,11 @@ const DEFAULT_RENDERER: &str = "ngl";
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 pub struct Args {
+    /// Open the real main-window template without restoring servers or
+    /// loading persistent application data.
+    #[clap(long)]
+    ui_preview: bool,
+
     /// File to write the log to. Windows portable builds keep the file in
     /// their local logs directory; other builds use the supplied path.
     #[clap(long, short = 'f')]
@@ -40,6 +45,10 @@ pub struct Args {
 }
 
 impl Args {
+    pub fn ui_preview(&self) -> bool {
+        self.ui_preview
+    }
+
     /// Build the tracing subscriber using parameters from the command line
     /// arguments
     ///

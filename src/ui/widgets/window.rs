@@ -315,6 +315,16 @@ static STARTUP_SERVER_RESTORE_RECORDED: std::sync::atomic::AtomicBool =
 
 #[template_callbacks]
 impl Window {
+    pub fn start_ui_preview(&self) {
+        self.set_shortcuts();
+        self.show_no_server_state();
+        self.rebuild_main_menu();
+        self.recalculate_layout("UI preview mounted");
+        tracing::info!(
+            "UI preview mounted without server restore, network requests, or persistent data"
+        );
+    }
+
     pub fn start_background_initialization(&self) {
         self.set_shortcuts();
 

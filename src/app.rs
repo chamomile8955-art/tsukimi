@@ -43,7 +43,11 @@ mod imp {
         fn constructed(&self) {
             self.parent_constructed();
             let obj = self.obj();
-            obj.set_application_id(Some(crate::APP_ID));
+            obj.set_application_id(Some(if crate::ui_preview_mode() {
+                crate::UI_PREVIEW_APP_ID
+            } else {
+                crate::APP_ID
+            }));
             obj.set_resource_base_path(Some(crate::APP_RESOURCE_PATH));
 
             obj.set_accels_for_action("win.about", &["<Ctrl>N"]);
@@ -64,6 +68,11 @@ mod imp {
                 if let Some(window) = app.active_window() {
                     window.present();
                 }
+                return;
+            }
+
+            if crate::ui_preview_mode() {
+                self.create_preview_window();
                 return;
             }
 
@@ -93,6 +102,23 @@ mod imp {
     impl AdwApplicationImpl for TsukimiApplication {}
 
     impl TsukimiApplication {
+        fn create_preview_window(&self) {
+            self.initialize_settings();
+            crate::ui::widgets::init();
+
+            let app = self.obj().clone();
+            let window = crate::Window::new(&app);
+            window.load_window_state();
+            window.recalculate_layout("UI preview window restored");
+            window.start_ui_preview();
+            window.add_tick_callback(|window, _| {
+                window.recalculate_layout("UI preview first frame");
+                crate::log_startup_timing("UI preview ready");
+                glib::ControlFlow::Break
+            });
+            window.present();
+        }
+
         fn initialize_settings(&self) {
             if self.settings_initialized.replace(true) {
                 return;

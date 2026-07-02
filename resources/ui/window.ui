@@ -248,15 +248,6 @@
                                           </object>
                                         </child>
                                         <child type="end">
-                                          <object class="GtkWindowControls">
-                                            <property name="side">end</property>
-                                            <property name="decoration-layout">:minimize,maximize,close</property>
-                                            <style>
-                                              <class name="macos-window-controls"/>
-                                            </style>
-                                          </object>
-                                        </child>
-                                        <child type="end">
                                           <object class="GtkMenuButton" id="main_menu_button">
                                             <property name="icon-name">open-menu-symbolic</property>
                                             <style>
@@ -264,6 +255,15 @@
                                               <class name="circular"/>
                                               <class name="glass-button"/>
                                               <class name="circular-icon-button"/>
+                                            </style>
+                                          </object>
+                                        </child>
+                                        <child type="end">
+                                          <object class="GtkWindowControls">
+                                            <property name="side">end</property>
+                                            <property name="decoration-layout">:minimize,maximize,close</property>
+                                            <style>
+                                              <class name="macos-window-controls"/>
                                             </style>
                                           </object>
                                         </child>

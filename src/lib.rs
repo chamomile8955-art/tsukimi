@@ -43,10 +43,16 @@ pub static USER_AGENT: LazyLock<String> =
     LazyLock::new(|| format!("{}/{} - {}", CLIENT_ID, version(), env::consts::OS));
 
 pub const APP_ID: &str = "moe.tsuna.tsukimi";
+pub const UI_PREVIEW_APP_ID: &str = "moe.tsuna.tsukimi.UiPreview";
 pub const CLIENT_ID: &str = "Tsukimi";
 const APP_RESOURCE_PATH: &str = "/moe/tsuna/tsukimi";
 const GRESOURCE_FILE: &str = "tsukimi.gresource";
 static STARTUP_STARTED: OnceLock<Instant> = OnceLock::new();
+static UI_PREVIEW_MODE: OnceLock<bool> = OnceLock::new();
+
+pub(crate) fn ui_preview_mode() -> bool {
+    UI_PREVIEW_MODE.get().copied().unwrap_or(false)
+}
 
 pub(crate) fn log_startup_timing(stage: &str) {
     if let Some(started) = STARTUP_STARTED.get() {
@@ -215,7 +221,26 @@ pub fn run() -> gtk::glib::ExitCode {
         STARTUP_STARTED.get().expect("startup clock").elapsed()
     };
 
-    Args::parse().init();
+    let args = Args::parse();
+    let ui_preview = args.ui_preview()
+        || env::var("TSUKIMI_UI_PREVIEW").ok().is_some_and(|value| {
+            matches!(
+                value.to_ascii_lowercase().as_str(),
+                "1" | "true" | "yes" | "on"
+            )
+        });
+    UI_PREVIEW_MODE
+        .set(ui_preview)
+        .expect("UI preview mode was initialized twice");
+    if ui_preview {
+        // Keep preview sessions isolated from saved accounts, routes, window
+        // state, and other persistent settings.
+        unsafe { env::set_var("GSETTINGS_BACKEND", "memory") };
+    }
+    args.init();
+    if ui_preview {
+        tracing::info!("UI preview mode enabled; persistent settings and server restore disabled");
+    }
     log_startup_timing_at("process start", Duration::ZERO);
     #[cfg(target_os = "windows")]
     log_startup_timing_at("portable paths ready", portable_paths_ready);
