@@ -402,7 +402,7 @@
                                                             <property name="valign">center</property>
                                                             <property name="vexpand">True</property>
                                                             <property name="icon-name">network-server-symbolic</property>
-                                                            <property name="title" translatable="yes">No Server Selected</property>
+                                                            <property name="title" translatable="yes">No Server Selected DEBUG 123</property>
                                                             <property name="description" translatable="yes">Add a server from the Sources sidebar to begin.</property>
                                                             <property name="child">
                                                               <object class="GtkButton">
