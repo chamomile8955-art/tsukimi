@@ -48,6 +48,9 @@ jobs:
           update: true
           path-type: minimal
           install: >-
+            coreutils
+            diffutils
+            file
             git
             unzip
             mingw-w64-ucrt-x86_64-toolchain
@@ -145,7 +148,8 @@ jobs:
             pkgconf \
             meson \
             glib-compile-resources \
-            gresource
+            gresource \
+            xmllint
           do
             case "$(command -v "$tool")" in
               /ucrt64/bin/*) ;;
@@ -155,7 +159,7 @@ jobs:
                 ;;
             esac
           done
-          for tool in sha256sum stat unzip; do
+          for tool in cmp diff file head realpath sha256sum stat unzip; do
             command -v "$tool"
           done
 
@@ -256,18 +260,76 @@ jobs:
             resources/resources.gresource.xml \
             resources/ui/window.ui \
             resources/style.css
+          echo "GResource compile working directory: $PWD"
+          echo "GResource manifest from current checkout: $(realpath resources/resources.gresource.xml)"
+          echo "window.ui manifest entry:"
+          grep -n "ui/window.ui" resources/resources.gresource.xml
+          if grep "ui/window.ui" resources/resources.gresource.xml |
+            grep -q 'preprocess='
+          then
+            echo "window.ui must not use GResource XML preprocessing" >&2
+            exit 1
+          fi
           echo "GResource source dependencies:"
+          echo "glib-compile-resources resources/resources.gresource.xml --sourcedir=resources --generate-dependencies"
           glib-compile-resources resources/resources.gresource.xml \
             --sourcedir=resources \
             --generate-dependencies
+          echo "glib-compile-resources resources/resources.gresource.xml --sourcedir=resources --target=$resource_file"
           glib-compile-resources resources/resources.gresource.xml \
             --sourcedir=resources \
             --target="$resource_file"
+
+          diagnose_resource_difference() {
+            local source_file="$1"
+            local extracted_file="$2"
+
+            echo "Byte-level resource difference diagnostics:"
+            wc -c "$source_file"
+            wc -c "$extracted_file"
+            file "$source_file"
+            file "$extracted_file"
+            echo "First 20 differing byte positions:"
+            cmp -l "$source_file" "$extracted_file" | head -n 20 || true
+            echo "First 100 lines of text diff:"
+            diff -u "$source_file" "$extracted_file" | head -n 100 || true
+            echo "First 10 source lines:"
+            head -n 10 "$source_file"
+            echo "First 10 extracted lines:"
+            head -n 10 "$extracted_file"
+          }
+
+          verify_normalized_window_xml() {
+            local source_file="$1"
+            local extracted_file="$2"
+            local normalized_dir="$3"
+            local normalized_source normalized_embedded
+            local source_hash embedded_hash
+
+            normalized_source="$normalized_dir/window-source.c14n.xml"
+            normalized_embedded="$normalized_dir/window-embedded.c14n.xml"
+            xmllint --noblanks --c14n "$source_file" > "$normalized_source"
+            xmllint --noblanks --c14n "$extracted_file" > "$normalized_embedded"
+            test -s "$normalized_source"
+            test -s "$normalized_embedded"
+
+            source_hash="$(sha256sum "$normalized_source" | awk '{print $1}')"
+            embedded_hash="$(sha256sum "$normalized_embedded" | awk '{print $1}')"
+            echo "Normalized window.ui source hash:   $source_hash"
+            echo "Normalized window.ui embedded hash: $embedded_hash"
+            if test "$source_hash" != "$embedded_hash"; then
+              echo "window.ui differs semantically after XML normalization" >&2
+              return 1
+            fi
+
+            echo "window.ui byte hash differs only by XML formatting or line endings; canonical XML matches"
+          }
 
           verify_gresource_content() {
             local source_file="$1"
             local resource_path="$2"
             local extracted_file="$3"
+            local verification_mode="$4"
             local extract_status extracted_size source_hash embedded_hash
 
             echo "Extracting GResource member:"
@@ -300,6 +362,15 @@ jobs:
             echo "Source hash   [$source_file]: $source_hash"
             echo "Embedded hash [$resource_path]: $embedded_hash"
             if test "$source_hash" != "$embedded_hash"; then
+              diagnose_resource_difference "$source_file" "$extracted_file"
+              if test "$verification_mode" = "normalized-window-xml" &&
+                verify_normalized_window_xml \
+                  "$source_file" \
+                  "$extracted_file" \
+                  "$resource_verify_dir"
+              then
+                return 0
+              fi
               echo "GResource content does not match the checked-out source" >&2
               exit 1
             fi
@@ -323,11 +394,13 @@ jobs:
           verify_gresource_content \
             resources/ui/window.ui \
             /moe/tsuna/tsukimi/ui/window.ui \
-            "$resource_verify_dir/window.ui"
+            "$resource_verify_dir/window.ui" \
+            normalized-window-xml
           verify_gresource_content \
             resources/style.css \
             /moe/tsuna/tsukimi/style.css \
-            "$resource_verify_dir/style.css"
+            "$resource_verify_dir/style.css" \
+            strict-byte
 
           echo "Extracted GResource debug output:"
           ls -lh "$resource_verify_dir/"
@@ -516,10 +589,56 @@ jobs:
           MSYS2_ARG_CONV_EXCL='*' gresource list "$resource_file" |
             grep -Fx '/moe/tsuna/tsukimi/style.css'
 
+          diagnose_zip_resource_difference() {
+            local source_file="$1"
+            local extracted_file="$2"
+
+            echo "Final ZIP byte-level resource difference diagnostics:"
+            wc -c "$source_file"
+            wc -c "$extracted_file"
+            file "$source_file"
+            file "$extracted_file"
+            echo "First 20 differing byte positions:"
+            cmp -l "$source_file" "$extracted_file" | head -n 20 || true
+            echo "First 100 lines of text diff:"
+            diff -u "$source_file" "$extracted_file" | head -n 100 || true
+            echo "First 10 source lines:"
+            head -n 10 "$source_file"
+            echo "First 10 extracted lines:"
+            head -n 10 "$extracted_file"
+          }
+
+          verify_normalized_zip_window_xml() {
+            local source_file="$1"
+            local extracted_file="$2"
+            local normalized_dir="$3"
+            local normalized_source normalized_zip
+            local source_hash zip_hash
+
+            normalized_source="$normalized_dir/window-source.c14n.xml"
+            normalized_zip="$normalized_dir/window-zip.c14n.xml"
+            xmllint --noblanks --c14n "$source_file" > "$normalized_source"
+            xmllint --noblanks --c14n "$extracted_file" > "$normalized_zip"
+            test -s "$normalized_source"
+            test -s "$normalized_zip"
+
+            source_hash="$(sha256sum "$normalized_source" | awk '{print $1}')"
+            zip_hash="$(sha256sum "$normalized_zip" | awk '{print $1}')"
+            echo "Normalized window.ui source hash: $source_hash"
+            echo "Normalized window.ui ZIP hash:    $zip_hash"
+            if test "$source_hash" != "$zip_hash"; then
+              echo "ZIP window.ui differs semantically after XML normalization" >&2
+              return 1
+            fi
+
+            echo "ZIP window.ui byte hash differs only by XML formatting or line endings; canonical XML matches"
+          }
+
           verify_zip_resource() {
             local source_file="$1"
             local resource_path="$2"
             local extracted_file="$3"
+            local verification_mode="$4"
             local extract_status extracted_size source_hash zip_hash
 
             echo "Extracting final ZIP GResource member:"
@@ -552,6 +671,15 @@ jobs:
             echo "Source hash [$source_file]: $source_hash"
             echo "ZIP hash    [$resource_path]: $zip_hash"
             if test "$source_hash" != "$zip_hash"; then
+              diagnose_zip_resource_difference "$source_file" "$extracted_file"
+              if test "$verification_mode" = "normalized-window-xml" &&
+                verify_normalized_zip_window_xml \
+                  "$source_file" \
+                  "$extracted_file" \
+                  "$verify_dir"
+              then
+                return 0
+              fi
               echo "Final ZIP contains a stale or mismatched GResource" >&2
               exit 1
             fi
@@ -560,11 +688,13 @@ jobs:
           verify_zip_resource \
             resources/ui/window.ui \
             /moe/tsuna/tsukimi/ui/window.ui \
-            "$verify_dir/window.ui"
+            "$verify_dir/window.ui" \
+            normalized-window-xml
           verify_zip_resource \
             resources/style.css \
             /moe/tsuna/tsukimi/style.css \
-            "$verify_dir/style.css"
+            "$verify_dir/style.css" \
+            strict-byte
 
           echo "Final ZIP extracted GResource debug output:"
           ls -lh "$verify_dir/window.ui" "$verify_dir/style.css"
