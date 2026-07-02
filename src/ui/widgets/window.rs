@@ -316,6 +316,32 @@ static STARTUP_SERVER_RESTORE_RECORDED: std::sync::atomic::AtomicBool =
 
 #[template_callbacks]
 impl Window {
+    fn log_shell_state(&self, stage: &str, saved_server_count: usize) {
+        let imp = self.imp();
+        let split_sidebar = imp.split_view.sidebar();
+        let split_content = imp.split_view.content();
+
+        tracing::info!(
+            stage,
+            outer_stack_page = ?imp.stack.visible_child_name(),
+            content_stack_page = ?imp.insidestack.visible_child_name(),
+            saved_server_count,
+            sidebar_item_count = imp.selectlist.items().n_items(),
+            split_sidebar_bound = split_sidebar.is_some(),
+            split_sidebar_type = split_sidebar
+                .as_ref()
+                .map(|widget| widget.type_().name().to_string()),
+            split_content_bound = split_content.is_some(),
+            split_content_type = split_content
+                .as_ref()
+                .map(|widget| widget.type_().name().to_string()),
+            split_sidebar_visible = imp.split_view.shows_sidebar(),
+            split_collapsed = imp.split_view.is_collapsed(),
+            ui_preview = crate::ui_preview_mode(),
+            "Runtime main-shell state"
+        );
+    }
+
     pub fn log_ui_runtime_diagnostics(&self) {
         fn visit(widget: &gtk::Widget, circular_count: &mut usize) {
             let is_button =
@@ -360,6 +386,7 @@ impl Window {
         self.set_shortcuts();
         self.show_no_server_state();
         self.rebuild_main_menu();
+        self.log_shell_state("UI preview fallback", 0);
         self.recalculate_layout("UI preview mounted");
         tracing::info!(
             "UI preview mounted without server restore, network requests, or persistent data"
@@ -804,6 +831,7 @@ impl Window {
         let accounts = SETTINGS.accounts();
         self.set_nav_servers();
         self.rebuild_main_menu();
+        self.log_shell_state("server model populated", accounts.len());
 
         if accounts.is_empty() {
             tracing::warn!(
@@ -811,6 +839,7 @@ impl Window {
                 "No startup server selected"
             );
             self.show_no_server_state();
+            self.log_shell_state("no saved servers fallback", 0);
             if track_startup {
                 crate::log_startup_timing("server restore completed");
             }
@@ -865,6 +894,7 @@ impl Window {
 
         let started = std::time::Instant::now();
         let selected = self.select_server(account, selection_reason).await;
+        self.log_shell_state("startup server selection completed", accounts.len());
         tracing::info!(
             elapsed_ms = started.elapsed().as_millis() as u64,
             success = selected,

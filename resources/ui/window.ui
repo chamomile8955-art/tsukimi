@@ -57,14 +57,7 @@
                       <object class="GtkStackPage">
                         <property name="name">main</property>
                         <property name="child">
-                          <object class="GtkBox">
-                            <property name="orientation">vertical</property>
-                            <style>
-                              <class name="main-layout"/>
-                            </style>
-                            <child>
-                              <object class="AdwOverlaySplitView" id="split_view">
-                                <property name="vexpand">True</property>
+                          <object class="AdwOverlaySplitView" id="split_view">
                             <property name="min-sidebar-width">280</property>
                             <property name="max-sidebar-width">380</property>
                             <property name="sidebar-width-fraction">0.15</property>
@@ -99,23 +92,56 @@
                                           <class name="unified-header"/>
                                         </style>
                                         <property name="title-widget">
-                                          <object class="GtkCenterBox">
-                                            <property name="hexpand">True</property>
+                                          <object class="GtkLabel">
+                                            <property name="label" translatable="yes">Sources</property>
                                             <property name="valign">center</property>
                                             <style>
-                                              <class name="unified-header-row"/>
+                                              <class name="title-3"/>
                                             </style>
-                                            <property name="center-widget">
-                                              <object class="GtkLabel">
-                                                <property name="label" translatable="yes">Sources</property>
-                                                <property name="valign">center</property>
-                                                <style>
-                                                  <class name="title-3"/>
-                                                </style>
-                                              </object>
-                                            </property>
                                           </object>
                                         </property>
+                                        <child type="start">
+                                          <object class="GtkButton">
+                                            <property name="width-request">40</property>
+                                            <property name="height-request">40</property>
+                                            <property name="valign">center</property>
+                                            <property name="icon-name">list-add-symbolic</property>
+                                            <property name="tooltip-text" translatable="yes">Add Server</property>
+                                            <property name="action-name">win.add-server</property>
+                                            <style>
+                                              <class name="flat"/>
+                                              <class name="circular"/>
+                                              <class name="glass-button"/>
+                                              <class name="circular-icon-button"/>
+                                            </style>
+                                          </object>
+                                        </child>
+                                      </object>
+                                    </child>
+                                    <child type="bottom">
+                                      <object class="GtkBox">
+                                        <property name="halign">end</property>
+                                        <property name="valign">center</property>
+                                        <property name="margin-end">12</property>
+                                        <property name="margin-top">4</property>
+                                        <property name="margin-bottom">4</property>
+                                        <child>
+                                          <object class="GtkButton">
+                                            <property name="width-request">40</property>
+                                            <property name="height-request">40</property>
+                                            <property name="valign">center</property>
+                                            <property name="icon-name">applications-system-symbolic</property>
+                                            <property name="tooltip-text" translatable="yes">Settings</property>
+                                            <property name="action-name">setting.account</property>
+                                            <style>
+                                              <class name="flat"/>
+                                              <class name="circular"/>
+                                              <class name="glass-button"/>
+                                              <class name="sidebar-settings-button"/>
+                                              <class name="circular-icon-button"/>
+                                            </style>
+                                          </object>
+                                        </child>
                                       </object>
                                     </child>
                                     <property name="content">
@@ -166,77 +192,107 @@
                                           <class name="unified-header"/>
                                         </style>
                                         <property name="title-widget">
-                                          <object class="GtkCenterBox">
-                                            <property name="hexpand">True</property>
-                                            <property name="valign">center</property>
+                                          <object class="GtkBox">
+                                            <property name="orientation">horizontal</property>
+                                            <property name="spacing">8</property>
+                                            <property name="valign">end</property>
+                                            <property name="margin-top">10</property>
                                             <style>
-                                              <class name="unified-header-row"/>
+                                              <class name="top-navigation"/>
                                             </style>
-                                            <property name="start-widget">
-                                              <object class="GtkBox">
-                                                <property name="orientation">horizontal</property>
-                                                <property name="spacing">8</property>
-                                                <property name="valign">center</property>
-                                                <child>
-                                                  <object class="GtkButton" id="popbutton">
-                                                    <property name="width-request">40</property>
-                                                    <property name="height-request">40</property>
-                                                    <property name="valign">center</property>
-                                                    <property name="icon-name">go-previous-symbolic</property>
-                                                    <property name="visible">False</property>
-                                                    <signal name="clicked" handler="on_pop" swapped="yes"/>
-                                                    <style>
-                                                      <class name="flat"/>
-                                                      <class name="circular"/>
-                                                      <class name="glass-button"/>
-                                                      <class name="circular-icon-button"/>
-                                                    </style>
-                                                  </object>
-                                                </child>
-                                              </object>
-                                            </property>
-                                            <property name="center-widget">
-                                              <object class="GtkLabel">
-                                                <property name="label" bind-source="navipage" bind-property="title" bind-flags="sync-create"/>
-                                                <property name="valign">center</property>
+                                            <child>
+                                              <object class="GtkToggleButton" id="home_nav">
+                                                <property name="label" translatable="yes">Home</property>
+                                                <property name="action-name">win.home</property>
+                                                <property name="active">True</property>
                                                 <style>
-                                                  <class name="title-3"/>
+                                                  <class name="flat"/>
+                                                  <class name="pill"/>
+                                                  <class name="segment-button"/>
                                                 </style>
                                               </object>
-                                            </property>
-                                            <property name="end-widget">
-                                              <object class="GtkBox">
-                                                <property name="orientation">horizontal</property>
-                                                <property name="spacing">8</property>
-                                                <property name="valign">center</property>
-                                                <child>
-                                                  <object class="GtkMenuButton" id="main_menu_button">
-                                                    <property name="width-request">40</property>
-                                                    <property name="height-request">40</property>
-                                                    <property name="valign">center</property>
-                                                    <property name="icon-name">open-menu-symbolic</property>
-                                                    <style>
-                                                      <class name="flat"/>
-                                                      <class name="circular"/>
-                                                      <class name="glass-button"/>
-                                                      <class name="circular-icon-button"/>
-                                                    </style>
-                                                  </object>
-                                                </child>
-                                                <child>
-                                                  <object class="GtkWindowControls">
-                                                    <property name="side">end</property>
-                                                    <property name="decoration-layout">:minimize,maximize,close</property>
-                                                    <property name="valign">center</property>
-                                                    <style>
-                                                      <class name="macos-window-controls"/>
-                                                    </style>
-                                                  </object>
-                                                </child>
+                                            </child>
+                                            <child>
+                                              <object class="GtkToggleButton" id="favorites_nav">
+                                                <property name="label" translatable="yes">Favorites</property>
+                                                <property name="action-name">win.favorites</property>
+                                                <property name="group">home_nav</property>
+                                                <style>
+                                                  <class name="flat"/>
+                                                  <class name="pill"/>
+                                                  <class name="segment-button"/>
+                                                </style>
                                               </object>
-                                            </property>
+                                            </child>
+                                            <child>
+                                              <object class="GtkToggleButton" id="search_nav">
+                                                <property name="label" translatable="yes">Search</property>
+                                                <property name="action-name">win.search</property>
+                                                <property name="group">home_nav</property>
+                                                <style>
+                                                  <class name="flat"/>
+                                                  <class name="pill"/>
+                                                  <class name="segment-button"/>
+                                                </style>
+                                              </object>
+                                            </child>
                                           </object>
                                         </property>
+                                        <child type="start">
+                                          <object class="GtkToggleButton" id="sidebar">
+                                            <property name="width-request">40</property>
+                                            <property name="height-request">40</property>
+                                            <property name="valign">center</property>
+                                            <property name="icon-name">sidebar-show-symbolic</property>
+                                            <property name="action-name">win.sidebar</property>
+                                            <style>
+                                              <class name="flat"/>
+                                              <class name="circular"/>
+                                              <class name="glass-button"/>
+                                              <class name="circular-icon-button"/>
+                                            </style>
+                                          </object>
+                                        </child>
+                                        <child type="start">
+                                          <object class="GtkButton" id="popbutton">
+                                            <property name="width-request">40</property>
+                                            <property name="height-request">40</property>
+                                            <property name="valign">center</property>
+                                            <property name="icon-name">go-previous-symbolic</property>
+                                            <property name="visible">False</property>
+                                            <signal name="clicked" handler="on_pop" swapped="yes"/>
+                                            <style>
+                                              <class name="flat"/>
+                                              <class name="circular"/>
+                                              <class name="glass-button"/>
+                                              <class name="circular-icon-button"/>
+                                            </style>
+                                          </object>
+                                        </child>
+                                        <child type="end">
+                                          <object class="GtkMenuButton" id="main_menu_button">
+                                            <property name="width-request">40</property>
+                                            <property name="height-request">40</property>
+                                            <property name="valign">center</property>
+                                            <property name="icon-name">open-menu-symbolic</property>
+                                            <style>
+                                              <class name="flat"/>
+                                              <class name="circular"/>
+                                              <class name="glass-button"/>
+                                              <class name="circular-icon-button"/>
+                                            </style>
+                                          </object>
+                                        </child>
+                                        <child type="end">
+                                          <object class="GtkWindowControls">
+                                            <property name="side">end</property>
+                                            <property name="decoration-layout">:minimize,maximize,close</property>
+                                            <property name="valign">center</property>
+                                            <style>
+                                              <class name="macos-window-controls"/>
+                                            </style>
+                                          </object>
+                                        </child>
                                       </object>
                                     </child>
                                     <child type="bottom">
@@ -402,120 +458,6 @@
                                 </property>
                               </object>
                             </property>
-                          </object>
-                            </child>
-                            <child>
-                              <object class="GtkBox" id="bottom_navigation">
-                                <property name="orientation">horizontal</property>
-                                <property name="spacing">8</property>
-                                <property name="halign">center</property>
-                                <property name="valign">center</property>
-                                <property name="margin-bottom">12</property>
-                                <style>
-                                  <class name="bottom-navigation"/>
-                                </style>
-                                <child>
-                                  <object class="GtkButton">
-                                    <property name="width-request">40</property>
-                                    <property name="height-request">40</property>
-                                    <property name="valign">center</property>
-                                    <property name="icon-name">list-add-symbolic</property>
-                                    <property name="tooltip-text" translatable="yes">Add Server</property>
-                                    <property name="action-name">win.add-server</property>
-                                    <style>
-                                      <class name="flat"/>
-                                      <class name="circular"/>
-                                      <class name="glass-button"/>
-                                      <class name="circular-icon-button"/>
-                                    </style>
-                                  </object>
-                                </child>
-                                <child>
-                                  <object class="GtkToggleButton" id="sidebar">
-                                    <property name="width-request">40</property>
-                                    <property name="height-request">40</property>
-                                    <property name="valign">center</property>
-                                    <property name="icon-name">network-server-symbolic</property>
-                                    <property name="tooltip-text" translatable="yes">Sources</property>
-                                    <property name="action-name">win.sidebar</property>
-                                    <style>
-                                      <class name="flat"/>
-                                      <class name="circular"/>
-                                      <class name="glass-button"/>
-                                      <class name="circular-icon-button"/>
-                                    </style>
-                                  </object>
-                                </child>
-                                <child>
-                                  <object class="GtkToggleButton" id="home_nav">
-                                    <property name="width-request">40</property>
-                                    <property name="height-request">40</property>
-                                    <property name="valign">center</property>
-                                    <property name="icon-name">go-home-symbolic</property>
-                                    <property name="tooltip-text" translatable="yes">Home</property>
-                                    <property name="action-name">win.home</property>
-                                    <property name="active">True</property>
-                                    <style>
-                                      <class name="flat"/>
-                                      <class name="circular"/>
-                                      <class name="glass-button"/>
-                                      <class name="circular-icon-button"/>
-                                    </style>
-                                  </object>
-                                </child>
-                                <child>
-                                  <object class="GtkToggleButton" id="favorites_nav">
-                                    <property name="width-request">40</property>
-                                    <property name="height-request">40</property>
-                                    <property name="valign">center</property>
-                                    <property name="icon-name">starred-symbolic</property>
-                                    <property name="tooltip-text" translatable="yes">Favorites</property>
-                                    <property name="action-name">win.favorites</property>
-                                    <property name="group">home_nav</property>
-                                    <style>
-                                      <class name="flat"/>
-                                      <class name="circular"/>
-                                      <class name="glass-button"/>
-                                      <class name="circular-icon-button"/>
-                                    </style>
-                                  </object>
-                                </child>
-                                <child>
-                                  <object class="GtkToggleButton" id="search_nav">
-                                    <property name="width-request">40</property>
-                                    <property name="height-request">40</property>
-                                    <property name="valign">center</property>
-                                    <property name="icon-name">system-search-symbolic</property>
-                                    <property name="tooltip-text" translatable="yes">Search</property>
-                                    <property name="action-name">win.search</property>
-                                    <property name="group">home_nav</property>
-                                    <style>
-                                      <class name="flat"/>
-                                      <class name="circular"/>
-                                      <class name="glass-button"/>
-                                      <class name="circular-icon-button"/>
-                                    </style>
-                                  </object>
-                                </child>
-                                <child>
-                                  <object class="GtkButton">
-                                    <property name="width-request">40</property>
-                                    <property name="height-request">40</property>
-                                    <property name="valign">center</property>
-                                    <property name="icon-name">applications-system-symbolic</property>
-                                    <property name="tooltip-text" translatable="yes">Settings</property>
-                                    <property name="action-name">setting.account</property>
-                                    <style>
-                                      <class name="flat"/>
-                                      <class name="circular"/>
-                                      <class name="glass-button"/>
-                                      <class name="sidebar-settings-button"/>
-                                      <class name="circular-icon-button"/>
-                                    </style>
-                                  </object>
-                                </child>
-                              </object>
-                            </child>
                           </object>
                         </property>
                       </object>
