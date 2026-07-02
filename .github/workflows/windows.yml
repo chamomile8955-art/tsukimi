@@ -244,7 +244,9 @@ jobs:
 
           # Tsukimi loads its GResource and GSettings schema at runtime.
           mkdir -p "$dist/share/tsukimi"
-          resource_file="$dist/share/tsukimi/tsukimi.gresource"
+          # Keep this path relative: MSYS2 argument conversion is disabled for
+          # gresource extract below so its internal /moe/... path is preserved.
+          resource_file="dist/Tsukimi/share/tsukimi/tsukimi.gresource"
           rm -f "$resource_file"
 
           echo "GitHub SHA: $GITHUB_SHA"
@@ -266,11 +268,32 @@ jobs:
             local source_file="$1"
             local resource_path="$2"
             local extracted_file="$3"
-            local source_hash embedded_hash
+            local extract_status extracted_size source_hash embedded_hash
 
-            gresource extract \
-              "$resource_file" \
-              "$resource_path" > "$extracted_file"
+            echo "Extracting GResource member:"
+            echo "MSYS2_ARG_CONV_EXCL='*' gresource extract '$resource_file' '$resource_path' > '$extracted_file'"
+            if MSYS2_ARG_CONV_EXCL='*' gresource extract \
+                "$resource_file" \
+                "$resource_path" > "$extracted_file"
+            then
+              extract_status=0
+            else
+              extract_status=$?
+              echo "gresource extract failed with exit code $extract_status" >&2
+              exit "$extract_status"
+            fi
+
+            if ! test -f "$extracted_file"; then
+              echo "gresource extract did not create $extracted_file" >&2
+              exit 1
+            fi
+            extracted_size="$(wc -c < "$extracted_file" | tr -d '[:space:]')"
+            echo "$(basename "$source_file") extracted size: $extracted_size bytes"
+            if ! test "$extracted_size" -gt 0; then
+              echo "gresource extract produced an empty file: $extracted_file" >&2
+              exit 1
+            fi
+
             source_hash="$(sha256sum "$source_file" | awk '{print $1}')"
             embedded_hash="$(sha256sum "$extracted_file" | awk '{print $1}')"
 
@@ -291,10 +314,10 @@ jobs:
           echo "GResource generated for packaging:"
           stat -c 'path=%n size=%s modified=%y' "$resource_file"
           echo "GResource contents:"
-          gresource list "$resource_file"
-          gresource list "$resource_file" |
+          MSYS2_ARG_CONV_EXCL='*' gresource list "$resource_file"
+          MSYS2_ARG_CONV_EXCL='*' gresource list "$resource_file" |
             grep -Fx '/moe/tsuna/tsukimi/ui/window.ui'
-          gresource list "$resource_file" |
+          MSYS2_ARG_CONV_EXCL='*' gresource list "$resource_file" |
             grep -Fx '/moe/tsuna/tsukimi/style.css'
 
           verify_gresource_content \
@@ -305,6 +328,16 @@ jobs:
             resources/style.css \
             /moe/tsuna/tsukimi/style.css \
             "$resource_verify_dir/style.css"
+
+          echo "Extracted GResource debug output:"
+          ls -lh "$resource_verify_dir/"
+          wc -c \
+            "$resource_verify_dir/window.ui" \
+            "$resource_verify_dir/style.css"
+          echo "window.ui preview:"
+          head -n 5 "$resource_verify_dir/window.ui"
+          echo "style.css preview:"
+          head -n 5 "$resource_verify_dir/style.css"
 
           schema_dir="$dist/share/glib-2.0/schemas"
           mkdir -p "$schema_dir"
@@ -444,11 +477,11 @@ jobs:
         run: |
           set -euxo pipefail
 
-          zip_file="$PWD/tsukimi-windows-x86_64.zip"
-          verify_dir="$PWD/dist/zip-verify"
+          zip_file="tsukimi-windows-x86_64.zip"
+          verify_dir="dist/zip-verify"
           package_root="$verify_dir/Tsukimi"
           resource_file="$package_root/share/tsukimi/tsukimi.gresource"
-          assembled_resource="$PWD/dist/Tsukimi/share/tsukimi/tsukimi.gresource"
+          assembled_resource="dist/Tsukimi/share/tsukimi/tsukimi.gresource"
 
           rm -rf "$verify_dir"
           mkdir -p "$verify_dir"
@@ -466,6 +499,7 @@ jobs:
             find "$verify_dir" -type f -name tsukimi.gresource | wc -l |
               tr -d '[:space:]'
           )"
+          echo "ZIP tsukimi.gresource count: $resource_count"
           test "$resource_count" = "1"
 
           echo "Required ZIP entries:"
@@ -476,21 +510,42 @@ jobs:
           echo "GResource extracted from final ZIP:"
           stat -c 'path=%n size=%s modified=%y' "$resource_file"
           echo "Final ZIP GResource contents:"
-          gresource list "$resource_file"
-          gresource list "$resource_file" |
+          MSYS2_ARG_CONV_EXCL='*' gresource list "$resource_file"
+          MSYS2_ARG_CONV_EXCL='*' gresource list "$resource_file" |
             grep -Fx '/moe/tsuna/tsukimi/ui/window.ui'
-          gresource list "$resource_file" |
+          MSYS2_ARG_CONV_EXCL='*' gresource list "$resource_file" |
             grep -Fx '/moe/tsuna/tsukimi/style.css'
 
           verify_zip_resource() {
             local source_file="$1"
             local resource_path="$2"
             local extracted_file="$3"
-            local source_hash zip_hash
+            local extract_status extracted_size source_hash zip_hash
 
-            gresource extract \
-              "$resource_file" \
-              "$resource_path" > "$extracted_file"
+            echo "Extracting final ZIP GResource member:"
+            echo "MSYS2_ARG_CONV_EXCL='*' gresource extract '$resource_file' '$resource_path' > '$extracted_file'"
+            if MSYS2_ARG_CONV_EXCL='*' gresource extract \
+                "$resource_file" \
+                "$resource_path" > "$extracted_file"
+            then
+              extract_status=0
+            else
+              extract_status=$?
+              echo "gresource extract failed with exit code $extract_status" >&2
+              exit "$extract_status"
+            fi
+
+            if ! test -f "$extracted_file"; then
+              echo "gresource extract did not create $extracted_file" >&2
+              exit 1
+            fi
+            extracted_size="$(wc -c < "$extracted_file" | tr -d '[:space:]')"
+            echo "ZIP $(basename "$source_file") extracted size: $extracted_size bytes"
+            if ! test "$extracted_size" -gt 0; then
+              echo "gresource extract produced an empty file: $extracted_file" >&2
+              exit 1
+            fi
+
             source_hash="$(sha256sum "$source_file" | awk '{print $1}')"
             zip_hash="$(sha256sum "$extracted_file" | awk '{print $1}')"
 
@@ -510,6 +565,14 @@ jobs:
             resources/style.css \
             /moe/tsuna/tsukimi/style.css \
             "$verify_dir/style.css"
+
+          echo "Final ZIP extracted GResource debug output:"
+          ls -lh "$verify_dir/window.ui" "$verify_dir/style.css"
+          wc -c "$verify_dir/window.ui" "$verify_dir/style.css"
+          echo "window.ui preview:"
+          head -n 5 "$verify_dir/window.ui"
+          echo "style.css preview:"
+          head -n 5 "$verify_dir/style.css"
 
       - name: Start artifact upload timer
         id: artifact-upload-timer
