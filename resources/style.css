@@ -1180,3 +1180,39 @@ popover.menu.floating-dialog contents > * {
   box-shadow: 0 18px 42px rgba(0, 0, 0, 0.18);
   color: @window_fg_color;
 }
+
+/* Final solid background: disable carousel/image tint */
+.app-window .home-carousel,
+.app-window .window-background,
+.app-window .window-background picture,
+.app-window picture#rootpic {
+  background-color: transparent;
+  background-image: none;
+  opacity: 0;
+}
+
+.app-window,
+.app-window.background,
+.app-window .window-background,
+.app-window .window-frame,
+.app-window .app-shell,
+.app-window .window-root-overlay,
+.app-window .window-toast-overlay,
+.app-window .window-stack,
+.app-window .window-background > box,
+.app-window .window-frame > box,
+.app-window .app-shell > box,
+.app-window .app-shell > overlay,
+.app-window .app-shell > stack,
+.app-window .window-stack > box {
+  background-color: @tsukimi_base_bg_light;
+  background-image: none;
+}
+
+.app-window .source-panel,
+.app-window .main-surface {
+  background-color: @tsukimi_panel_bg_light;
+  background-image: none;
+  background-clip: padding-box;
+  opacity: 1;
+}

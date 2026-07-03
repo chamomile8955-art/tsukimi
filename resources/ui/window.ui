@@ -570,7 +570,7 @@
                     <property name="content-fit">cover</property>
                     <property name="hexpand">true</property>
                     <property name="vexpand">true</property>
-                    <property name="opacity">0.15</property>
+                    <property name="opacity">0</property>
                   </object>
                 </child>
               </object>
