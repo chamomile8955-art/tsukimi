@@ -6,7 +6,7 @@
 @define-color glass_selected alpha(@window_fg_color, 0.13);
 @define-color glass_border alpha(@window_fg_color, 0.08);
 @define-color glass_highlight alpha(@window_fg_color, 0.065);
-@define-color glass_surface @window_bg_color;
+@define-color glass_surface @view_bg_color;
 @define-color glass_shadow rgba(0, 0, 0, 0.10);
 @define-color glass_shadow_strong rgba(0, 0, 0, 0.12);
 
@@ -41,8 +41,8 @@ button.pill.ultrasmall {
 }
 
 .circular.smaller {
-  min-height: 40px;
-  min-width: 40px;
+  min-height: 42px;
+  min-width: 42px;
   padding: 0;
   border-radius: 999px;
   -gtk-icon-size: 18px;
@@ -516,22 +516,21 @@ window.app-window.solid-csd {
 }
 
 .app-shell {
-  background-image: linear-gradient(to bottom right,
-      alpha(@accent_bg_color, 0.035),
-      alpha(@window_bg_color, 0.98) 34%,
-      @window_bg_color);
+  background-color: @window_bg_color;
+  background-image: none;
 }
 
 .window-root-overlay,
 .window-toast-overlay,
 .window-stack,
 .window-background {
-  background-color: transparent;
+  background-color: @window_bg_color;
 }
 
 .source-toolbar,
 .source-header {
-  background-color: transparent;
+  background-color: @glass_surface;
+  background-image: none;
 }
 
 .source-header {
@@ -542,7 +541,8 @@ window.app-window.solid-csd {
 
 .main-toolbar,
 .content-stack {
-  background-color: transparent;
+  background-color: @glass_surface;
+  background-image: none;
 }
 
 .main-toolbar {
@@ -553,16 +553,16 @@ window.app-window.solid-csd {
   min-height: 44px;
   border-bottom: 1px solid @glass_border;
   border-radius: 22px 22px 0 0;
-  background-color: alpha(@window_bg_color, 0.82);
+  background-color: @glass_surface;
+  background-image: none;
   box-shadow: none;
 }
 
 .window-titlebar {
   min-height: 44px;
   padding: 4px 8px;
-  background-image: linear-gradient(to bottom,
-      @glass_fill,
-      alpha(@window_bg_color, 0.88));
+  background-color: @glass_surface;
+  background-image: none;
   box-shadow: none;
 }
 
@@ -571,7 +571,15 @@ window.app-window.solid-csd {
 .main-page,
 .content-stack {
   border-radius: 0 0 22px 22px;
-  background-color: transparent;
+  background-color: @glass_surface;
+  background-image: none;
+}
+
+.content-state-overlay {
+  background-color: @glass_surface;
+  background-image: none;
+  border-radius: 0 0 22px 22px;
+  box-shadow: none;
 }
 
 .macos-window-controls,
@@ -582,8 +590,8 @@ window.app-window.solid-csd {
 
 .macos-window-controls button,
 .app-window windowcontrols button {
-  min-height: 40px;
-  min-width: 40px;
+  min-height: 42px;
+  min-width: 42px;
   margin: 0 4px;
   padding: 0;
   border: 1px solid @glass_border;
@@ -660,8 +668,8 @@ window.app-window.solid-csd {
 
 button.glass-button,
 menubutton.glass-button > button {
-  min-height: 40px;
-  min-width: 40px;
+  min-height: 42px;
+  min-width: 42px;
   border: 1px solid @glass_border;
   border-radius: 999px;
   background-color: @glass_fill;
@@ -692,15 +700,17 @@ menubutton.glass-button > button:focus-visible {
 }
 
 button.circular-icon-button,
+togglebutton.circular-icon-button,
 menubutton.circular-icon-button > button {
-  min-width: 40px;
-  min-height: 40px;
+  min-width: 42px;
+  min-height: 42px;
   padding: 0;
   border-radius: 999px;
   -gtk-icon-size: 18px;
 }
 
 button.circular-icon-button image,
+togglebutton.circular-icon-button image,
 menubutton.circular-icon-button > button image {
   margin: 0;
   padding: 0;
@@ -772,13 +782,14 @@ popover.menu modelbutton:hover {
 }
 
 /* Windows floating shell polish */
-.app-window .surface {
+.app-window .source-panel,
+.app-window .main-surface {
   background-color: @glass_surface;
   background-image: none;
   background-clip: padding-box;
   border: 1px solid @glass_border;
   border-radius: 22px;
-  box-shadow: 0 18px 42px @glass_shadow_strong;
+  box-shadow: 0 12px 28px @glass_shadow;
   transform: translateZ(0);
 }
 
@@ -791,13 +802,17 @@ popover.menu modelbutton:hover {
 .app-window .main-content-pane,
 .app-window .main-navigation,
 .app-window .main-page,
-.app-window .content-stack,
-.app-window .window-stack,
-.app-window .window-root-overlay,
-.app-window .window-toast-overlay {
+.app-window .content-stack {
   background-color: @glass_surface;
   background-image: none;
   border-radius: 22px;
+}
+
+.app-window .window-stack,
+.app-window .window-root-overlay,
+.app-window .window-toast-overlay {
+  background-color: @window_bg_color;
+  background-image: none;
 }
 
 .app-window .window-frame,
@@ -821,12 +836,12 @@ popover.menu modelbutton:hover {
 .app-window button.circular-icon-button,
 .app-window togglebutton.circular-icon-button,
 .app-window menubutton.circular-icon-button > button {
-  min-width: 40px;
-  min-height: 40px;
+  min-width: 42px;
+  min-height: 42px;
   padding: 0;
   background-color: @glass_surface;
   background-clip: padding-box;
-  border: 1px solid alpha(@glass_border, 0.6);
+  border: 1px solid @glass_border;
   border-radius: 999px;
   box-shadow: none;
   outline: none;
@@ -838,7 +853,7 @@ popover.menu modelbutton:hover {
 .app-window button.circular-icon-button:hover,
 .app-window togglebutton.circular-icon-button:hover,
 .app-window menubutton.circular-icon-button > button:hover {
-  background-color: shade(@glass_surface, 1.04);
+  background-color: alpha(@window_fg_color, 0.08);
   box-shadow: none;
 }
 
@@ -847,7 +862,7 @@ popover.menu modelbutton:hover {
 .app-window togglebutton.circular-icon-button:active,
 .app-window togglebutton.circular-icon-button:checked,
 .app-window menubutton.circular-icon-button > button:active {
-  background-color: shade(@glass_surface, 0.96);
+  background-color: alpha(@window_fg_color, 0.12);
   box-shadow: none;
 }
 
@@ -856,6 +871,20 @@ popover.menu modelbutton:hover {
 .app-window menubutton.circular-icon-button > button image {
   margin: 0;
   -gtk-icon-shadow: none;
+}
+
+.app-window button,
+.app-window button label,
+.app-window button.circular-icon-button,
+.app-window button.circular-icon-button image,
+.app-window togglebutton.circular-icon-button,
+.app-window togglebutton.circular-icon-button image,
+.app-window menubutton.circular-icon-button > button,
+.app-window menubutton.circular-icon-button > button image,
+.app-window button.suggested-action label,
+.app-window button.pill label,
+.app-window button.glass-button label {
+  color: @window_fg_color;
 }
 
 .app-window .unified-header,

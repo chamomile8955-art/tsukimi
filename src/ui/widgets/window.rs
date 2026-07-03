@@ -3,10 +3,7 @@ use std::path::PathBuf;
 use adw::prelude::*;
 use gettextrs::gettext;
 use gio::Settings;
-use gtk::{
-    Widget,
-    subclass::prelude::*,
-};
+use gtk::subclass::prelude::*;
 mod imp {
     use std::cell::{
         OnceCell,
@@ -93,6 +90,8 @@ mod imp {
         pub likedpage: TemplateChild<adw::Bin>,
         #[template_child]
         pub searchpage: TemplateChild<adw::Bin>,
+        #[template_child]
+        pub no_server_state: TemplateChild<adw::StatusPage>,
         #[template_child]
         pub mpv_playlist: TemplateChild<gtk::ListView>,
         #[template_child]
@@ -337,6 +336,7 @@ impl Window {
                 .map(|widget| widget.type_().name().to_string()),
             split_sidebar_visible = imp.split_view.shows_sidebar(),
             split_collapsed = imp.split_view.is_collapsed(),
+            no_server_overlay_visible = imp.no_server_state.is_visible(),
             ui_preview = crate::ui_preview_mode(),
             "Runtime main-shell state"
         );
@@ -687,9 +687,17 @@ impl Window {
     fn show_no_server_state(&self) {
         self.mainpage();
         self.imp().home_nav.set_active(true);
-        self.imp().insidestack.set_visible_child_name("no-server");
         self.imp().navipage.set_title("");
         self.imp().last_content_list_selection.replace(None);
+        if !self.imp().no_server_state.is_visible() {
+            self.imp().no_server_state.set_visible(true);
+        }
+    }
+
+    fn hide_no_server_state(&self) {
+        if self.imp().no_server_state.is_visible() {
+            self.imp().no_server_state.set_visible(false);
+        }
     }
 
     async fn select_server(&self, mut account: Account, selection_reason: &'static str) -> bool {
@@ -750,9 +758,12 @@ impl Window {
         if imp.homepage.child().is_none() {
             imp.homepage.set_child(Some(&HomePage::new()));
         }
+        self.hide_no_server_state();
         imp.navipage.set_title(&gettext("Home"));
         imp.mainview.pop_to_tag("mainpage");
-        imp.insidestack.set_visible_child_name("homepage");
+        if imp.insidestack.visible_child_name().as_deref() != Some("homepage") {
+            imp.insidestack.set_visible_child_name("homepage");
+        }
         imp.popbutton.set_visible(false);
         imp.last_content_list_selection.replace(Some(0));
     }
@@ -768,9 +779,12 @@ impl Window {
         if imp.likedpage.child().is_none() {
             imp.likedpage.set_child(Some(&LikedPage::new()));
         }
+        self.hide_no_server_state();
         imp.navipage.set_title(&gettext("Favorites"));
         imp.mainview.pop_to_tag("mainpage");
-        imp.insidestack.set_visible_child_name("likedpage");
+        if imp.insidestack.visible_child_name().as_deref() != Some("likedpage") {
+            imp.insidestack.set_visible_child_name("likedpage");
+        }
         imp.popbutton.set_visible(false);
         imp.last_content_list_selection.replace(Some(1));
     }
@@ -786,9 +800,12 @@ impl Window {
         if imp.searchpage.child().is_none() {
             imp.searchpage.set_child(Some(&SearchPage::new()));
         }
+        self.hide_no_server_state();
         imp.navipage.set_title(&gettext("Search"));
         imp.mainview.pop_to_tag("mainpage");
-        imp.insidestack.set_visible_child_name("searchpage");
+        if imp.insidestack.visible_child_name().as_deref() != Some("searchpage") {
+            imp.insidestack.set_visible_child_name("searchpage");
+        }
         imp.popbutton.set_visible(false);
         imp.last_content_list_selection.replace(Some(2));
     }
@@ -908,7 +925,6 @@ impl Window {
 
     pub fn set_nav_servers(&self) {
         let imp = self.imp();
-        imp.servers_section.remove_all();
         let accounts = SETTINGS.accounts();
         let session = JELLYFIN_CLIENT.session();
         let selected_server = if !session.account.user_id.is_empty()
@@ -922,13 +938,31 @@ impl Window {
         };
         let mut selected_index = None;
 
+        let model_matches = imp.selectlist.items().n_items() == accounts.len() as u32
+            && accounts.iter().enumerate().all(|(index, account)| {
+                imp.selectlist
+                    .item(index as u32)
+                    .is_some_and(|item| item.title().as_deref() == Some(account.servername.as_str()))
+            });
+
+        if !model_matches {
+            imp.servers_section.remove_all();
+        }
+
         for (index, account) in accounts.iter().enumerate() {
-            let item = adw::SidebarItem::new(&account.servername);
+            let item = if model_matches {
+                imp.selectlist
+                    .item(index as u32)
+                    .expect("existing sidebar model item")
+            } else {
+                let item = adw::SidebarItem::new(&account.servername);
+                imp.servers_section.append(item.clone());
+                item
+            };
             item.set_icon_name(Some("network-server-symbolic"));
             item.set_subtitle(account.active_route().map(|route| {
                 format!("{} · {}", route.name, route.url)
             }).as_deref());
-            imp.servers_section.append(item);
             if account.servername == selected_server {
                 selected_index = Some(index as u32);
             }
@@ -942,9 +976,17 @@ impl Window {
     pub fn reset(&self) {
         self.mainpage();
         self.set_nav_servers();
-        self.remove_all();
+        self.imp().player_toolbar_box.on_stop_button_clicked();
+        if let Some(homepage) = self.imp().homepage.child().and_downcast::<HomePage>() {
+            homepage.update(false);
+        }
+        if let Some(likedpage) = self.imp().likedpage.child().and_downcast::<LikedPage>() {
+            likedpage.update();
+        }
+        if let Some(searchpage) = self.imp().searchpage.child().and_downcast::<SearchPage>() {
+            searchpage.update();
+        }
         self.homepage();
-        self.recalculate_layout("home mounted");
     }
 
     pub fn hard_set_fraction(&self, to_value: f64) {
@@ -1033,7 +1075,6 @@ impl Window {
     }
 
     pub fn recalculate_layout(&self, stage: &str) {
-        let stage = stage.to_string();
         let (default_width, default_height) = self.default_size();
         let width = self.width().max(default_width);
         let height = self.height().max(default_height);
@@ -1044,24 +1085,6 @@ impl Window {
             "Layout recalculation requested"
         );
         self.queue_allocate();
-        self.queue_draw();
-        self.imp().split_view.queue_allocate();
-        self.imp().insidestack.queue_allocate();
-        glib::idle_add_local_once(glib::clone!(
-            #[weak(rename_to = obj)]
-            self,
-            move || {
-                obj.queue_allocate();
-                obj.imp().split_view.queue_allocate();
-                obj.imp().insidestack.queue_allocate();
-                tracing::info!(
-                    stage = %stage,
-                    width = obj.width(),
-                    height = obj.height(),
-                    "Layout initialization size"
-                );
-            }
-        ));
     }
 
     pub fn set_title(&self, title: &str) {
@@ -1069,7 +1092,9 @@ impl Window {
     }
 
     pub fn mainpage(&self) {
-        self.imp().stack.set_visible_child_name("main");
+        if self.imp().stack.visible_child_name().as_deref() != Some("main") {
+            self.imp().stack.set_visible_child_name("main");
+        }
     }
 
     pub fn refresh_homepage_if_needed(&self) {
@@ -1288,13 +1313,6 @@ impl Window {
             likedpage.update();
         }
         self.likedpage();
-    }
-
-    pub fn remove_all(&self) {
-        self.imp().homepage.set_child(None::<&Widget>);
-        self.imp().likedpage.set_child(None::<&Widget>);
-        self.imp().searchpage.set_child(None::<&Widget>);
-        self.imp().player_toolbar_box.on_stop_button_clicked();
     }
 
     fn open_server_panel(&self) {
