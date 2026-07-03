@@ -512,6 +512,8 @@ impl Window {
 
         let popover = gtk::PopoverMenu::from_model(Some(&menu));
         popover.add_css_class("glass-popover");
+        popover.add_css_class("floating-dialog");
+        popover.add_css_class("settings-dialog");
         let theme_box = gtk::Box::builder()
             .orientation(gtk::Orientation::Vertical)
             .spacing(10)

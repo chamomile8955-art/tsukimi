@@ -14,6 +14,74 @@
 @define-color app_base_bg_light #e7e7e7;
 @define-color app_panel_bg_light #f6f6f6;
 
+* {
+  font-family:
+    "SF Pro Display",
+    "SF Pro Text",
+    -apple-system,
+    BlinkMacSystemFont,
+    "PingFang SC",
+    "Hiragino Sans GB",
+    "Segoe UI Variable",
+    "Segoe UI",
+    "Microsoft YaHei UI",
+    "Microsoft YaHei",
+    "Noto Sans CJK SC",
+    sans-serif;
+}
+
+.title-1,
+.title-2,
+.title-3,
+.large-title,
+headerbar label {
+  font-family:
+    "SF Pro Display",
+    "SF Pro Text",
+    -apple-system,
+    BlinkMacSystemFont,
+    "PingFang SC",
+    "Hiragino Sans GB",
+    "Segoe UI Variable",
+    "Segoe UI",
+    "Microsoft YaHei UI",
+    "Microsoft YaHei",
+    "Noto Sans CJK SC",
+    sans-serif;
+}
+
+label,
+button,
+entry,
+textview,
+row,
+listview,
+gridview {
+  font-family:
+    "SF Pro Text",
+    "SF Pro Display",
+    -apple-system,
+    BlinkMacSystemFont,
+    "PingFang SC",
+    "Hiragino Sans GB",
+    "Segoe UI Variable",
+    "Segoe UI",
+    "Microsoft YaHei UI",
+    "Microsoft YaHei",
+    "Noto Sans CJK SC",
+    sans-serif;
+}
+
+.monospace,
+code,
+pre {
+  font-family:
+    "SF Mono",
+    "Cascadia Code",
+    "Consolas",
+    monospace;
+}
+
 .sbackground {
   background: rgba(0, 0, 0, 0.15);
 }
@@ -346,12 +414,11 @@ row image {
 }
 
 .themeselector checkbutton {
-  padding: 0;
-  min-height: 40px;
-  min-width: 40px;
-  padding: 4px;
-  background-clip: content-box;
-  border-radius: 999px;
+  min-width: 52px;
+  min-height: 52px;
+  padding: 2px;
+  background-clip: padding-box;
+  border-radius: 9999px;
   box-shadow: 0 8px 24px @glass_shadow;
 }
 
@@ -367,6 +434,13 @@ row image {
   box-shadow: 0 8px 24px @glass_shadow;
 }
 
+.themeselector checkbutton.light,
+.themeselector checkbutton.dark {
+  min-width: 52px;
+  min-height: 52px;
+  border-radius: 9999px;
+}
+
 .themeselector checkbutton.light {
   background-color: #fff;
 }
@@ -380,10 +454,12 @@ row image {
   border: none;
   background: none;
   box-shadow: none;
-  min-width: 12px;
-  min-height: 12px;
-  transform: translate(24px, 16px);
-  padding: 4px;
+  min-width: 14px;
+  min-height: 14px;
+  margin: 0;
+  padding: 2px;
+  transform: translate(28px, 16px);
+  border-radius: 9999px;
 }
 
 checkbutton.theme-selector radio:checked {
@@ -975,4 +1051,88 @@ popover.menu modelbutton:hover {
   border-bottom: none;
   box-shadow: none;
   background-image: none;
+}
+
+/* Solid floating dialogs and menus */
+.app-window .floating-dialog-scrim,
+.floating-dialog-scrim {
+  background-color: rgba(0, 0, 0, 0.28);
+}
+
+.app-window .floating-dialog,
+.app-window .solid-dialog,
+.app-window .add-server-dialog,
+.app-window .settings-dialog,
+.floating-dialog,
+window.floating-dialog,
+dialog.floating-dialog,
+popover.floating-dialog contents,
+popover.menu.floating-dialog contents,
+popover.glass-popover contents {
+  background-color: #f7f7f7;
+  background-image: none;
+  border: 1px solid alpha(@window_fg_color, 0.10);
+  border-radius: 22px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.28);
+  color: @window_fg_color;
+}
+
+.app-window .floating-dialog-content,
+.app-window .solid-dialog-content,
+.app-window .add-server-dialog-content,
+.app-window .settings-dialog-content,
+.floating-dialog-content,
+.solid-dialog-content,
+.add-server-dialog-content,
+.settings-dialog-content {
+  background-color: transparent;
+  background-image: none;
+  color: @window_fg_color;
+}
+
+popover.floating-dialog contents,
+popover.menu.floating-dialog contents,
+popover.glass-popover contents {
+  min-width: 280px;
+  background-color: #f7f7f7;
+  background-image: none;
+  border-radius: 22px;
+  color: @window_fg_color;
+}
+
+popover.floating-dialog arrow,
+popover.menu.floating-dialog arrow,
+popover.glass-popover arrow {
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.floating-dialog label,
+.solid-dialog label,
+.add-server-dialog label,
+.settings-dialog label,
+popover.floating-dialog label,
+popover.menu.floating-dialog label,
+popover.glass-popover label {
+  color: @window_fg_color;
+}
+
+@media (prefers-color-scheme: dark) {
+  .app-window .floating-dialog,
+  .app-window .solid-dialog,
+  .app-window .add-server-dialog,
+  .app-window .settings-dialog,
+  .floating-dialog,
+  window.floating-dialog,
+  dialog.floating-dialog,
+  popover.floating-dialog contents,
+  popover.menu.floating-dialog contents,
+  popover.glass-popover contents {
+    background-color: #2f2f2f;
+    background-image: none;
+  }
 }

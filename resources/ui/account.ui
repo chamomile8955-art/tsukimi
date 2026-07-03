@@ -1,14 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <template parent="AdwDialog" class="AccountWindow">
-    <property name="content-width">800</property>
-    <property name="content-height">1000</property>
+    <property name="content-width">520</property>
+    <property name="content-height">760</property>
     <property name="title" translatable="yes">Add a New Server</property>
     <style>
       <class name="glass-dialog"/>
+      <class name="floating-dialog"/>
+      <class name="solid-dialog"/>
+      <class name="add-server-dialog"/>
     </style>
     <child>
       <object class="AdwToastOverlay" id="toast">
+        <style>
+          <class name="floating-dialog-content"/>
+          <class name="solid-dialog-content"/>
+          <class name="add-server-dialog-content"/>
+        </style>
         <child>
           <object class="AdwNavigationView" id="navigation_view">
             <child>

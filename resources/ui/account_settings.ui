@@ -6,6 +6,9 @@
     <property name="search-enabled">True</property>
     <style>
       <class name="account-settings"/>
+      <class name="floating-dialog"/>
+      <class name="solid-dialog"/>
+      <class name="settings-dialog"/>
     </style>
     <child>
       <object class="AdwPreferencesPage">
