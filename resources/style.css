@@ -18,16 +18,11 @@
 
 * {
   font-family:
-    "SF Pro Display",
-    "SF Pro Text",
-    -apple-system,
-    BlinkMacSystemFont,
-    "PingFang SC",
-    "Hiragino Sans GB",
     "Segoe UI Variable",
     "Segoe UI",
     "Microsoft YaHei UI",
     "Microsoft YaHei",
+    "PingFang SC",
     "Noto Sans CJK SC",
     sans-serif;
 }
@@ -36,42 +31,37 @@
 .title-2,
 .title-3,
 .large-title,
-headerbar label {
+.heading,
+headerbar label,
+.app-window .source-header label,
+.app-window .main-header label {
   font-family:
-    "SF Pro Display",
-    "SF Pro Text",
-    -apple-system,
-    BlinkMacSystemFont,
-    "PingFang SC",
-    "Hiragino Sans GB",
+    "Segoe UI Variable Display",
     "Segoe UI Variable",
     "Segoe UI",
     "Microsoft YaHei UI",
     "Microsoft YaHei",
-    "Noto Sans CJK SC",
     sans-serif;
+  font-weight: 600;
 }
 
-label,
 button,
-entry,
-textview,
-row,
-listview,
-gridview {
+button label,
+togglebutton,
+togglebutton label,
+menubutton,
+menubutton button,
+popover label,
+.sidebar label,
+.source-sidebar label {
   font-family:
-    "SF Pro Text",
-    "SF Pro Display",
-    -apple-system,
-    BlinkMacSystemFont,
-    "PingFang SC",
-    "Hiragino Sans GB",
+    "Segoe UI Variable Text",
     "Segoe UI Variable",
     "Segoe UI",
     "Microsoft YaHei UI",
     "Microsoft YaHei",
-    "Noto Sans CJK SC",
     sans-serif;
+  font-weight: 500;
 }
 
 .monospace,
@@ -431,12 +421,14 @@ row image {
 
 .themeselector checkbutton.light:checked,
 .themeselector checkbutton.dark:checked {
-  border: 3px solid @accent_bg_color;
-  box-shadow: 0 8px 24px @glass_shadow;
+  border: 2px solid @accent_color;
+  background-image: none;
+  box-shadow: none;
 }
 
 .themeselector checkbutton.light,
 .themeselector checkbutton.dark {
+  border: 1px solid alpha(@window_fg_color, 0.18);
   border-radius: 9999px;
 }
 
@@ -450,20 +442,27 @@ row image {
 
 .themeselector checkbutton radio {
   -gtk-icon-source: none;
+  opacity: 0;
   border: none;
   background: none;
   box-shadow: none;
-  min-width: 12px;
-  min-height: 12px;
+  min-width: 0;
+  min-height: 0;
   margin: 0;
-  padding: 2px;
+  padding: 0;
   border-radius: 9999px;
 }
 
 .themeselector checkbutton.theme-selector radio:checked {
-  -gtk-icon-source: -gtk-icontheme("object-select-symbolic");
-  background-color: @theme_selected_bg_color;
-  color: @theme_selected_fg_color;
+  -gtk-icon-source: none;
+  opacity: 0;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  box-shadow: none;
 }
 
 .startup-content-skeleton {
@@ -608,68 +607,6 @@ window.app-window.solid-csd {
   border-radius: 0 0 22px 22px;
 }
 
-.macos-window-controls,
-.app-window windowcontrols {
-  margin-left: 8px;
-  margin-right: 4px;
-}
-
-.macos-window-controls button,
-.app-window windowcontrols button {
-  min-height: 60px;
-  min-width: 60px;
-  margin: 0 4px;
-  padding: 0;
-  border: 1px solid @glass_border;
-  border-radius: 999px;
-  background-color: @tsukimi_panel_bg_light;
-  background-image: none;
-  background-clip: padding-box;
-  box-shadow: none;
-  -gtk-icon-size: 24px;
-}
-
-.macos-window-controls button image,
-.app-window windowcontrols button image {
-  -gtk-icon-transform: scale(1);
-  -gtk-icon-shadow: none;
-}
-
-.macos-window-controls button:hover,
-.app-window windowcontrols button:hover {
-  background-color: shade(@glass_surface, 1.04);
-}
-
-.macos-window-controls button.close:hover,
-.app-window windowcontrols button.close:hover {
-  color: white;
-  background-color: rgb(214, 73, 69);
-}
-
-.macos-window-controls button.minimize:hover,
-.app-window windowcontrols button.minimize:hover {
-  color: rgba(20, 20, 20, 0.9);
-  background-color: rgb(222, 171, 58);
-}
-
-.macos-window-controls button.maximize:hover,
-.app-window windowcontrols button.maximize:hover {
-  color: rgba(20, 20, 20, 0.9);
-  background-color: rgb(72, 178, 94);
-}
-
-.macos-window-controls button:active,
-.app-window windowcontrols button:active {
-  background-color: shade(@glass_surface, 0.96);
-  box-shadow: none;
-}
-
-.macos-window-controls button:focus-visible,
-.app-window windowcontrols button:focus-visible {
-  outline: 2px solid alpha(@accent_color, 0.72);
-  outline-offset: 2px;
-}
-
 .media-library-scroll,
 .media-library-content {
   background-color: transparent;
@@ -743,13 +680,6 @@ togglebutton.circular-icon-button image,
 menubutton.circular-icon-button > button image {
   margin: 0;
   padding: 0;
-}
-
-.glass-popover contents {
-  border: 1px solid @glass_border;
-  border-radius: 14px;
-  background-color: @glass_surface;
-  box-shadow: 0 18px 42px @glass_shadow_strong;
 }
 
 popover.menu contents {
@@ -907,12 +837,8 @@ popover.menu modelbutton:hover {
 .app-window .solid-dialog,
 .app-window .add-server-dialog,
 .app-window .settings-dialog,
-.floating-dialog,
 window.floating-dialog,
-dialog.floating-dialog,
-popover.floating-dialog contents,
-popover.menu.floating-dialog contents,
-popover.glass-popover contents {
+dialog.floating-dialog {
   background-color: #f7f7f7;
   background-image: none;
   border: 1px solid alpha(@window_fg_color, 0.10);
@@ -931,16 +857,6 @@ popover.glass-popover contents {
 .settings-dialog-content {
   background-color: transparent;
   background-image: none;
-  color: @window_fg_color;
-}
-
-popover.floating-dialog contents,
-popover.menu.floating-dialog contents,
-popover.glass-popover contents {
-  min-width: 280px;
-  background-color: #f7f7f7;
-  background-image: none;
-  border-radius: 22px;
   color: @window_fg_color;
 }
 
@@ -966,16 +882,29 @@ popover.glass-popover label {
 }
 
 
-/* Final shell color unification */
+/* Final Apple-like shell rhythm */
 .app-window,
+.app-window.background,
+.app-window .window-background,
 .app-window .window-frame,
 .app-window .app-shell,
 .app-window .window-root-overlay,
 .app-window .window-toast-overlay,
 .app-window .window-stack,
-.app-window .window-background {
+.app-window .window-background > box,
+.app-window .window-frame > box,
+.app-window .app-shell > box,
+.app-window .app-shell > overlay,
+.app-window .app-shell > stack,
+.app-window .window-stack > box {
   background-color: @tsukimi_base_bg_light;
   background-image: none;
+}
+
+.app-window .window-frame {
+  border: 1px solid @glass_border;
+  border-radius: 34px;
+  box-shadow: none;
 }
 
 .app-window .source-panel,
@@ -984,17 +913,34 @@ popover.glass-popover label {
   background-image: none;
   background-clip: padding-box;
   border: 1px solid @tsukimi_panel_border;
-  border-radius: 22px;
+  border-radius: 32px;
   box-shadow: 0 12px 28px @tsukimi_panel_shadow;
   opacity: 1;
 }
 
-
 .app-window .source-header,
 .app-window .main-header,
+.app-window .window-titlebar {
+  min-height: 76px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  padding-left: 16px;
+  padding-right: 16px;
+  background-color: transparent;
+  background-image: none;
+  border: none;
+  box-shadow: none;
+}
+
+.app-window .source-header > *,
+.app-window .main-header > *,
+.app-window .window-titlebar > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
 .app-window .source-toolbar,
 .app-window .main-toolbar,
-.app-window .window-titlebar,
 .app-window .main-content-pane,
 .app-window .main-navigation,
 .app-window .main-page,
@@ -1003,91 +949,15 @@ popover.glass-popover label {
 .app-window headerbar.flat,
 .app-window headerbar.window-titlebar,
 .app-window headerbar.main-header,
-.app-window headerbar.source-header {
+.app-window headerbar.source-header,
+.app-window toolbarview,
+.app-window toolbarview > box,
+.app-window toolbarview > box > box {
   background-color: transparent;
   background-image: none;
+  border: none;
   border-bottom: none;
   box-shadow: none;
-}
-
-/* Final header action alignment */
-.app-window .source-header,
-.app-window .main-header,
-.app-window .window-titlebar {
-  min-height: 68px;
-  padding-top: 4px;
-  padding-bottom: 4px;
-}
-
-.app-window .source-header button.circular-icon-button,
-.app-window .source-header togglebutton.circular-icon-button,
-.app-window .source-header menubutton.circular-icon-button > button,
-.app-window .main-header button.circular-icon-button,
-.app-window .main-header togglebutton.circular-icon-button,
-.app-window .main-header menubutton.circular-icon-button > button,
-.app-window .window-titlebar button.circular-icon-button,
-.app-window .window-titlebar togglebutton.circular-icon-button,
-.app-window .window-titlebar menubutton.circular-icon-button > button {
-  min-width: 60px;
-  min-height: 60px;
-  margin-top: 0;
-  margin-bottom: 0;
-  padding: 0;
-  border-radius: 999px;
-  -gtk-icon-size: 24px;
-}
-
-.app-window .source-header button.circular-icon-button image,
-.app-window .source-header togglebutton.circular-icon-button image,
-.app-window .source-header menubutton.circular-icon-button > button image,
-.app-window .main-header button.circular-icon-button image,
-.app-window .main-header togglebutton.circular-icon-button image,
-.app-window .main-header menubutton.circular-icon-button > button image,
-.app-window .window-titlebar button.circular-icon-button image,
-.app-window .window-titlebar togglebutton.circular-icon-button image,
-.app-window .window-titlebar menubutton.circular-icon-button > button image {
-  margin: 0;
-  padding: 0;
-  -gtk-icon-shadow: none;
-}
-
-/* Final window control size unification */
-.app-window .macos-window-controls button,
-.app-window windowcontrols button {
-  min-width: 60px;
-  min-height: 60px;
-  margin-top: 0;
-  margin-bottom: 0;
-  padding: 0;
-  border-radius: 999px;
-  -gtk-icon-size: 24px;
-}
-
-.app-window .macos-window-controls button image,
-.app-window windowcontrols button image {
-  margin: 0;
-  padding: 0;
-  -gtk-icon-shadow: none;
-}
-
-/* Final panel corner and circular button rhythm */
-.app-window .window-frame {
-  border-radius: 34px;
-}
-
-.app-window .source-panel,
-.app-window .main-surface {
-  border-radius: 32px;
-}
-
-.app-window .source-header,
-.app-window .main-header,
-.app-window .window-titlebar {
-  min-height: 76px;
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 10px;
-  padding-right: 10px;
 }
 
 .app-window .main-toolbar {
@@ -1101,19 +971,212 @@ popover.glass-popover label {
   border-radius: 0 0 32px 32px;
 }
 
-.app-window .source-header button.circular-icon-button,
-.app-window .source-header togglebutton.circular-icon-button,
-.app-window .source-header menubutton.circular-icon-button > button,
-.app-window .main-header button.circular-icon-button,
-.app-window .main-header togglebutton.circular-icon-button,
-.app-window .main-header menubutton.circular-icon-button > button,
-.app-window .window-titlebar button.circular-icon-button,
-.app-window .window-titlebar togglebutton.circular-icon-button,
-.app-window .window-titlebar menubutton.circular-icon-button > button,
-.app-window .macos-window-controls button,
-.app-window windowcontrols button {
-  min-width: 60px;
-  min-height: 60px;
+.app-window button.circular-icon-button,
+.app-window togglebutton.circular-icon-button,
+.app-window menubutton.circular-icon-button > button {
+  min-width: 52px;
+  min-height: 52px;
   margin-top: 0;
   margin-bottom: 0;
+  padding: 0;
+  border-radius: 999px;
+  background-color: @tsukimi_panel_bg_light;
+  background-image: none;
+  background-clip: padding-box;
+  border: 1px solid alpha(@glass_border, 0.6);
+  box-shadow: none;
+  outline: none;
+  text-shadow: none;
+  -gtk-icon-size: 20px;
+}
+
+.app-window button.circular-icon-button:hover,
+.app-window togglebutton.circular-icon-button:hover,
+.app-window menubutton.circular-icon-button > button:hover {
+  background-color: mix(@window_fg_color, @tsukimi_panel_bg_light, 0.08);
+  background-image: none;
+  box-shadow: none;
+}
+
+.app-window button.circular-icon-button:active,
+.app-window button.circular-icon-button:checked,
+.app-window togglebutton.circular-icon-button:active,
+.app-window togglebutton.circular-icon-button:checked,
+.app-window menubutton.circular-icon-button > button:active {
+  background-color: mix(@window_fg_color, @tsukimi_panel_bg_light, 0.12);
+  background-image: none;
+  box-shadow: none;
+}
+
+.app-window button.circular-icon-button image,
+.app-window togglebutton.circular-icon-button image,
+.app-window menubutton.circular-icon-button > button image {
+  margin: 0;
+  padding: 0;
+  -gtk-icon-shadow: none;
+  -gtk-icon-transform: scale(1);
+}
+
+.app-window button.segment-button,
+.app-window togglebutton.segment-button {
+  min-height: 42px;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 18px;
+  padding-right: 18px;
+  border-radius: 999px;
+}
+
+.app-window button.segment-button label,
+.app-window togglebutton.segment-button label {
+  margin: 0;
+  padding: 0;
+}
+
+.app-window button,
+.app-window button label,
+.app-window button.pill label,
+.app-window button.suggested-action label,
+.app-window button.glass-button label,
+.app-window button.add-server-button label {
+  color: @window_fg_color;
+}
+
+.app-window .source-footer,
+.app-window .source-bottom-bar,
+.app-window .source-bottom,
+.app-window .source-actions,
+.app-window .bottom-navigation {
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-bottom: 16px;
+  background-color: transparent;
+  background-image: none;
+  border: none;
+  box-shadow: none;
+}
+
+.app-window .source-footer button.circular-icon-button,
+.app-window .source-bottom-bar button.circular-icon-button,
+.app-window .source-bottom button.circular-icon-button,
+.app-window .source-actions button.circular-icon-button,
+.app-window .bottom-navigation button.circular-icon-button {
+  min-width: 52px;
+  min-height: 52px;
+  -gtk-icon-size: 20px;
+}
+
+/* Final Apple-like traffic light window controls */
+.app-window windowcontrols,
+.app-window .macos-window-controls {
+  min-height: 52px;
+  margin: 0;
+  padding: 0 8px;
+  border: none;
+  background: transparent;
+  background-image: none;
+  box-shadow: none;
+}
+
+.app-window windowcontrols button,
+.app-window .macos-window-controls button {
+  min-width: 14px;
+  min-height: 14px;
+  margin: 0 5px;
+  padding: 0;
+  border-radius: 999px;
+  border: none;
+  background-color: alpha(@window_fg_color, 0.22);
+  background-image: none;
+  box-shadow: none;
+  outline: none;
+  color: transparent;
+  -gtk-icon-size: 0;
+}
+
+.app-window windowcontrols button image,
+.app-window .macos-window-controls button image {
+  opacity: 0;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  -gtk-icon-size: 0;
+  -gtk-icon-shadow: none;
+}
+
+.app-window windowcontrols button.close:hover,
+.app-window .macos-window-controls button.close:hover {
+  background-color: #ff5f57;
+}
+
+.app-window windowcontrols button.minimize:hover,
+.app-window .macos-window-controls button.minimize:hover {
+  background-color: #ffbd2e;
+}
+
+.app-window windowcontrols button.maximize:hover,
+.app-window .macos-window-controls button.maximize:hover {
+  background-color: #28c840;
+}
+
+.app-window windowcontrols button.close:active,
+.app-window .macos-window-controls button.close:active {
+  background-color: #bf4943;
+}
+
+.app-window windowcontrols button.minimize:active,
+.app-window .macos-window-controls button.minimize:active {
+  background-color: #c49022;
+}
+
+.app-window windowcontrols button.maximize:active,
+.app-window .macos-window-controls button.maximize:active {
+  background-color: #1f9f33;
+}
+
+/* Final single-layer settings popover */
+popover.glass-popover,
+popover.glass-popover.background,
+popover.menu.glass-popover,
+popover.floating-dialog,
+popover.menu.floating-dialog,
+.app-window popover.glass-popover,
+.app-window popover.floating-dialog {
+  margin: 0;
+  padding: 0;
+  background-color: transparent;
+  background-image: none;
+  border: none;
+  box-shadow: none;
+}
+
+popover.glass-popover contents,
+popover.menu.glass-popover contents,
+popover.floating-dialog contents,
+popover.menu.floating-dialog contents,
+.app-window popover.glass-popover contents,
+.app-window popover.floating-dialog contents {
+  margin: 0;
+  padding: 0;
+  background-color: transparent;
+  background-image: none;
+  border: none;
+  box-shadow: none;
+}
+
+popover.glass-popover contents > *,
+popover.menu.glass-popover contents > *,
+popover.floating-dialog contents > *,
+popover.menu.floating-dialog contents > * {
+  min-width: 280px;
+  background-color: #f7f7f7;
+  background-image: none;
+  background-clip: padding-box;
+  border: 1px solid alpha(@window_fg_color, 0.10);
+  border-radius: 22px;
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.18);
+  color: @window_fg_color;
 }

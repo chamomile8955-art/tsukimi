@@ -85,7 +85,6 @@
                                       <object class="AdwHeaderBar">
                                         <property name="show-start-title-buttons">false</property>
                                         <property name="show-end-title-buttons">false</property>
-                                        <property name="margin-top">8</property>
                                         <style>
                                           <class name="flat"/>
                                           <class name="source-header"/>
@@ -103,8 +102,8 @@
                                         </property>
                                         <child type="start">
                                           <object class="GtkButton">
-                                            <property name="width-request">60</property>
-                                            <property name="height-request">60</property>
+                                            <property name="width-request">52</property>
+                                            <property name="height-request">52</property>
                                             <property name="valign">center</property>
                                             <property name="icon-name">list-add-symbolic</property>
                                             <property name="tooltip-text" translatable="yes">Add Server</property>
@@ -121,15 +120,17 @@
                                     </child>
                                     <child type="bottom">
                                       <object class="GtkBox">
-                                        <property name="halign">end</property>
+                                        <property name="halign">start</property>
                                         <property name="valign">center</property>
-                                        <property name="margin-end">12</property>
+                                        <property name="margin-start">16</property>
+                                        <property name="margin-end">0</property>
                                         <property name="margin-top">4</property>
-                                        <property name="margin-bottom">4</property>
+                                        <property name="margin-bottom">16</property>
                                         <child>
                                           <object class="GtkButton">
-                                            <property name="width-request">60</property>
-                                            <property name="height-request">60</property>
+                                            <property name="width-request">52</property>
+                                            <property name="height-request">52</property>
+                                            <property name="halign">start</property>
                                             <property name="valign">center</property>
                                             <property name="icon-name">applications-system-symbolic</property>
                                             <property name="tooltip-text" translatable="yes">Settings</property>
@@ -196,8 +197,7 @@
                                           <object class="GtkBox">
                                             <property name="orientation">horizontal</property>
                                             <property name="spacing">8</property>
-                                            <property name="valign">end</property>
-                                            <property name="margin-top">10</property>
+                                            <property name="valign">center</property>
                                             <style>
                                               <class name="top-navigation"/>
                                             </style>
@@ -241,8 +241,8 @@
                                         </property>
                                         <child type="start">
                                           <object class="GtkToggleButton" id="sidebar">
-                                            <property name="width-request">60</property>
-                                            <property name="height-request">60</property>
+                                            <property name="width-request">52</property>
+                                            <property name="height-request">52</property>
                                             <property name="valign">center</property>
                                             <property name="icon-name">sidebar-show-symbolic</property>
                                             <property name="action-name">win.sidebar</property>
@@ -256,8 +256,8 @@
                                         </child>
                                         <child type="start">
                                           <object class="GtkButton" id="popbutton">
-                                            <property name="width-request">60</property>
-                                            <property name="height-request">60</property>
+                                            <property name="width-request">52</property>
+                                            <property name="height-request">52</property>
                                             <property name="valign">center</property>
                                             <property name="icon-name">go-previous-symbolic</property>
                                             <property name="visible">False</property>
@@ -282,8 +282,8 @@
                                         </child>
                                         <child type="end">
                                           <object class="GtkMenuButton" id="main_menu_button">
-                                            <property name="width-request">60</property>
-                                            <property name="height-request">60</property>
+                                            <property name="width-request">52</property>
+                                            <property name="height-request">52</property>
                                             <property name="valign">center</property>
                                             <property name="icon-name">open-menu-symbolic</property>
                                             <style>
