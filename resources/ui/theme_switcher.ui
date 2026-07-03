@@ -16,10 +16,10 @@
               <class name="theme-selector"/>
               <class name="light"/>
             </style>
-            <property name="hexpand">false</property>
             <property name="width-request">52</property>
             <property name="height-request">52</property>
-            <property name="halign">3</property>
+            <property name="halign">center</property>
+            <property name="valign">center</property>
             <property name="focus-on-click">false</property>
             <property name="action-name">app.color-scheme</property>
             <property name="action-target">2</property>
@@ -35,10 +35,10 @@
               <class name="theme-selector"/>
               <class name="dark"/>
             </style>
-            <property name="hexpand">false</property>
             <property name="width-request">52</property>
             <property name="height-request">52</property>
-            <property name="halign">3</property>
+            <property name="halign">center</property>
+            <property name="valign">center</property>
             <property name="group">light</property>
             <property name="focus-on-click">false</property>
             <property name="action-name">app.color-scheme</property>
