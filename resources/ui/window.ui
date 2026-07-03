@@ -38,7 +38,7 @@
             <style>
               <class name="window-root-overlay"/>
             </style>
-            <child>
+            <child type="overlay">
               <object class="AdwToastOverlay" id="toast">
                 <property name="overflow">hidden</property>
                 <style>
@@ -47,7 +47,8 @@
                 <child>
                   <object class="GtkStack" id="stack">
                     <property name="overflow">hidden</property>
-                    <property name="transition-type">none</property>
+                    <property name="transition-type">crossfade</property>
+                    <property name="transition-duration">200</property>
                     <property name="visible-child-name">main</property>
                     <style>
                       <class name="window-stack"/>
@@ -101,8 +102,8 @@
                                         </property>
                                         <child type="start">
                                           <object class="GtkButton">
-                                            <property name="width-request">42</property>
-                                            <property name="height-request">42</property>
+                                            <property name="width-request">40</property>
+                                            <property name="height-request">40</property>
                                             <property name="valign">center</property>
                                             <property name="icon-name">list-add-symbolic</property>
                                             <property name="tooltip-text" translatable="yes">Add Server</property>
@@ -126,8 +127,8 @@
                                         <property name="margin-bottom">4</property>
                                         <child>
                                           <object class="GtkButton">
-                                            <property name="width-request">42</property>
-                                            <property name="height-request">42</property>
+                                            <property name="width-request">40</property>
+                                            <property name="height-request">40</property>
                                             <property name="valign">center</property>
                                             <property name="icon-name">applications-system-symbolic</property>
                                             <property name="tooltip-text" translatable="yes">Settings</property>
@@ -239,8 +240,8 @@
                                         </property>
                                         <child type="start">
                                           <object class="GtkToggleButton" id="sidebar">
-                                            <property name="width-request">42</property>
-                                            <property name="height-request">42</property>
+                                            <property name="width-request">40</property>
+                                            <property name="height-request">40</property>
                                             <property name="valign">center</property>
                                             <property name="icon-name">sidebar-show-symbolic</property>
                                             <property name="action-name">win.sidebar</property>
@@ -254,12 +255,26 @@
                                         </child>
                                         <child type="start">
                                           <object class="GtkButton" id="popbutton">
-                                            <property name="width-request">42</property>
-                                            <property name="height-request">42</property>
+                                            <property name="width-request">40</property>
+                                            <property name="height-request">40</property>
                                             <property name="valign">center</property>
                                             <property name="icon-name">go-previous-symbolic</property>
                                             <property name="visible">False</property>
                                             <signal name="clicked" handler="on_pop" swapped="yes"/>
+                                            <style>
+                                              <class name="flat"/>
+                                              <class name="circular"/>
+                                              <class name="glass-button"/>
+                                              <class name="circular-icon-button"/>
+                                            </style>
+                                          </object>
+                                        </child>
+                                        <child type="end">
+                                          <object class="GtkMenuButton" id="main_menu_button">
+                                            <property name="width-request">40</property>
+                                            <property name="height-request">40</property>
+                                            <property name="valign">center</property>
+                                            <property name="icon-name">open-menu-symbolic</property>
                                             <style>
                                               <class name="flat"/>
                                               <class name="circular"/>
@@ -275,20 +290,6 @@
                                             <property name="valign">center</property>
                                             <style>
                                               <class name="macos-window-controls"/>
-                                            </style>
-                                          </object>
-                                        </child>
-                                        <child type="end">
-                                          <object class="GtkMenuButton" id="main_menu_button">
-                                            <property name="width-request">42</property>
-                                            <property name="height-request">42</property>
-                                            <property name="valign">center</property>
-                                            <property name="icon-name">open-menu-symbolic</property>
-                                            <style>
-                                              <class name="flat"/>
-                                              <class name="circular"/>
-                                              <class name="glass-button"/>
-                                              <class name="circular-icon-button"/>
                                             </style>
                                           </object>
                                         </child>
@@ -330,7 +331,8 @@
                                                   <object class="GtkStack" id="insidestack">
                                                     <property name="overflow">hidden</property>
                                                     <property name="hexpand">True</property>
-                                                    <property name="transition-type">none</property>
+                                                    <property name="transition-type">crossfade</property>
+                                                    <property name="transition-duration">100</property>
                                                     <property name="visible-child-name">loading</property>
                                                     <style>
                                                       <class name="content-stack"/>
@@ -418,37 +420,37 @@
                                                         </property>
                                                       </object>
                                                     </child>
+                                                    <child>
+                                                      <object class="GtkStackPage">
+                                                        <property name="name">no-server</property>
+                                                        <property name="child">
+                                                          <object class="AdwStatusPage">
+                                                            <property name="valign">center</property>
+                                                            <property name="vexpand">True</property>
+                                                            <property name="icon-name">network-server-symbolic</property>
+                                                            <property name="title" translatable="yes">No Server Selected</property>
+                                                            <property name="description" translatable="yes">Add a server from the Sources sidebar to begin.</property>
+                                                            <property name="child">
+                                                              <object class="GtkButton">
+                                                                <property name="label" translatable="yes">Add Server</property>
+                                                                <property name="halign">center</property>
+                                                                <property name="action-name">win.add-server</property>
+                                                                <style>
+                                                                  <class name="suggested-action"/>
+                                                                  <class name="pill"/>
+                                                                  <class name="glass-button"/>
+                                                                  <class name="add-server-button"/>
+                                                                </style>
+                                                              </object>
+                                                            </property>
+                                                          </object>
+                                                        </property>
+                                                      </object>
+                                                    </child>
                                                   </object>
                                                 </child>
                                               </object>
                                             </child>
-                                          </object>
-                                        </child>
-                                        <child type="overlay">
-                                          <object class="AdwStatusPage" id="no_server_state">
-                                            <property name="visible">False</property>
-                                            <property name="valign">fill</property>
-                                            <property name="halign">fill</property>
-                                            <property name="vexpand">True</property>
-                                            <property name="hexpand">True</property>
-                                            <property name="icon-name">network-server-symbolic</property>
-                                            <property name="title" translatable="yes">No Server Selected</property>
-                                            <property name="description" translatable="yes">Add a server from the Sources sidebar to begin.</property>
-                                            <style>
-                                              <class name="content-state-overlay"/>
-                                            </style>
-                                            <property name="child">
-                                              <object class="GtkButton">
-                                                <property name="label" translatable="yes">Add Server</property>
-                                                <property name="halign">center</property>
-                                                <property name="action-name">win.add-server</property>
-                                                <style>
-                                                  <class name="suggested-action"/>
-                                                  <class name="pill"/>
-                                                  <class name="glass-button"/>
-                                                </style>
-                                              </object>
-                                            </property>
                                           </object>
                                         </child>
                                       </object>
