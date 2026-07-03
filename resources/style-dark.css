@@ -69,7 +69,7 @@
 	background-clip: padding-box;
 	border: 1px solid alpha(@window_fg_color, 0.10);
 	border-radius: 32px;
-	box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16);
+	box-shadow: none;
 	opacity: 1;
 }
 
@@ -156,9 +156,16 @@
 	padding-bottom: 32px;
 }
 
+/* Split-view wrapper nodes must not tint the sidebar differently. */
+.sidebar-pane,
+.content-pane,
+.app-window .app-shell > .background {
+	background-color: #2f2f2f;
+	background-image: none;
+	box-shadow: none;
+}
+
 /* Normal app circular buttons: 52px only. Window controls are excluded. */
-button.glass-button,
-menubutton.glass-button > button,
 .app-window button.circular-icon-button,
 .app-window togglebutton.circular-icon-button,
 .app-window menubutton.circular-icon-button > button {
@@ -177,6 +184,21 @@ menubutton.glass-button > button,
 	text-shadow: none;
 	color: @window_fg_color;
 	-gtk-icon-size: 20px;
+}
+
+/* Text glass buttons keep their natural width and padding. */
+.app-window button.add-server-button {
+	min-width: 132px;
+	min-height: 44px;
+	padding: 0 24px;
+	border-radius: 999px;
+	font-size: 1em;
+	font-weight: 600;
+}
+
+.app-window button.add-server-button label {
+	margin: 0;
+	padding: 0;
 }
 
 button.glass-button:hover,
@@ -294,12 +316,12 @@ menubutton.glass-button > button:focus-visible {
 
 .app-window windowcontrols button,
 .app-window .macos-window-controls button {
-	min-width: 14px;
-	min-height: 14px;
-	margin: 19px 5px;
+	min-width: 18px;
+	min-height: 18px;
+	margin: 17px 5px;
 	padding: 0;
 	border-radius: 999px;
-	border: none;
+	border: 1px solid alpha(@window_fg_color, 0.10);
 	background-color: alpha(@window_fg_color, 0.26);
 	background-image: none;
 	background-clip: padding-box;
@@ -323,16 +345,19 @@ menubutton.glass-button > button:focus-visible {
 .app-window windowcontrols button.close:hover,
 .app-window .macos-window-controls button.close:hover {
 	background-color: #ff5f57;
+	border-color: #e0443e;
 }
 
 .app-window windowcontrols button.minimize:hover,
 .app-window .macos-window-controls button.minimize:hover {
 	background-color: #ffbd2e;
+	border-color: #dea123;
 }
 
 .app-window windowcontrols button.maximize:hover,
 .app-window .macos-window-controls button.maximize:hover {
 	background-color: #28c840;
+	border-color: #1fa934;
 }
 
 .app-window windowcontrols button.close:active,
@@ -411,18 +436,40 @@ popover.menu.floating-dialog arrow {
 	box-shadow: none;
 }
 
-/* Dialogs and add-server/settings surfaces */
+/* Settings is a native floating window. */
 .account-settings,
-.glass-dialog,
-.app-window .floating-dialog,
-.app-window .solid-dialog,
-.app-window .add-server-dialog,
 .app-window .settings-dialog,
 window.floating-dialog,
-dialog.floating-dialog {
+window.settings-dialog {
 	background-color: #2f2f2f;
 	background-image: none;
 	border: 1px solid alpha(@window_fg_color, 0.10);
+	border-radius: 22px;
+	box-shadow: 0 24px 64px rgba(0, 0, 0, 0.28);
+	color: @window_fg_color;
+}
+
+/* Add-server is an AdwDialog: keep the host transparent and style only its
+ * floating sheet so the parent window remains visible through the dimming. */
+dialog.add-server-dialog,
+dialog.glass-dialog,
+dialog.solid-dialog {
+	background-color: transparent;
+	background-image: none;
+	border: none;
+	box-shadow: none;
+}
+
+dialog.add-server-dialog floating-sheet > dimming {
+	background-color: rgba(0, 0, 0, 0.30);
+}
+
+dialog.add-server-dialog floating-sheet > sheet,
+dialog.add-server-dialog sheet {
+	background-color: #2f2f2f;
+	background-image: none;
+	background-clip: padding-box;
+	border: 1px solid alpha(@window_fg_color, 0.12);
 	border-radius: 22px;
 	box-shadow: 0 24px 64px rgba(0, 0, 0, 0.28);
 	color: @window_fg_color;
@@ -438,6 +485,18 @@ dialog.floating-dialog {
 .glass-dialog stack,
 .glass-dialog scrolledwindow,
 .glass-dialog viewport {
+	background-color: #2f2f2f;
+	background-image: none;
+	color: @window_fg_color;
+}
+
+.add-server-dialog-content,
+.add-server-dialog navigationview,
+.add-server-dialog toolbarview,
+.add-server-dialog headerbar,
+.add-server-dialog stack,
+.add-server-dialog scrolledwindow,
+.add-server-dialog viewport {
 	background-color: #2f2f2f;
 	background-image: none;
 	color: @window_fg_color;
@@ -472,19 +531,6 @@ dialog.floating-dialog {
 .glass-dialog button.suggested-action {
 	border-radius: 10px;
 	box-shadow: none;
-}
-
-.app-window .floating-dialog-content,
-.app-window .solid-dialog-content,
-.app-window .add-server-dialog-content,
-.app-window .settings-dialog-content,
-.floating-dialog-content,
-.solid-dialog-content,
-.add-server-dialog-content,
-.settings-dialog-content {
-	background-color: transparent;
-	background-image: none;
-	color: @window_fg_color;
 }
 
 .floating-dialog label,

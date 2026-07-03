@@ -3,6 +3,7 @@
   <template parent="AdwDialog" class="AccountWindow">
     <property name="content-width">520</property>
     <property name="content-height">760</property>
+    <property name="presentation-mode">floating</property>
     <property name="title" translatable="yes">Add a New Server</property>
     <style>
       <class name="glass-dialog"/>

@@ -558,8 +558,8 @@
             <child>
               <object class="GtkStack" id="backgroundstack">
                 <property name="overflow">hidden</property>
-                <property name="transition-type">crossfade</property>
-                <property name="transition-duration">1000</property>
+                <property name="transition-type">none</property>
+                <property name="transition-duration">0</property>
                 <style>
                   <class name="window-background"/>
                 </style>
