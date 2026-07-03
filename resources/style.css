@@ -870,38 +870,6 @@ popover.menu modelbutton:hover {
   min-height: 44px;
 }
 
-@media (prefers-color-scheme: dark) {
-  button.glass-button,
-  menubutton.glass-button > button,
-  .macos-window-controls button,
-  .app-window windowcontrols button,
-  .app-window button.circular-icon-button,
-  .app-window togglebutton.circular-icon-button,
-  .app-window menubutton.circular-icon-button > button {
-    background-color: @tsukimi_panel_bg_dark;
-    background-image: none;
-    box-shadow: none;
-  }
-
-  button.glass-button:hover,
-  menubutton.glass-button > button:hover,
-  .app-window button.circular-icon-button:hover,
-  .app-window togglebutton.circular-icon-button:hover,
-  .app-window menubutton.circular-icon-button > button:hover {
-    background-color: mix(@window_fg_color, @tsukimi_panel_bg_dark, 0.08);
-  }
-
-  button.glass-button:active,
-  button.glass-button:checked,
-  menubutton.glass-button > button:active,
-  .app-window button.circular-icon-button:active,
-  .app-window button.circular-icon-button:checked,
-  .app-window togglebutton.circular-icon-button:active,
-  .app-window togglebutton.circular-icon-button:checked,
-  .app-window menubutton.circular-icon-button > button:active {
-    background-color: mix(@window_fg_color, @tsukimi_panel_bg_dark, 0.12);
-  }
-}
 
 .app-window .bottom-navigation {
   padding: 4px 8px;
@@ -997,21 +965,6 @@ popover.glass-popover label {
   color: @window_fg_color;
 }
 
-@media (prefers-color-scheme: dark) {
-  .app-window .floating-dialog,
-  .app-window .solid-dialog,
-  .app-window .add-server-dialog,
-  .app-window .settings-dialog,
-  .floating-dialog,
-  window.floating-dialog,
-  dialog.floating-dialog,
-  popover.floating-dialog contents,
-  popover.menu.floating-dialog contents,
-  popover.glass-popover contents {
-    background-color: #2f2f2f;
-    background-image: none;
-  }
-}
 
 /* Final shell color unification */
 .app-window,
@@ -1056,24 +1009,3 @@ popover.glass-popover label {
   box-shadow: none;
 }
 
-@media (prefers-color-scheme: dark) {
-  .app-window,
-  .app-window .window-frame,
-  .app-window .app-shell,
-  .app-window .window-root-overlay,
-  .app-window .window-toast-overlay,
-  .app-window .window-stack,
-  .app-window .window-background {
-    background-color: @tsukimi_base_bg_dark;
-    background-image: none;
-  }
-
-  .app-window .source-panel,
-  .app-window .main-surface {
-    background-color: @tsukimi_panel_bg_dark;
-    background-image: none;
-    border: 1px solid @tsukimi_panel_border;
-    box-shadow: 0 12px 28px @tsukimi_panel_shadow;
-    opacity: 1;
-  }
-}

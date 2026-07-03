@@ -5,3 +5,109 @@
 .played-mark {
 	background-color: rgba(0, 0, 0, 0.5);
 }
+
+/* Final dark shell color unification */
+.app-window,
+.app-window .window-frame,
+.app-window .app-shell,
+.app-window .window-root-overlay,
+.app-window .window-toast-overlay,
+.app-window .window-stack,
+.app-window .window-background {
+	background-color: #2f2f2f;
+	background-image: none;
+}
+
+.app-window .source-panel,
+.app-window .main-surface {
+	background-color: #242424;
+	background-image: none;
+	background-clip: padding-box;
+	border: 1px solid alpha(@window_fg_color, 0.10);
+	border-radius: 22px;
+	box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16);
+	opacity: 1;
+}
+
+.app-window .source-header,
+.app-window .main-header,
+.app-window .source-toolbar,
+.app-window .main-toolbar,
+.app-window .window-titlebar,
+.app-window .main-content-pane,
+.app-window .main-navigation,
+.app-window .main-page,
+.app-window .content-stack,
+.app-window headerbar,
+.app-window headerbar.flat,
+.app-window headerbar.window-titlebar,
+.app-window headerbar.main-header,
+.app-window headerbar.source-header {
+	background-color: transparent;
+	background-image: none;
+	border: none;
+	box-shadow: none;
+}
+
+button.glass-button,
+menubutton.glass-button > button,
+.macos-window-controls button,
+.app-window windowcontrols button,
+.app-window button.circular-icon-button,
+.app-window togglebutton.circular-icon-button,
+.app-window menubutton.circular-icon-button > button {
+	background-color: #242424;
+	background-image: none;
+	border: 1px solid alpha(@window_fg_color, 0.10);
+	box-shadow: none;
+	color: @window_fg_color;
+}
+
+button.glass-button:hover,
+menubutton.glass-button > button:hover,
+.macos-window-controls button:hover,
+.app-window windowcontrols button:hover,
+.app-window button.circular-icon-button:hover,
+.app-window togglebutton.circular-icon-button:hover,
+.app-window menubutton.circular-icon-button > button:hover {
+	background-color: #303030;
+	background-image: none;
+	box-shadow: none;
+}
+
+.app-window button,
+.app-window button label,
+.app-window button image,
+.app-window togglebutton,
+.app-window togglebutton image,
+.app-window menubutton > button,
+.app-window menubutton > button image {
+	color: @window_fg_color;
+}
+
+.app-window .floating-dialog,
+.app-window .solid-dialog,
+.app-window .add-server-dialog,
+.app-window .settings-dialog,
+.floating-dialog,
+window.floating-dialog,
+dialog.floating-dialog,
+popover.floating-dialog contents,
+popover.menu.floating-dialog contents,
+popover.glass-popover contents {
+	background-color: #2f2f2f;
+	background-image: none;
+	border: 1px solid alpha(@window_fg_color, 0.10);
+	border-radius: 22px;
+	box-shadow: 0 24px 64px rgba(0, 0, 0, 0.28);
+	color: @window_fg_color;
+}
+
+.app-window .floating-dialog-content,
+.app-window .solid-dialog-content,
+.app-window .add-server-dialog-content,
+.app-window .settings-dialog-content {
+	background-color: transparent;
+	background-image: none;
+	color: @window_fg_color;
+}
