@@ -532,7 +532,6 @@ window.app-window.solid-csd {
 
 .source-header {
   min-height: 44px;
-  border-bottom: 1px solid @glass_border;
 }
 
 .content-stack {
@@ -545,7 +544,6 @@ window.app-window.solid-csd {
 
 .main-header {
   min-height: 44px;
-  border-bottom: 1px solid @glass_border;
   border-radius: 22px 22px 0 0;
 }
 
@@ -683,15 +681,17 @@ menubutton.glass-button > button:focus-visible {
 }
 
 button.circular-icon-button,
+togglebutton.circular-icon-button,
 menubutton.circular-icon-button > button {
-  min-width: 40px;
-  min-height: 40px;
+  min-width: 60px;
+  min-height: 60px;
   padding: 0;
   border-radius: 999px;
-  -gtk-icon-size: 18px;
+  -gtk-icon-size: 24px;
 }
 
 button.circular-icon-button image,
+togglebutton.circular-icon-button image,
 menubutton.circular-icon-button > button image {
   margin: 0;
   padding: 0;
@@ -762,17 +762,6 @@ popover.menu modelbutton:hover {
   box-shadow: 0 8px 24px @glass_shadow;
 }
 
-/* Windows floating panels: keep shell and overlay containers untouched. */
-.app-window .source-panel,
-.app-window .main-surface {
-  background-color: @app_panel_bg_light;
-  background-image: none;
-  background-clip: padding-box;
-  border: 1px solid @glass_border;
-  border-radius: 22px;
-  box-shadow: 0 12px 28px @glass_shadow;
-}
-
 .app-window .main-surface {
   margin-left: 0;
 }
@@ -797,8 +786,8 @@ popover.menu modelbutton:hover {
 .app-window button.circular-icon-button,
 .app-window togglebutton.circular-icon-button,
 .app-window menubutton.circular-icon-button > button {
-  min-width: 40px;
-  min-height: 40px;
+  min-width: 60px;
+  min-height: 60px;
   padding: 0;
   background-color: @app_panel_bg_light;
   background-image: none;
@@ -809,7 +798,7 @@ popover.menu modelbutton:hover {
   outline: none;
   text-shadow: none;
   transform: translateZ(0);
-  -gtk-icon-size: 18px;
+  -gtk-icon-size: 24px;
 }
 
 .app-window button.circular-icon-button:hover,
@@ -864,12 +853,6 @@ popover.menu modelbutton:hover {
     background-image: none;
   }
 
-  .app-window .source-panel,
-  .app-window .main-surface {
-    background-color: @app_panel_bg_dark;
-    background-image: none;
-  }
-
   button.glass-button,
   menubutton.glass-button > button,
   .macos-window-controls button,
@@ -917,4 +900,79 @@ popover.menu modelbutton:hover {
 .app-window .bottom-navigation menubutton {
   margin-top: 0;
   margin-bottom: 0;
+}
+
+/* Final unified surfaces */
+.app-window .source-panel,
+.app-window .main-surface {
+  background-color: @app_panel_bg_light;
+  background-image: none;
+  background-clip: padding-box;
+  border: 1px solid @glass_border;
+  border-radius: 22px;
+  box-shadow: 0 12px 28px @glass_shadow;
+}
+
+.app-window .source-toolbar,
+.app-window .source-header,
+.app-window .main-toolbar,
+.app-window .main-header,
+.app-window .main-content-pane,
+.app-window .main-navigation,
+.app-window .main-page,
+.app-window .content-stack,
+.app-window .window-titlebar {
+  background-color: transparent;
+  background-image: none;
+  box-shadow: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  .app-window .source-panel,
+  .app-window .main-surface,
+  .app-window .source-toolbar,
+  .app-window .source-header,
+  .app-window .main-toolbar,
+  .app-window .main-header,
+  .app-window .main-content-pane,
+  .app-window .main-navigation,
+  .app-window .main-page,
+  .app-window .content-stack,
+  .app-window .window-titlebar {
+    background-color: @app_panel_bg_dark;
+    background-image: none;
+  }
+
+  .app-window .source-panel,
+  .app-window .main-surface {
+    border: 1px solid @glass_border;
+    border-radius: 22px;
+    box-shadow: 0 12px 28px @glass_shadow;
+  }
+}
+
+/* Remove header separators */
+.app-window .source-header,
+.app-window .main-header,
+.app-window .source-toolbar,
+.app-window .main-toolbar,
+.app-window .window-titlebar,
+.app-window headerbar,
+.app-window headerbar.flat,
+.app-window headerbar.window-titlebar,
+.app-window headerbar.main-header,
+.app-window headerbar.source-header {
+  border: none;
+  border-bottom: none;
+  box-shadow: none;
+  background-image: none;
+}
+
+.app-window toolbarview,
+.app-window toolbarview > box,
+.app-window toolbarview > box > box {
+  border: none;
+  border-bottom: none;
+  box-shadow: none;
+  background-image: none;
 }
