@@ -2,6 +2,9 @@
 <interface>
   <template parent="AdwNavigationPage" class="MPVPage">
     <property name="title">Tsukimi</property>
+    <style>
+      <class name="mpv-player"/>
+    </style>
     <child>
       <object class="GtkEventControllerMotion">
         <signal name="motion" handler="on_motion" swapped="yes" />
@@ -79,7 +82,7 @@
             <child type="overlay">
               <object class="GtkRevealer" id="top_revealer">
                 <property name="transition-type">crossfade</property>
-                <property name="transition-duration">800</property>
+                <property name="transition-duration">180</property>
                 <property name="reveal-child">false</property>
                 <property name="halign">fill</property>
                 <property name="valign">start</property>
@@ -105,6 +108,7 @@
                             <style>
                               <class name="flat" />
                               <class name="circular" />
+                              <class name="mpv-control-button" />
                             </style>
                           </object>
                         </child>
@@ -148,6 +152,7 @@
                             </property>
                             <style>
                                 <class name="accent" />
+                                <class name="mpv-info-button" />
                             </style>
                             </object>
                         </child>
@@ -160,6 +165,7 @@
                             <style>
                               <class name="flat" />
                               <class name="circular" />
+                              <class name="mpv-control-button" />
                             </style>
                           </object>
                         </child>
@@ -174,6 +180,7 @@
                             <style>
                               <class name="flat" />
                               <class name="circular" />
+                              <class name="mpv-control-button" />
                             </style>
                           </object>
                         </child>
@@ -188,6 +195,7 @@
                             <style>
                               <class name="flat" />
                               <class name="circular" />
+                              <class name="mpv-control-button" />
                             </style>
                           </object>
                         </child>
@@ -212,7 +220,7 @@
             <child type="overlay">
               <object class="GtkRevealer" id="bottom_revealer">
                 <property name="transition-type">crossfade</property>
-                <property name="transition-duration">800</property>
+                <property name="transition-duration">180</property>
                 <property name="reveal-child">false</property>
                 <property name="halign">fill</property>
                 <property name="valign">end</property>
@@ -240,6 +248,7 @@
                                 <style>
                                   <class name="flat" />
                                   <class name="circular" />
+                                  <class name="mpv-control-button" />
                                 </style>
                               </object>
                             </child>
@@ -259,6 +268,7 @@
                                 <style>
                                   <class name="circular" />
                                   <class name="flat" />
+                                  <class name="mpv-control-button" />
                                 </style>
                               </object>
                             </child>
@@ -283,6 +293,7 @@
                                   <class name="flat" />
                                   <class name="mpv-play-button" />
                                   <class name="circular" />
+                                  <class name="mpv-control-button" />
                                 </style>
                               </object>
                             </child>
@@ -302,6 +313,7 @@
                                 <style>
                                   <class name="circular" />
                                   <class name="flat" />
+                                  <class name="mpv-control-button" />
                                 </style>
                               </object>
                             </child>
@@ -313,6 +325,7 @@
                                 <style>
                                   <class name="flat" />
                                   <class name="circular" />
+                                  <class name="mpv-control-button" />
                                 </style>
                               </object>
                             </child>
@@ -337,13 +350,14 @@
                                 <style>
                                   <class name="accent" />
                                   <class name="monospace" />
+                                  <class name="mpv-info-button" />
                                 </style>
                               </object>
                             </child>
                             <child>
                               <object class="GtkBox">
                                 <property name="orientation">horizontal</property>
-                                <property name="spacing">2</property>
+                                <property name="spacing">8</property>
                                 <property name="valign">center</property>
                                 <child>
                                   <object class="GtkMenuButton" id="audio_tracks_menu_button">
@@ -354,6 +368,7 @@
                                     <style>
                                       <class name="flat" />
                                       <class name="circular" />
+                                      <class name="mpv-control-button" />
                                     </style>
                                   </object>
                                 </child>
@@ -366,6 +381,7 @@
                                     <style>
                                       <class name="flat" />
                                       <class name="circular" />
+                                      <class name="mpv-control-button" />
                                     </style>
                                   </object>
                                 </child>
@@ -378,6 +394,7 @@
                                         <style>
                                             <class name="flat" />
                                             <class name="circular" />
+                                            <class name="mpv-control-button" />
                                         </style>
                                     </object>
                                 </child>
@@ -390,6 +407,7 @@
                                     <style>
                                       <class name="flat" />
                                       <class name="circular" />
+                                      <class name="mpv-control-button" />
                                     </style>
                                   </object>
                                 </child>
@@ -406,6 +424,7 @@
                                     <style>
                                         <class name="flat" />
                                         <class name="circular" />
+                                        <class name="mpv-control-button" />
                                     </style>
                                   </object>
                                 </child>
@@ -422,6 +441,7 @@
                                     <style>
                                       <class name="flat" />
                                       <class name="circular" />
+                                      <class name="mpv-control-button" />
                                     </style>
                                   </object>
                                 </child>
@@ -510,6 +530,9 @@
     <property name="width-request">320</property>
     <property name="position">top</property>
     <property name="has-arrow">true</property>
+    <style>
+      <class name="mpv-player-popover"/>
+    </style>
     <child>
       <object class="GtkScrolledWindow">
         <child>
@@ -529,6 +552,9 @@
     <property name="width-request">320</property>
     <property name="position">top</property>
     <property name="has-arrow">true</property>
+    <style>
+      <class name="mpv-player-popover"/>
+    </style>
     <child>
       <object class="GtkScrolledWindow">
         <child>
@@ -547,6 +573,9 @@
   <object class="GtkPopover" id="volume_adj_popover">
     <property name="position">top</property>
     <property name="has-arrow">true</property>
+    <style>
+      <class name="mpv-player-popover"/>
+    </style>
     <child>
     <object class="GtkScale" id="volume_scale">
       <property name="adjustment">volume_adj</property>

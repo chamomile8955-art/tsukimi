@@ -396,7 +396,22 @@ mod imp {
 
             self.fullscreened.set(fullscreened);
 
-            self.obj().notify_fullscreened();
+            let obj = self.obj();
+            if fullscreened {
+                obj.add_css_class("mpv-fullscreen");
+            } else {
+                obj.remove_css_class("mpv-fullscreen");
+            }
+
+            if let Some(window) = obj.root().and_downcast::<gtk::Window>() {
+                if fullscreened {
+                    window.add_css_class("playback-fullscreen");
+                } else {
+                    window.remove_css_class("playback-fullscreen");
+                }
+            }
+
+            obj.notify_fullscreened();
         }
 
         fn set_paused(&self, paused: bool) {

@@ -45,7 +45,11 @@ jobs:
         uses: msys2/setup-msys2@v2
         with:
           msystem: UCRT64
-          update: true
+          # The action already installs from the current MSYS2 release and
+          # caches downloaded packages. A full rolling-system update on every
+          # manual build is expensive and is not needed for this application.
+          update: false
+          cache: true
           path-type: minimal
           install: >-
             coreutils

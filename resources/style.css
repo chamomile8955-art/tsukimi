@@ -1143,3 +1143,205 @@ popover.menu modelbutton:hover {
 .floating-dialog-scrim {
   background-color: rgba(0, 0, 0, 0.28);
 }
+
+/* Theme-independent playback chrome.
+ * Playback controls intentionally stay dark in both application themes. */
+.app-window .mpv-player,
+.app-window .mpv-player toolbarview {
+  background-color: #000000;
+  background-image: none;
+  color: #f5f6f7;
+}
+
+.app-window .mpv-player headerbar.mpv-top-bar,
+.app-window .mpv-player .mpv-top-bar {
+  min-height: 76px;
+  padding: 12px 24px;
+  background-color: #1a1b1d;
+  background-image: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  color: #f5f6f7;
+}
+
+.app-window .mpv-player .mpv-bottom-bar {
+  padding: 20px 32px 24px;
+  background-color: #0b0b0c;
+  background-image: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  color: #f5f6f7;
+}
+
+.app-window .mpv-player label,
+.app-window .mpv-player image,
+.app-window .mpv-player button,
+.app-window .mpv-player togglebutton,
+.app-window .mpv-player menubutton > button {
+  color: #f5f6f7;
+  -gtk-icon-shadow: none;
+  text-shadow: none;
+}
+
+.app-window .mpv-player label.dimmed,
+.app-window .mpv-player .caption {
+  color: rgba(245, 246, 247, 0.72);
+}
+
+.app-window .mpv-player button.mpv-control-button,
+.app-window .mpv-player togglebutton.mpv-control-button,
+.app-window .mpv-player menubutton.mpv-control-button > button {
+  min-width: 52px;
+  min-height: 52px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.08);
+  background-image: none;
+  background-clip: padding-box;
+  box-shadow: none;
+  color: #f5f6f7;
+  -gtk-icon-size: 22px;
+}
+
+.app-window .mpv-player button.mpv-control-button:hover,
+.app-window .mpv-player togglebutton.mpv-control-button:hover,
+.app-window .mpv-player menubutton.mpv-control-button > button:hover {
+  border-color: rgba(255, 255, 255, 0.18);
+  background-color: rgba(255, 255, 255, 0.16);
+}
+
+.app-window .mpv-player button.mpv-control-button:active,
+.app-window .mpv-player button.mpv-control-button:checked,
+.app-window .mpv-player togglebutton.mpv-control-button:active,
+.app-window .mpv-player togglebutton.mpv-control-button:checked,
+.app-window .mpv-player menubutton.mpv-control-button > button:active {
+  background-color: rgba(255, 255, 255, 0.23);
+}
+
+.app-window .mpv-player button.mpv-control-button image,
+.app-window .mpv-player togglebutton.mpv-control-button image,
+.app-window .mpv-player menubutton.mpv-control-button > button image {
+  margin: 0;
+  padding: 0;
+  color: #f5f6f7;
+  -gtk-icon-shadow: none;
+}
+
+.app-window .mpv-player button.mpv-play-button {
+  min-width: 56px;
+  min-height: 56px;
+  background-color: rgba(255, 255, 255, 0.16);
+}
+
+.app-window .mpv-player button.mpv-info-button {
+  min-height: 52px;
+  padding: 0 16px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.08);
+  background-image: none;
+  box-shadow: none;
+  color: #f5f6f7;
+}
+
+.app-window .mpv-player button.mpv-info-button:hover {
+  border-color: rgba(255, 255, 255, 0.18);
+  background-color: rgba(255, 255, 255, 0.16);
+}
+
+.app-window .mpv-player windowcontrols button {
+  border-color: rgba(255, 255, 255, 0.10);
+  background-color: rgba(255, 255, 255, 0.34);
+}
+
+.app-window .mpv-player .speed-label,
+.app-window .mpv-player .volume-bar,
+.app-window .mpv-player button.osd {
+  color: #f5f6f7;
+}
+
+.app-window .mpv-player .volume-bar,
+.app-window .mpv-player button.osd {
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background-color: rgba(18, 19, 21, 0.94);
+  background-image: none;
+  box-shadow: none;
+}
+
+.app-window .mpv-player .mpv-seekbar > trough {
+  min-height: 6px;
+  border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.22);
+}
+
+.app-window .mpv-player .mpv-seekbar > trough > highlight,
+.app-window .mpv-player .mpv-seekbar > trough > fill {
+  min-height: 6px;
+  border-radius: 999px;
+  background-color: #3584e4;
+}
+
+.app-window .mpv-player .mpv-seekbar > trough > slider {
+  min-width: 18px;
+  min-height: 18px;
+  border-radius: 999px;
+  background-color: #f5f6f7;
+  box-shadow: none;
+}
+
+popover.mpv-player-popover {
+  padding: 0;
+  background-color: transparent;
+  background-image: none;
+  border: none;
+  box-shadow: none;
+}
+
+popover.mpv-player-popover contents {
+  background-color: #1a1b1d;
+  background-image: none;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 14px;
+  box-shadow: none;
+  color: #f5f6f7;
+}
+
+popover.mpv-player-popover arrow {
+  background-color: #1a1b1d;
+  background-image: none;
+  border-color: rgba(255, 255, 255, 0.10);
+  box-shadow: none;
+}
+
+popover.mpv-player-popover label,
+popover.mpv-player-popover image,
+popover.mpv-player-popover row {
+  color: #f5f6f7;
+}
+
+/* Fullscreen playback must cover the native content area without an inner
+ * card outline or rounded clipping. The explicit class is synchronized from
+ * MPVPage's existing fullscreen property for reliable Windows behavior. */
+window.app-window.playback-fullscreen,
+window.app-window.playback-fullscreen.background,
+window.app-window.playback-fullscreen .window-frame,
+window.app-window.playback-fullscreen .window-root-overlay,
+window.app-window.playback-fullscreen .window-toast-overlay,
+window.app-window.playback-fullscreen .window-stack,
+window.app-window.playback-fullscreen .mpv-player,
+window.app-window.fullscreen,
+window.app-window.fullscreen .window-frame,
+window.app-window.fullscreen .window-root-overlay,
+window.app-window.fullscreen .window-toast-overlay,
+window.app-window.fullscreen .window-stack,
+window.app-window.fullscreen .mpv-player {
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  outline: none;
+}
