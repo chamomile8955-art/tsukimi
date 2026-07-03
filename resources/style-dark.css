@@ -6,7 +6,12 @@
 	background-color: rgba(0, 0, 0, 0.5);
 }
 
-/* Final Apple-like dark shell rhythm */
+/* Clean final dark shell/dialog/button rules
+ * Keep this section as the only final override area for the main window.
+ * Do not append duplicate final blocks after this section.
+ */
+
+/* Solid single-color dark background */
 .app-window,
 .app-window.background,
 .app-window .window-background,
@@ -25,9 +30,35 @@
 	background-image: none;
 }
 
+.app-window .home-carousel {
+	background-color: transparent;
+	background-image: none;
+}
+
+.app-window .window-background {
+	background-color: #2f2f2f;
+	background-image: none;
+	opacity: 1;
+}
+
+.app-window .window-background picture {
+	background-color: transparent;
+	background-image: none;
+	opacity: 0;
+}
+
+/* Floating panels */
 .app-window .window-frame {
 	border: 1px solid alpha(@window_fg_color, 0.10);
 	border-radius: 34px;
+	box-shadow: none;
+}
+
+.app-window.maximized .window-frame,
+.app-window.fullscreen .window-frame,
+.app-window.tiled .window-frame {
+	border-color: transparent;
+	border-radius: 0;
 	box-shadow: none;
 }
 
@@ -42,6 +73,7 @@
 	opacity: 1;
 }
 
+/* Header/content transparency and alignment */
 .app-window .source-header,
 .app-window .main-header,
 .app-window .window-titlebar {
@@ -53,6 +85,7 @@
 	background-color: transparent;
 	background-image: none;
 	border: none;
+	border-bottom: none;
 	box-shadow: none;
 }
 
@@ -95,6 +128,19 @@
 	border-radius: 0 0 32px 32px;
 }
 
+.media-library-scroll,
+.media-library-content {
+	background-color: transparent;
+}
+
+.media-library-content {
+	padding-top: 8px;
+	padding-bottom: 32px;
+}
+
+/* Normal app circular buttons: 52px only. Window controls are excluded. */
+button.glass-button,
+menubutton.glass-button > button,
 .app-window button.circular-icon-button,
 .app-window togglebutton.circular-icon-button,
 .app-window menubutton.circular-icon-button > button {
@@ -115,6 +161,8 @@
 	-gtk-icon-size: 20px;
 }
 
+button.glass-button:hover,
+menubutton.glass-button > button:hover,
 .app-window button.circular-icon-button:hover,
 .app-window togglebutton.circular-icon-button:hover,
 .app-window menubutton.circular-icon-button > button:hover {
@@ -123,6 +171,9 @@
 	box-shadow: none;
 }
 
+button.glass-button:active,
+button.glass-button:checked,
+menubutton.glass-button > button:active,
 .app-window button.circular-icon-button:active,
 .app-window button.circular-icon-button:checked,
 .app-window togglebutton.circular-icon-button:active,
@@ -131,6 +182,17 @@
 	background-color: #363636;
 	background-image: none;
 	box-shadow: none;
+}
+
+button.glass-button:disabled,
+menubutton.glass-button:disabled > button {
+	opacity: 0.42;
+}
+
+button.glass-button:focus-visible,
+menubutton.glass-button > button:focus-visible {
+	outline: 2px solid alpha(@accent_color, 0.72);
+	outline-offset: 2px;
 }
 
 .app-window button.circular-icon-button image,
@@ -142,6 +204,7 @@
 	-gtk-icon-transform: scale(1);
 }
 
+/* Center navigation */
 .app-window button.segment-button,
 .app-window togglebutton.segment-button {
 	min-height: 42px;
@@ -174,6 +237,7 @@
 	color: @window_fg_color;
 }
 
+/* Source footer / settings placement support */
 .app-window .source-footer,
 .app-window .source-bottom-bar,
 .app-window .source-bottom,
@@ -198,30 +262,7 @@
 	-gtk-icon-size: 20px;
 }
 
-.app-window .floating-dialog,
-.app-window .solid-dialog,
-.app-window .add-server-dialog,
-.app-window .settings-dialog,
-window.floating-dialog,
-dialog.floating-dialog {
-	background-color: #2f2f2f;
-	background-image: none;
-	border: 1px solid alpha(@window_fg_color, 0.10);
-	border-radius: 22px;
-	box-shadow: 0 24px 64px rgba(0, 0, 0, 0.28);
-	color: @window_fg_color;
-}
-
-.app-window .floating-dialog-content,
-.app-window .solid-dialog-content,
-.app-window .add-server-dialog-content,
-.app-window .settings-dialog-content {
-	background-color: transparent;
-	background-image: none;
-	color: @window_fg_color;
-}
-
-/* Final Apple-like traffic light window controls */
+/* Apple-like traffic light window controls */
 .app-window windowcontrols,
 .app-window .macos-window-controls {
 	min-height: 52px;
@@ -290,7 +331,10 @@ dialog.floating-dialog {
 	background-color: #1f9f33;
 }
 
-/* Final single-layer settings popover */
+/* Popover shell is transparent; only the inner card draws a surface. */
+.app-window popover,
+.app-window popover.background,
+.app-window popover.menu,
 popover.glass-popover,
 popover.glass-popover.background,
 popover.menu.glass-popover,
@@ -306,6 +350,8 @@ popover.menu.floating-dialog,
 	box-shadow: none;
 }
 
+.app-window popover contents,
+.app-window popover.menu contents,
 popover.glass-popover contents,
 popover.menu.glass-popover contents,
 popover.floating-dialog contents,
@@ -334,49 +380,85 @@ popover.menu.floating-dialog contents > * {
 	color: @window_fg_color;
 }
 
-/* Final solid dark background: keep base visible, disable image tint */
-.app-window .home-carousel {
-	background-color: transparent;
-	background-image: none;
+popover.glass-popover arrow,
+popover.menu.glass-popover arrow,
+popover.floating-dialog arrow,
+popover.menu.floating-dialog arrow {
+	min-width: 0;
+	min-height: 0;
+	padding: 0;
+	background: transparent;
+	border: none;
+	box-shadow: none;
 }
 
-.app-window .window-background {
+/* Dialogs and add-server/settings surfaces */
+.account-settings,
+.glass-dialog,
+.app-window .floating-dialog,
+.app-window .solid-dialog,
+.app-window .add-server-dialog,
+.app-window .settings-dialog,
+window.floating-dialog,
+dialog.floating-dialog {
 	background-color: #2f2f2f;
 	background-image: none;
-	opacity: 1;
-}
-
-.app-window .window-background picture {
-	background-color: transparent;
-	background-image: none;
-	opacity: 0;
-}
-
-.app-window,
-.app-window.background,
-.app-window .window-background,
-.app-window .window-frame,
-.app-window .app-shell,
-.app-window .window-root-overlay,
-.app-window .window-toast-overlay,
-.app-window .window-stack,
-.app-window .window-background > box,
-.app-window .window-frame > box,
-.app-window .app-shell > box,
-.app-window .app-shell > overlay,
-.app-window .app-shell > stack,
-.app-window .window-stack > box {
-	background-color: #2f2f2f;
-	background-image: none;
-}
-
-.app-window .source-panel,
-.app-window .main-surface {
-	background-color: #242424;
-	background-image: none;
-	background-clip: padding-box;
 	border: 1px solid alpha(@window_fg_color, 0.10);
-	border-radius: 32px;
-	box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16);
-	opacity: 1;
+	border-radius: 22px;
+	box-shadow: 0 24px 64px rgba(0, 0, 0, 0.28);
+	color: @window_fg_color;
+}
+
+.account-settings .boxed-list,
+.glass-dialog .boxed-list {
+	border: 1px solid alpha(@window_fg_color, 0.10);
+	border-radius: 14px;
+	background-color: #242424;
+	box-shadow: none;
+}
+
+.account-settings button.flat,
+.glass-dialog button.flat {
+	border: 1px solid alpha(@window_fg_color, 0.10);
+	border-radius: 10px;
+	background-color: #242424;
+}
+
+.account-settings button.flat:hover,
+.glass-dialog button.flat:hover {
+	background-color: #303030;
+}
+
+.account-settings button.flat:active,
+.glass-dialog button.flat:active {
+	background-color: #363636;
+}
+
+.account-settings button.suggested-action,
+.glass-dialog button.suggested-action {
+	border-radius: 10px;
+	box-shadow: none;
+}
+
+.app-window .floating-dialog-content,
+.app-window .solid-dialog-content,
+.app-window .add-server-dialog-content,
+.app-window .settings-dialog-content,
+.floating-dialog-content,
+.solid-dialog-content,
+.add-server-dialog-content,
+.settings-dialog-content {
+	background-color: transparent;
+	background-image: none;
+	color: @window_fg_color;
+}
+
+.floating-dialog label,
+.solid-dialog label,
+.add-server-dialog label,
+.settings-dialog label,
+popover.floating-dialog label,
+popover.menu.floating-dialog label,
+popover.glass-popover label {
+	color: @window_fg_color;
 }
