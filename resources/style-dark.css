@@ -73,7 +73,7 @@
 	opacity: 1;
 }
 
-/* Header/content transparency and alignment */
+/* Header/content surfaces share the exact panel color. */
 .app-window .source-header,
 .app-window .main-header,
 .app-window .window-titlebar {
@@ -82,7 +82,7 @@
 	padding-bottom: 12px;
 	padding-left: 16px;
 	padding-right: 16px;
-	background-color: transparent;
+	background-color: #242424;
 	background-image: none;
 	border: none;
 	border-bottom: none;
@@ -96,12 +96,30 @@
 	margin-bottom: 0;
 }
 
+.app-window .top-navigation {
+	min-height: 52px;
+	margin: 0;
+	padding: 0;
+}
+
+.app-window .source-header label,
+.app-window .main-header label,
+.app-window .top-navigation button label,
+.app-window .top-navigation togglebutton label {
+	margin: 0;
+	padding: 0;
+}
+
 .app-window .source-toolbar,
 .app-window .main-toolbar,
+.app-window .source-sidebar,
 .app-window .main-content-pane,
 .app-window .main-navigation,
 .app-window .main-page,
 .app-window .content-stack,
+.app-window statuspage,
+.app-window .media-library-scroll,
+.app-window .media-library-content,
 .app-window headerbar,
 .app-window headerbar.flat,
 .app-window headerbar.window-titlebar,
@@ -110,7 +128,7 @@
 .app-window toolbarview,
 .app-window toolbarview > box,
 .app-window toolbarview > box > box {
-	background-color: transparent;
+	background-color: #242424;
 	background-image: none;
 	border: none;
 	border-bottom: none;
@@ -278,12 +296,13 @@ menubutton.glass-button > button:focus-visible {
 .app-window .macos-window-controls button {
 	min-width: 14px;
 	min-height: 14px;
-	margin: 0 5px;
+	margin: 19px 5px;
 	padding: 0;
 	border-radius: 999px;
 	border: none;
 	background-color: alpha(@window_fg_color, 0.26);
 	background-image: none;
+	background-clip: padding-box;
 	box-shadow: none;
 	outline: none;
 	color: transparent;
@@ -406,6 +425,21 @@ dialog.floating-dialog {
 	border: 1px solid alpha(@window_fg_color, 0.10);
 	border-radius: 22px;
 	box-shadow: 0 24px 64px rgba(0, 0, 0, 0.28);
+	color: @window_fg_color;
+}
+
+.account-settings preferencespage,
+.account-settings navigationview,
+.account-settings toolbarview,
+.glass-dialog .floating-dialog-content,
+.glass-dialog navigationview,
+.glass-dialog toolbarview,
+.glass-dialog headerbar,
+.glass-dialog stack,
+.glass-dialog scrolledwindow,
+.glass-dialog viewport {
+	background-color: #2f2f2f;
+	background-image: none;
 	color: @window_fg_color;
 }
 
