@@ -9,6 +9,10 @@
 @define-color glass_surface @window_bg_color;
 @define-color glass_shadow rgba(0, 0, 0, 0.10);
 @define-color glass_shadow_strong rgba(0, 0, 0, 0.12);
+@define-color app_base_bg_dark #2f2f2f;
+@define-color app_panel_bg_dark #242424;
+@define-color app_base_bg_light #e7e7e7;
+@define-color app_panel_bg_light #f6f6f6;
 
 .sbackground {
   background: rgba(0, 0, 0, 0.15);
@@ -486,8 +490,15 @@ progressbar.accent > trough {
   box-shadow: 0 18px 42px @glass_shadow_strong;
 }
 
-.app-window {
-  background-color: @window_bg_color;
+.app-window,
+.window-frame,
+.app-shell,
+.window-root-overlay,
+.window-toast-overlay,
+.window-stack,
+.window-background {
+  background-color: @app_base_bg_light;
+  background-image: none;
 }
 
 window.app-window.csd,
@@ -498,7 +509,6 @@ window.app-window.solid-csd {
 .window-frame {
   border: 1px solid @glass_border;
   border-radius: 22px;
-  background-color: @window_bg_color;
   box-shadow: none;
 }
 
@@ -510,32 +520,21 @@ window.app-window.solid-csd {
   box-shadow: none;
 }
 
-.app-shell {
-  background-image: linear-gradient(to bottom right,
-      alpha(@accent_bg_color, 0.035),
-      alpha(@window_bg_color, 0.98) 34%,
-      @window_bg_color);
-}
-
-.window-root-overlay,
-.window-toast-overlay,
-.window-stack,
-.window-background {
-  background-color: transparent;
-}
-
 .source-toolbar,
-.source-header {
+.main-toolbar,
+.source-header,
+.main-header,
+.window-titlebar {
   background-color: transparent;
+  background-image: none;
+  box-shadow: none;
 }
 
 .source-header {
   min-height: 44px;
   border-bottom: 1px solid @glass_border;
-  box-shadow: none;
 }
 
-.main-toolbar,
 .content-stack {
   background-color: transparent;
 }
@@ -548,17 +547,11 @@ window.app-window.solid-csd {
   min-height: 44px;
   border-bottom: 1px solid @glass_border;
   border-radius: 22px 22px 0 0;
-  background-color: alpha(@window_bg_color, 0.82);
-  box-shadow: none;
 }
 
 .window-titlebar {
   min-height: 44px;
   padding: 4px 8px;
-  background-image: linear-gradient(to bottom,
-      @glass_fill,
-      alpha(@window_bg_color, 0.88));
-  box-shadow: none;
 }
 
 .main-content-pane,
@@ -583,7 +576,8 @@ window.app-window.solid-csd {
   padding: 0;
   border: 1px solid @glass_border;
   border-radius: 999px;
-  background-color: @glass_surface;
+  background-color: @app_panel_bg_light;
+  background-image: none;
   background-clip: padding-box;
   box-shadow: none;
   -gtk-icon-size: 18px;
@@ -659,19 +653,21 @@ menubutton.glass-button > button {
   min-width: 40px;
   border: 1px solid @glass_border;
   border-radius: 999px;
-  background-color: @glass_fill;
-  box-shadow: 0 8px 24px @glass_shadow;
+  background-color: @app_panel_bg_light;
+  background-image: none;
+  box-shadow: none;
 }
 
 button.glass-button:hover,
 menubutton.glass-button > button:hover {
-  background-color: @glass_hover;
+  background-color: mix(@window_fg_color, @app_panel_bg_light, 0.08);
+  box-shadow: none;
 }
 
 button.glass-button:active,
 button.glass-button:checked,
 menubutton.glass-button > button:active {
-  background-color: @glass_pressed;
+  background-color: mix(@window_fg_color, @app_panel_bg_light, 0.12);
   box-shadow: none;
 }
 
@@ -769,12 +765,12 @@ popover.menu modelbutton:hover {
 /* Windows floating panels: keep shell and overlay containers untouched. */
 .app-window .source-panel,
 .app-window .main-surface {
-  background-color: @glass_surface;
+  background-color: @app_panel_bg_light;
   background-image: none;
   background-clip: padding-box;
   border: 1px solid @glass_border;
   border-radius: 22px;
-  box-shadow: 0 18px 42px @glass_shadow_strong;
+  box-shadow: 0 12px 28px @glass_shadow;
 }
 
 .app-window .main-surface {
@@ -783,7 +779,7 @@ popover.menu modelbutton:hover {
 
 .app-window .window-frame,
 .app-window .app-shell {
-  background-color: @window_bg_color;
+  background-color: @app_base_bg_light;
   background-image: none;
   background-clip: padding-box;
   box-shadow: none;
@@ -793,10 +789,9 @@ popover.menu modelbutton:hover {
 .app-window headerbar.window-titlebar,
 .app-window .main-header,
 .app-window .source-header {
-  background-color: @glass_surface;
+  background-color: transparent;
   background-image: none;
   box-shadow: none;
-  border: none;
 }
 
 .app-window button.circular-icon-button,
@@ -805,7 +800,8 @@ popover.menu modelbutton:hover {
   min-width: 40px;
   min-height: 40px;
   padding: 0;
-  background-color: @glass_surface;
+  background-color: @app_panel_bg_light;
+  background-image: none;
   background-clip: padding-box;
   border: 1px solid alpha(@glass_border, 0.6);
   border-radius: 999px;
@@ -819,7 +815,7 @@ popover.menu modelbutton:hover {
 .app-window button.circular-icon-button:hover,
 .app-window togglebutton.circular-icon-button:hover,
 .app-window menubutton.circular-icon-button > button:hover {
-  background-color: shade(@glass_surface, 1.04);
+  background-color: mix(@window_fg_color, @app_panel_bg_light, 0.08);
   box-shadow: none;
 }
 
@@ -828,7 +824,7 @@ popover.menu modelbutton:hover {
 .app-window togglebutton.circular-icon-button:active,
 .app-window togglebutton.circular-icon-button:checked,
 .app-window menubutton.circular-icon-button > button:active {
-  background-color: shade(@glass_surface, 0.96);
+  background-color: mix(@window_fg_color, @app_panel_bg_light, 0.12);
   box-shadow: none;
 }
 
@@ -839,15 +835,71 @@ popover.menu modelbutton:hover {
   -gtk-icon-shadow: none;
 }
 
+.app-window button,
+.app-window button label,
+.app-window button.pill label,
+.app-window button.suggested-action label,
+.app-window button.glass-button label,
 .app-window button.add-server-button label {
   color: @window_fg_color;
-  opacity: 1;
 }
 
 .app-window .unified-header,
 .app-window .unified-header-row,
 .app-window .bottom-navigation {
   min-height: 44px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .app-window,
+  .window-frame,
+  .app-shell,
+  .window-root-overlay,
+  .window-toast-overlay,
+  .window-stack,
+  .window-background,
+  .app-window .window-frame,
+  .app-window .app-shell {
+    background-color: @app_base_bg_dark;
+    background-image: none;
+  }
+
+  .app-window .source-panel,
+  .app-window .main-surface {
+    background-color: @app_panel_bg_dark;
+    background-image: none;
+  }
+
+  button.glass-button,
+  menubutton.glass-button > button,
+  .macos-window-controls button,
+  .app-window windowcontrols button,
+  .app-window button.circular-icon-button,
+  .app-window togglebutton.circular-icon-button,
+  .app-window menubutton.circular-icon-button > button {
+    background-color: @app_panel_bg_dark;
+    background-image: none;
+    box-shadow: none;
+  }
+
+  button.glass-button:hover,
+  menubutton.glass-button > button:hover,
+  .app-window button.circular-icon-button:hover,
+  .app-window togglebutton.circular-icon-button:hover,
+  .app-window menubutton.circular-icon-button > button:hover {
+    background-color: mix(@window_fg_color, @app_panel_bg_dark, 0.08);
+  }
+
+  button.glass-button:active,
+  button.glass-button:checked,
+  menubutton.glass-button > button:active,
+  .app-window button.circular-icon-button:active,
+  .app-window button.circular-icon-button:checked,
+  .app-window togglebutton.circular-icon-button:active,
+  .app-window togglebutton.circular-icon-button:checked,
+  .app-window menubutton.circular-icon-button > button:active {
+    background-color: mix(@window_fg_color, @app_panel_bg_dark, 0.12);
+  }
 }
 
 .app-window .bottom-navigation {
