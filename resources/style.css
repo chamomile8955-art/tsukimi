@@ -616,8 +616,8 @@ window.app-window.solid-csd {
 
 .macos-window-controls button,
 .app-window windowcontrols button {
-  min-height: 40px;
-  min-width: 40px;
+  min-height: 60px;
+  min-width: 60px;
   margin: 0 4px;
   padding: 0;
   border: 1px solid @glass_border;
@@ -626,7 +626,7 @@ window.app-window.solid-csd {
   background-image: none;
   background-clip: padding-box;
   box-shadow: none;
-  -gtk-icon-size: 18px;
+  -gtk-icon-size: 24px;
 }
 
 .macos-window-controls button image,
@@ -989,6 +989,7 @@ popover.glass-popover label {
   opacity: 1;
 }
 
+
 .app-window .source-header,
 .app-window .main-header,
 .app-window .source-toolbar,
@@ -1007,5 +1008,65 @@ popover.glass-popover label {
   background-image: none;
   border-bottom: none;
   box-shadow: none;
+}
+
+/* Final header action alignment */
+.app-window .source-header,
+.app-window .main-header,
+.app-window .window-titlebar {
+  min-height: 68px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.app-window .source-header button.circular-icon-button,
+.app-window .source-header togglebutton.circular-icon-button,
+.app-window .source-header menubutton.circular-icon-button > button,
+.app-window .main-header button.circular-icon-button,
+.app-window .main-header togglebutton.circular-icon-button,
+.app-window .main-header menubutton.circular-icon-button > button,
+.app-window .window-titlebar button.circular-icon-button,
+.app-window .window-titlebar togglebutton.circular-icon-button,
+.app-window .window-titlebar menubutton.circular-icon-button > button {
+  min-width: 60px;
+  min-height: 60px;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding: 0;
+  border-radius: 999px;
+  -gtk-icon-size: 24px;
+}
+
+.app-window .source-header button.circular-icon-button image,
+.app-window .source-header togglebutton.circular-icon-button image,
+.app-window .source-header menubutton.circular-icon-button > button image,
+.app-window .main-header button.circular-icon-button image,
+.app-window .main-header togglebutton.circular-icon-button image,
+.app-window .main-header menubutton.circular-icon-button > button image,
+.app-window .window-titlebar button.circular-icon-button image,
+.app-window .window-titlebar togglebutton.circular-icon-button image,
+.app-window .window-titlebar menubutton.circular-icon-button > button image {
+  margin: 0;
+  padding: 0;
+  -gtk-icon-shadow: none;
+}
+
+/* Final window control size unification */
+.app-window .macos-window-controls button,
+.app-window windowcontrols button {
+  min-width: 60px;
+  min-height: 60px;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding: 0;
+  border-radius: 999px;
+  -gtk-icon-size: 24px;
+}
+
+.app-window .macos-window-controls button image,
+.app-window windowcontrols button image {
+  margin: 0;
+  padding: 0;
+  -gtk-icon-shadow: none;
 }
 
