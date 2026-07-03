@@ -440,7 +440,9 @@ row image {
   background-color: #202020;
 }
 
-.themeselector checkbutton radio {
+.themeselector checkbutton radio,
+.themeselector checkbutton check,
+.themeselector checkbutton image {
   -gtk-icon-source: none;
   opacity: 0;
   border: none;
@@ -451,9 +453,15 @@ row image {
   margin: 0;
   padding: 0;
   border-radius: 9999px;
+  -gtk-icon-size: 0;
 }
 
-.themeselector checkbutton.theme-selector radio:checked {
+.themeselector checkbutton.theme-selector radio:checked,
+.themeselector checkbutton.theme-selector check:checked,
+.themeselector checkbutton.theme-selector image:checked,
+.themeselector checkbutton:checked radio,
+.themeselector checkbutton:checked check,
+.themeselector checkbutton:checked image {
   -gtk-icon-source: none;
   opacity: 0;
   min-width: 0;
@@ -463,6 +471,7 @@ row image {
   border: none;
   background: none;
   box-shadow: none;
+  -gtk-icon-size: 0;
 }
 
 .startup-content-skeleton {
@@ -1181,11 +1190,19 @@ popover.menu.floating-dialog contents > * {
   color: @window_fg_color;
 }
 
-/* Final solid background: disable carousel/image tint */
-.app-window .home-carousel,
-.app-window .window-background,
-.app-window .window-background picture,
-.app-window picture#rootpic {
+/* Final solid light background: keep base visible, disable image tint */
+.app-window .home-carousel {
+  background-color: transparent;
+  background-image: none;
+}
+
+.app-window .window-background {
+  background-color: @tsukimi_base_bg_light;
+  background-image: none;
+  opacity: 1;
+}
+
+.app-window .window-background picture {
   background-color: transparent;
   background-image: none;
   opacity: 0;
@@ -1215,4 +1232,26 @@ popover.menu.floating-dialog contents > * {
   background-image: none;
   background-clip: padding-box;
   opacity: 1;
+}
+
+/* Final generic popover shell cleanup */
+.app-window popover,
+.app-window popover.background,
+.app-window popover.menu {
+  background-color: transparent;
+  background-image: none;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  margin: 0;
+}
+
+.app-window popover contents,
+.app-window popover.menu contents {
+  background-color: transparent;
+  background-image: none;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  margin: 0;
 }
