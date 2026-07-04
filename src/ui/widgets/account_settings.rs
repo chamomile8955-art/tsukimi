@@ -16,6 +16,7 @@ use crate::{
     utils::{
         spawn,
         spawn_tokio,
+        spawn_tokio_blocking,
     },
 };
 use adw::{
@@ -60,8 +61,6 @@ mod imp {
         #[template_child]
         pub sidebarcontrol: TemplateChild<adw::SwitchRow>,
         #[template_child]
-        pub backgroundspinrow: TemplateChild<adw::SpinRow>,
-        #[template_child]
         pub threadspinrow: TemplateChild<adw::SpinRow>,
         #[template_child]
         pub refresh_control: TemplateChild<adw::SwitchRow>,
@@ -70,13 +69,9 @@ mod imp {
         #[template_child]
         pub selectlastcontrol: TemplateChild<adw::SwitchRow>,
         #[template_child]
-        pub backgroundblurspinrow: TemplateChild<adw::SpinRow>,
-        #[template_child]
-        pub backgroundblurcontrol: TemplateChild<adw::SwitchRow>,
-        #[template_child]
-        pub backgroundcontrol: TemplateChild<gtk::Switch>,
-        #[template_child]
         pub config_switchrow: TemplateChild<adw::SwitchRow>,
+        #[template_child]
+        pub cache_clear_row: TemplateChild<adw::ActionRow>,
 
         #[template_child]
         pub preferred_audio_language_comborow: TemplateChild<adw::ComboRow>,
@@ -149,20 +144,6 @@ mod imp {
                     set.cacheclear().await;
                 },
             );
-            klass.install_action_async(
-                "setting.rootpic",
-                None,
-                |set, _action, _parameter| async move {
-                    set.set_rootpic().await;
-                },
-            );
-            klass.install_action(
-                "setting.backgroundclear",
-                None,
-                move |set, _action, _parameter| {
-                    set.clearpic();
-                },
-            );
             klass.install_action(
                 "version.add-prefer",
                 None,
@@ -190,10 +171,9 @@ mod imp {
             self.parent_constructed();
             let obj = self.obj();
             obj.set_sidebar();
-            obj.set_picopactiy();
-            obj.set_pic();
             obj.bind_settings();
             obj.refersh_descriptors();
+            obj.refresh_cache_size();
         }
     }
 
@@ -209,6 +189,26 @@ glib::wrapper! {
     @extends gtk::ApplicationWindow, gtk::Window, gtk::Widget, adw::PreferencesWindow, adw::Window,
     @implements gio::ActionGroup, gio::ActionMap, gtk::Accessible, gtk::Buildable,
         gtk::ConstraintTarget, gtk::Native, gtk::Root, gtk::ShortcutManager;
+}
+
+fn directory_size(path: &std::path::Path) -> u64 {
+    let Ok(entries) = std::fs::read_dir(path) else {
+        return 0;
+    };
+
+    entries.flatten().fold(0, |total, entry| {
+        let Ok(file_type) = entry.file_type() else {
+            return total;
+        };
+        let size = if file_type.is_dir() {
+            directory_size(&entry.path())
+        } else if file_type.is_file() {
+            entry.metadata().map(|metadata| metadata.len()).unwrap_or(0)
+        } else {
+            0
+        };
+        total.saturating_add(size)
+    })
 }
 
 #[template_callbacks]
@@ -293,87 +293,38 @@ impl AccountSettings {
     pub async fn cacheclear(&self) {
         let path = jellyfin_cache_path().await;
         if path.exists() {
-            std::fs::remove_dir_all(path).unwrap();
+            let result = spawn_tokio_blocking(move || std::fs::remove_dir_all(path)).await;
+            if let Err(error) = result {
+                self.toast(format!("{}: {error}", gettext("Failed to clear cache")));
+                return;
+            }
         }
+        self.imp().cache_clear_row.set_subtitle(&format!(
+            "{}: {}",
+            gettext("Cache Size"),
+            bytefmt::format(0)
+        ));
         self.toast(gettext("Cache Cleared"))
     }
 
-    pub async fn set_rootpic(&self) {
-        let images_filter = gtk::FileFilter::new();
-        images_filter.set_name(Some("Image"));
-        images_filter.add_pixbuf_formats();
-        let model = gio::ListStore::new::<gtk::FileFilter>();
-        model.append(&images_filter);
-        let window = self.window();
-        let filedialog = gtk::FileDialog::builder()
-            .modal(true)
-            .title("Select a picture")
-            .filters(&model)
-            .build();
-        match filedialog.open_future(Some(&window)).await {
-            Ok(file) => {
-                let file_path = file.path().unwrap().display().to_string();
-                SETTINGS.set_root_pic(&file_path).unwrap();
-                window.set_rootpic(file);
-            }
-            Err(_) => self.toast(gettext("No file selected")),
-        };
-    }
-
-    pub fn set_picopactiy(&self) {
-        let imp = self.imp();
-        imp.backgroundspinrow
-            .set_value(SETTINGS.pic_opacity().into());
-        imp.backgroundspinrow.connect_value_notify(glib::clone!(
-            #[weak(rename_to = obj)]
-            self,
-            move |control| {
-                SETTINGS.set_pic_opacity(control.value() as i32).unwrap();
-                let window = obj.window();
-                window.set_picopacity(control.value() as i32);
-            }
-        ));
-    }
-
-    pub fn set_pic(&self) {
-        let imp = self.imp();
-        imp.backgroundcontrol
-            .set_active(SETTINGS.background_enabled());
-        imp.backgroundcontrol.connect_active_notify(glib::clone!(
-            #[weak(rename_to = obj)]
-            self,
-            move |control| {
-                SETTINGS
-                    .set_background_enabled(control.is_active())
-                    .unwrap();
-                if !control.is_active() {
-                    let window = obj.window();
-                    window.clear_pic();
-                }
-            }
-        ));
-    }
-
-    pub fn clearpic(&self) {
-        glib::spawn_future_local(glib::clone!(
+    pub fn refresh_cache_size(&self) {
+        spawn(glib::clone!(
             #[weak(rename_to = obj)]
             self,
             async move {
-                let window = obj.window();
-                window.clear_pic();
+                let path = jellyfin_cache_path().await;
+                let bytes = spawn_tokio_blocking(move || directory_size(&path)).await;
+                obj.imp().cache_clear_row.set_subtitle(&format!(
+                    "{}: {}",
+                    gettext("Cache Size"),
+                    bytefmt::format(bytes)
+                ));
             }
         ));
-        SETTINGS.set_root_pic("").unwrap();
     }
 
     pub fn bind_settings(&self) {
         let imp = self.imp();
-        SETTINGS
-            .bind("is-blurenabled", &imp.backgroundblurcontrol.get(), "active")
-            .build();
-        SETTINGS
-            .bind("pic-blur", &imp.backgroundblurspinrow.get(), "value")
-            .build();
         SETTINGS
             .bind("mpv-config", &imp.config_switchrow.get(), "active")
             .build();

@@ -31,6 +31,7 @@
         <signal name="clicked" handler="on_edit_clicked" swapped="yes"/>
         <style>
           <class name="flat"/>
+          <class name="glass-button"/>
         </style>
       </object>
     </child>
@@ -42,6 +43,7 @@
         <property name="visible">False</property>
         <style>
           <class name="flat"/>
+          <class name="glass-button"/>
         </style>
       </object>
     </child>
@@ -53,6 +55,7 @@
         <signal name="clicked" handler="on_delete_clicked" swapped="yes"/>
         <style>
           <class name="flat"/>
+          <class name="glass-button"/>
         </style>
       </object>
     </child>

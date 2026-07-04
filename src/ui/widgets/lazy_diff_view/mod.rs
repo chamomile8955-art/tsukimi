@@ -33,11 +33,11 @@ mod virtual_viewport;
 use animated_bin::AnimatedBin;
 use virtual_viewport::VirtualViewport;
 
-const DIFF_ANIMATION_QUEUE_DELAY: Duration = Duration::from_millis(320);
-const INSERT_ANIMATION_DURATION_MS: u32 = 260;
-const REMOVE_ANIMATION_DURATION_MS: u32 = 220;
-const REORDER_ANIMATION_DURATION_MS: u32 = 260;
-const INSERT_MOTION_OFFSET: f64 = 16.0;
+const DIFF_ANIMATION_QUEUE_DELAY: Duration = Duration::ZERO;
+const INSERT_ANIMATION_DURATION_MS: u32 = 0;
+const REMOVE_ANIMATION_DURATION_MS: u32 = 0;
+const REORDER_ANIMATION_DURATION_MS: u32 = 0;
+const INSERT_MOTION_OFFSET: f64 = 0.0;
 const HORIZONTAL_MIN_CONTENT_HEIGHT: i32 = 128;
 const VERTICAL_MIN_CONTENT_HEIGHT: i32 = 240;
 const VIRTUAL_ROW_EXTENT: i32 = 84;

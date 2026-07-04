@@ -208,6 +208,8 @@ mod imp {
         #[template_child]
         pub subtitle_tracks_menu_button: TemplateChild<gtk::MenuButton>,
         #[template_child]
+        pub mpv_window_controls: TemplateChild<gtk::WindowControls>,
+        #[template_child]
         pub title_label1: TemplateChild<gtk::Label>,
         #[template_child]
         pub title_label2: TemplateChild<gtk::Label>,
@@ -351,6 +353,14 @@ mod imp {
 
             let obj = self.obj();
 
+            super::normalize_window_control_buttons(
+                self.mpv_window_controls.upcast_ref::<gtk::Widget>(),
+            );
+            self.mpv_window_controls.connect_map(|controls| {
+                super::normalize_window_control_buttons(
+                    controls.upcast_ref::<gtk::Widget>(),
+                );
+            });
             obj.set_popover();
 
             obj.connect_root_notify(|obj| {
@@ -425,6 +435,22 @@ mod imp {
             }
             self.paused.set(paused);
         }
+    }
+}
+
+fn normalize_window_control_buttons(widget: &gtk::Widget) {
+    if let Some(button) = widget.downcast_ref::<gtk::Button>() {
+        button.set_size_request(18, 18);
+        button.set_hexpand(false);
+        button.set_vexpand(false);
+        button.set_halign(gtk::Align::Center);
+        button.set_valign(gtk::Align::Center);
+    }
+
+    let mut child = widget.first_child();
+    while let Some(current) = child {
+        child = current.next_sibling();
+        normalize_window_control_buttons(&current);
     }
 }
 

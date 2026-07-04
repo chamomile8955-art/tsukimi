@@ -658,6 +658,14 @@ msgstr "缓存"
 msgid "Clear Cache"
 msgstr "清除缓存"
 
+#: resources/ui/account_settings.ui
+msgid "Calculating cache size…"
+msgstr "正在计算缓存大小…"
+
+#: src/ui/widgets/account_settings.rs
+msgid "Failed to clear cache"
+msgstr "清除缓存失败"
+
 #: resources/ui/account_settings.ui:231 resources/ui/account_settings.ui:350
 msgid "Others"
 msgstr "其他"

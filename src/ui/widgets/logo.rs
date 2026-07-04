@@ -22,7 +22,8 @@ pub async fn set_logo(id: String, image_type: &str, tag: Option<u8>) -> Revealer
     image.set_halign(gtk::Align::Fill);
     image.set_content_fit(gtk::ContentFit::Contain);
     let revealer = gtk::Revealer::builder()
-        .transition_type(gtk::RevealerTransitionType::Crossfade)
+        .transition_type(gtk::RevealerTransitionType::None)
+        .transition_duration(0)
         .child(&image)
         .reveal_child(false)
         .vexpand(true)

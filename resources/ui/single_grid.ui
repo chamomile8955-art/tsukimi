@@ -39,6 +39,10 @@
                         <property name="use-underline">True</property>
                       </object>
                     </property>
+                    <style>
+                      <class name="flat"/>
+                      <class name="glass-button"/>
+                    </style>
                   </object>
                 </child>
                 <child>
@@ -47,6 +51,11 @@
                     <property name="tooltip-text" translatable="yes">Filter Panel</property>
                     <property name="valign">center</property>
                     <signal name="clicked" handler="filter_panel_cb" swapped="yes" />
+                    <style>
+                      <class name="flat"/>
+                      <class name="circular"/>
+                      <class name="glass-button"/>
+                    </style>
                   </object>
                 </child>
               </object>
@@ -130,7 +139,8 @@
         </child>
         <child>
           <object class="GtkStack" id="stack">
-            <property name="transition-type">crossfade</property>
+            <property name="transition-type">none</property>
+            <property name="transition-duration">0</property>
             <property name="vexpand">True</property>
             <child>
               <object class="GtkStackPage">

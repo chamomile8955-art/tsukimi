@@ -534,30 +534,87 @@ impl TuItem {
     pub async fn play_series(&self, obj: &impl IsA<gtk::Widget>) {
         let id = self.id();
 
+        let next_up_id = id.clone();
         let nextup_list =
-            match spawn_tokio(async move { JELLYFIN_CLIENT.get_shows_next_up(&id).await }).await {
+            match spawn_tokio(async move { JELLYFIN_CLIENT.get_shows_next_up(&next_up_id).await })
+                .await
+            {
                 Ok(list) => list,
                 Err(e) => {
-                    obj.toast(e.to_user_facing());
-                    return;
+                    tracing::warn!(
+                        series_id = %id,
+                        %e,
+                        "Unable to load next-up episode; falling back to the first episode"
+                    );
+                    Default::default()
                 }
             };
 
-        let Some(nextup_item) = nextup_list.items.first() else {
-            obj.toast(gettext("No next up video found"));
+        if let Some(nextup_item) = nextup_list.items.first() {
+            self.direct_play_video_id(
+                obj,
+                TuItem::from_simple(nextup_item.to_owned()),
+                nextup_list
+                    .items
+                    .into_iter()
+                    .map(TuItem::from_simple)
+                    .collect(),
+            )
+            .await;
             return;
-        };
+        }
 
-        self.direct_play_video_id(
-            obj,
-            TuItem::from_simple(nextup_item.to_owned()),
-            nextup_list
+        let seasons_id = id.clone();
+        let mut seasons = match spawn_tokio(async move {
+            JELLYFIN_CLIENT.get_season_list(&seasons_id).await
+        })
+        .await
+        {
+            Ok(seasons) => seasons.items,
+            Err(e) => {
+                obj.toast(e.to_user_facing());
+                return;
+            }
+        };
+        seasons.sort_by_key(|season| {
+            (
+                season.index_number.unwrap_or(u32::MAX) == 0,
+                season.index_number.unwrap_or(u32::MAX),
+            )
+        });
+
+        for season in seasons {
+            let series_id = id.clone();
+            let season_id = season.id;
+            let episodes = match spawn_tokio(async move {
+                JELLYFIN_CLIENT
+                    .get_episodes(&series_id, &season_id, 0)
+                    .await
+            })
+            .await
+            {
+                Ok(episodes) => episodes,
+                Err(_) => continue,
+            };
+
+            let episode_items = episodes
                 .items
                 .into_iter()
                 .map(TuItem::from_simple)
-                .collect(),
-        )
-        .await;
+                .collect::<Vec<_>>();
+            if let Some(first_episode) = episode_items.iter().min_by_key(|episode| {
+                (
+                    episode.parent_index_number(),
+                    episode.index_number(),
+                )
+            }) {
+                self.direct_play_video_id(obj, first_episode.clone(), episode_items)
+                    .await;
+                return;
+            }
+        }
+
+        obj.toast(gettext("No next up video found"));
     }
 
     pub fn fmt_period(&self) -> String {
@@ -713,7 +770,7 @@ impl TuItem {
 
     pub fn has_direct_play_mark(&self) -> bool {
         match self.item_type().as_str() {
-            MOVIE if self.is_resume() => true,
+            MOVIE => true,
             EPISODE if self.is_resume() => true,
             _ => false,
         }
@@ -774,7 +831,8 @@ impl TuItem {
     }
 
     pub fn can_direct_play(&self) -> bool {
-        matches!(self.item_type().as_str(), MOVIE | EPISODE) && self.is_resume()
+        self.item_type() == MOVIE
+            || (self.item_type() == EPISODE && self.is_resume())
     }
 
     pub fn key(&self) -> String {

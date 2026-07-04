@@ -11,7 +11,8 @@
             <property name="hscrollbar-policy">never</property>
             <child>
               <object class="GtkStack" id="stack">
-                <property name="transition-type">crossfade</property>
+                <property name="transition-type">none</property>
+                <property name="transition-duration">0</property>
                 <property name="vexpand">True</property>
                 <child>
                   <object class="GtkStackPage">

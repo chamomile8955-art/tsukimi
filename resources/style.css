@@ -9,8 +9,8 @@
 @define-color glass_surface @window_bg_color;
 @define-color glass_shadow rgba(0, 0, 0, 0.10);
 @define-color glass_shadow_strong rgba(0, 0, 0, 0.12);
-@define-color tsukimi_base_bg_dark #2f2f2f;
-@define-color tsukimi_panel_bg_dark #242424;
+@define-color tsukimi_base_bg_dark #111111;
+@define-color tsukimi_panel_bg_dark #181818;
 @define-color tsukimi_base_bg_light #e7e7e7;
 @define-color tsukimi_panel_bg_light #f6f6f6;
 @define-color tsukimi_panel_border alpha(@window_fg_color, 0.08);
@@ -731,6 +731,37 @@ window.app-window.solid-csd {
   padding-bottom: 32px;
 }
 
+/* Three control scales: 52px navigation/player controls, 44px standard
+ * controls, and 40px compact overlay controls. */
+.app-window button,
+.app-window togglebutton,
+.app-window menubutton > button {
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid alpha(@glass_border, 0.72);
+  border-radius: 12px;
+  background-color: @glass_fill;
+  background-image: none;
+  background-clip: padding-box;
+  box-shadow: none;
+  -gtk-icon-size: 18px;
+}
+
+.app-window button.suggested-action,
+.app-window button.accent,
+.app-window togglebutton.suggested-action,
+.app-window togglebutton.accent {
+  background-color: @accent_bg_color;
+  border-color: alpha(@accent_color, 0.72);
+  color: @accent_fg_color;
+}
+
+.app-window button.destructive-action {
+  background-color: @error_bg_color;
+  border-color: alpha(@error_color, 0.72);
+  color: @error_fg_color;
+}
+
 /* Normal app circular buttons: 52px only. Window controls are excluded. */
 .app-window button.circular-icon-button,
 .app-window togglebutton.circular-icon-button,
@@ -751,6 +782,29 @@ window.app-window.solid-csd {
   -gtk-icon-size: 20px;
 }
 
+.app-window button.glass-button.circular,
+.app-window togglebutton.glass-button.circular,
+.app-window menubutton.glass-button.circular > button {
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0;
+  border-radius: 999px;
+}
+
+.app-window button.circular-icon-button,
+.app-window togglebutton.circular-icon-button,
+.app-window menubutton.circular-icon-button > button {
+  min-width: 52px;
+  min-height: 52px;
+}
+
+.app-window button.glass-button.circular.circular-icon-button,
+.app-window togglebutton.glass-button.circular.circular-icon-button,
+.app-window menubutton.glass-button.circular.circular-icon-button > button {
+  min-width: 52px;
+  min-height: 52px;
+}
+
 /* Text glass buttons keep their natural width and padding. */
 .app-window button.add-server-button {
   min-width: 132px;
@@ -767,6 +821,7 @@ window.app-window.solid-csd {
 }
 
 button.glass-button:hover,
+togglebutton.glass-button:hover,
 menubutton.glass-button > button:hover,
 .app-window button.circular-icon-button:hover,
 .app-window togglebutton.circular-icon-button:hover,
@@ -778,6 +833,8 @@ menubutton.glass-button > button:hover,
 
 button.glass-button:active,
 button.glass-button:checked,
+togglebutton.glass-button:active,
+togglebutton.glass-button:checked,
 menubutton.glass-button > button:active,
 .app-window button.circular-icon-button:active,
 .app-window button.circular-icon-button:checked,
@@ -812,7 +869,7 @@ menubutton.glass-button > button:focus-visible {
 /* Center navigation */
 .app-window button.segment-button,
 .app-window togglebutton.segment-button {
-  min-height: 42px;
+  min-height: 44px;
   margin-top: 0;
   margin-bottom: 0;
   padding-top: 0;
@@ -902,7 +959,7 @@ dialog.floating-dialog windowcontrols button {
   box-shadow: none;
   outline: none;
   color: transparent;
-  -gtk-icon-size: 0;
+  -gtk-icon-size: 1px;
 }
 
 .app-window windowcontrols button image,
@@ -910,11 +967,11 @@ dialog.floating-dialog windowcontrols button {
 window.floating-dialog windowcontrols button image,
 dialog.floating-dialog windowcontrols button image {
   opacity: 0;
-  min-width: 0;
-  min-height: 0;
+  min-width: 1px;
+  min-height: 1px;
   margin: 0;
   padding: 0;
-  -gtk-icon-size: 0;
+  -gtk-icon-size: 1px;
   -gtk-icon-shadow: none;
 }
 
@@ -1133,8 +1190,11 @@ dialog.add-server-dialog sheet {
 
 .account-settings button.flat,
 .glass-dialog button.flat {
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0 12px;
   border: 1px solid @glass_border;
-  border-radius: 10px;
+  border-radius: 12px;
   background-color: @glass_fill;
 }
 
@@ -1207,10 +1267,11 @@ popover.glass-popover label {
 }
 
 button.media-card-play-button {
-  min-width: 30px;
-  min-height: 30px;
+  min-width: 40px;
+  min-height: 40px;
   padding: 0;
-  -gtk-icon-size: 15px;
+  border-radius: 999px;
+  -gtk-icon-size: 18px;
 }
 
 .app-window .main-surface {
@@ -1333,8 +1394,8 @@ popover.floating-menu separator {
 }
 
 .app-window .mpv-player button.mpv-play-button {
-  min-width: 56px;
-  min-height: 56px;
+  min-width: 52px;
+  min-height: 52px;
   background-color: rgba(255, 255, 255, 0.16);
 }
 

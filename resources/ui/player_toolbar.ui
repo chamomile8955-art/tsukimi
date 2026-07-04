@@ -80,6 +80,7 @@
                                         <signal name="clicked" handler="on_prev_button_clicked" swapped="yes"/>
                                         <style>
                                             <class name="circular"/>
+                                            <class name="glass-button"/>
                                         </style>
                                     </object>
                                 </child>
@@ -91,6 +92,7 @@
                                         <signal name="clicked" handler="on_play_button_clicked" swapped="yes"/>
                                         <style>
                                             <class name="flat"/>
+                                            <class name="glass-button"/>
                                         </style>
                                         <child>
                                             <object class="GtkImage" id="play_pause_image">
@@ -110,6 +112,7 @@
                                         <signal name="clicked" handler="on_next_button_clicked" swapped="true"/>
                                         <style>
                                             <class name="circular"/>
+                                            <class name="glass-button"/>
                                         </style>
                                     </object>
                                 </child>
@@ -181,6 +184,7 @@
                                 <signal name="clicked" handler="on_stop_button_clicked" swapped="yes"/>
                                 <style>
                                     <class name="flat"/>
+                                    <class name="glass-button"/>
                                 </style>
                                 <child>
                                     <object class="GtkImage">
@@ -198,6 +202,7 @@
                                 <property name="menu-model">repeat-menu</property>
                                 <style>
                                     <class name="flat"/>
+                                    <class name="glass-button"/>
                                 </style>
                                 <child>
                                     <object class="GtkBox" id="replayBox">

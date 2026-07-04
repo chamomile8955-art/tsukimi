@@ -45,7 +45,6 @@ use crate::{
         CachePolicy,
         fetch_with_cache,
         get_image_with_cache,
-        spawn,
     },
 };
 
@@ -212,15 +211,6 @@ impl AlbumPage {
 
         let image = gtk::gio::File::for_path(path);
         imp.cover_image.set_file(Some(&image));
-
-        spawn(glib::clone!(
-            #[weak(rename_to = obj)]
-            self,
-            async move {
-                let window = obj.root().and_downcast::<super::window::Window>().unwrap();
-                window.set_rootpic(image);
-            }
-        ));
     }
 
     pub async fn get_songs(&self) {

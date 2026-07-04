@@ -48,6 +48,7 @@
                                 <signal name="clicked" handler="on_restart" swapped="yes"/>
                                 <style>
                                   <class name="accent" />
+                                  <class name="glass-button" />
                                 </style>
                               </object>
                             </child>
@@ -59,6 +60,7 @@
                                 <signal name="clicked" handler="on_shutdown" swapped="yes"/>
                                 <style>
                                   <class name="accent" />
+                                  <class name="glass-button" />
                                 </style>
                               </object>
                             </child>

@@ -22,11 +22,7 @@ pub struct Settings(ThreadGuard<gio::Settings>);
 
 impl Settings {
     const KEY_IS_OVERLAY: &'static str = "is-overlay";
-    const KEY_ROOT_PIC: &'static str = "root-pic";
-    const KEY_IS_BACKGROUND_ENABLED: &'static str = "is-backgroundenabled";
     const KEY_THREADS: &'static str = "threads";
-    const KEY_PIC_OPACITY: &'static str = "pic-opacity";
-    const KEY_PIC_BLUR: &'static str = "pic-blur";
     const KEY_PREFERRED_SERVER: &'static str = "preferred-server";
     const KEY_IS_AUTO_SELECT_SERVER: &'static str = "is-auto-select-server";
     const KEY_LIST_SORT_BY: &'static str = "list-sort-by";
@@ -416,36 +412,8 @@ impl Settings {
         self.boolean(Self::KEY_IS_OVERLAY)
     }
 
-    pub fn set_root_pic(&self, root_pic: &str) -> Result<(), glib::BoolError> {
-        self.set_string(Self::KEY_ROOT_PIC, root_pic)
-    }
-
-    pub fn root_pic(&self) -> String {
-        self.string(Self::KEY_ROOT_PIC).to_string()
-    }
-
     pub fn threads(&self) -> i32 {
         self.int(Self::KEY_THREADS)
-    }
-
-    pub fn set_pic_opacity(&self, pic_opacity: i32) -> Result<(), glib::BoolError> {
-        self.set_int(Self::KEY_PIC_OPACITY, pic_opacity)
-    }
-
-    pub fn pic_opacity(&self) -> i32 {
-        self.int(Self::KEY_PIC_OPACITY)
-    }
-
-    pub fn pic_blur(&self) -> i32 {
-        self.int(Self::KEY_PIC_BLUR)
-    }
-
-    pub fn set_background_enabled(&self, background_enabled: bool) -> Result<(), glib::BoolError> {
-        self.set_boolean(Self::KEY_IS_BACKGROUND_ENABLED, background_enabled)
-    }
-
-    pub fn background_enabled(&self) -> bool {
-        self.boolean(Self::KEY_IS_BACKGROUND_ENABLED)
     }
 }
 

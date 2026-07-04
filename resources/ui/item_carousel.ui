@@ -4,7 +4,8 @@
   <template parent="AdwBin" class="ItemCarousel">
     <child>
       <object class="GtkRevealer" id="backrevealer">
-        <property name="transition-type">crossfade</property>
+        <property name="transition-type">none</property>
+        <property name="transition-duration">0</property>
         <property name="transition-duration">700</property>
         <property name="reveal-child">False</property>
         <child>

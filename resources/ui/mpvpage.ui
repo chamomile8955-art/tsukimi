@@ -196,10 +196,16 @@
                           </object>
                         </child>
                         <child>
-                          <object class="GtkWindowControls">
+                          <object class="GtkWindowControls" id="mpv_window_controls">
                             <property name="side">end</property>
+                            <property name="decoration-layout">:minimize,maximize,close</property>
+                            <property name="halign">end</property>
+                            <property name="valign">center</property>
+                            <property name="hexpand">False</property>
+                            <property name="vexpand">False</property>
                             <style>
                               <class name="flat" />
+                              <class name="macos-window-controls" />
                             </style>
                           </object>
                         </child>

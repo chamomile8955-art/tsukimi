@@ -3,14 +3,13 @@ use adw::{
     subclass::prelude::*,
 };
 use gtk::{
-    gdk,
     glib,
     graphene,
     gsk,
 };
 
-pub const MAX_SCALE: f32 = 1.08;
-const ANIMATION_DURATION: u32 = 200;
+pub const MAX_SCALE: f32 = 1.035;
+const ANIMATION_DURATION: u32 = 120;
 
 mod imp {
     use std::cell::{
@@ -124,24 +123,8 @@ mod imp {
             let scale = 1.0 + (super::MAX_SCALE - 1.0) * progress;
             let child_snapshot = gtk::Snapshot::new();
 
-            // A restrained blurred copy gives the hovered poster a soft glow
-            // without replacing or obscuring the original image.
-            child_snapshot.push_opacity((0.14 * progress) as f64);
-            child_snapshot.push_blur(18.0 * progress as f64);
-            obj.snapshot_child(&child, &child_snapshot);
-            child_snapshot.pop();
-            child_snapshot.pop();
-
-            let shadow = gsk::Shadow::new(
-                gdk::RGBA::new(0.0, 0.0, 0.0, 0.32 * progress),
-                0.0,
-                8.0 * progress,
-                24.0 * progress,
-            );
-            child_snapshot.push_shadow(&[shadow]);
             self.call_underlay(&child_snapshot);
             obj.snapshot_child(&child, &child_snapshot);
-            child_snapshot.pop();
 
             let Some(node) = child_snapshot.to_node() else {
                 return;

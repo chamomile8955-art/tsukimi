@@ -7,7 +7,6 @@ use once_cell::sync::Lazy;
 
 pub mod account_item;
 pub mod actions;
-pub mod background_paintable;
 pub mod core_song;
 pub mod descriptor;
 pub mod dropdown_factory;

@@ -624,6 +624,14 @@ msgstr ""
 msgid "Clear Cache"
 msgstr ""
 
+#: resources/ui/account_settings.ui
+msgid "Calculating cache size…"
+msgstr ""
+
+#: src/ui/widgets/account_settings.rs
+msgid "Failed to clear cache"
+msgstr ""
+
 #: resources/ui/account_settings.ui:231 resources/ui/account_settings.ui:350
 msgid "Others"
 msgstr ""

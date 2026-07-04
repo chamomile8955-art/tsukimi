@@ -97,7 +97,7 @@ pub(crate) mod imp {
                 utils::TuItemBuildExt,
             },
         },
-        utils::spawn_g_timeout,
+        utils::spawn,
     };
 
     // Object holding the state
@@ -282,7 +282,7 @@ pub(crate) mod imp {
             }
 
             let obj = self.obj();
-            spawn_g_timeout(glib::clone!(
+            spawn(glib::clone!(
                 #[weak]
                 obj,
                 async move {
@@ -664,22 +664,83 @@ impl ItemPage {
 
     async fn set_shows_next_up(&self, id: &str) -> Option<TuItem> {
         let id = id.to_string();
-        let next_up =
-            match spawn_tokio(async move { JELLYFIN_CLIENT.get_shows_next_up(&id).await }).await {
-                Ok(next_up) => next_up,
-                Err(e) => {
-                    self.toast(e.to_user_facing());
-                    return None;
+        let next_up_id = id.clone();
+        match spawn_tokio(async move {
+            JELLYFIN_CLIENT.get_shows_next_up(&next_up_id).await
+        })
+        .await
+        {
+            Ok(next_up) => {
+                if let Some(next_up_item) = next_up.items.into_iter().next() {
+                    let tu_item = TuItem::from_simple(next_up_item);
+                    self.set_now_item::<false>(&tu_item);
+                    return Some(tu_item);
+                }
+            }
+            Err(error) => {
+                tracing::warn!(
+                    series_id = %id,
+                    %error,
+                    "Unable to load next-up episode; falling back to the first episode"
+                );
+            }
+        }
+
+        let seasons_id = id.clone();
+        let mut seasons = match spawn_tokio(async move {
+            JELLYFIN_CLIENT.get_season_list(&seasons_id).await
+        })
+        .await
+        {
+            Ok(seasons) => seasons.items,
+            Err(error) => {
+                self.toast(error.to_user_facing());
+                return None;
+            }
+        };
+        // Prefer the first numbered season. Specials (season 0) are only used
+        // when the series has no regular season.
+        seasons.sort_by_key(|season| {
+            (
+                season.index_number.unwrap_or(u32::MAX) == 0,
+                season.index_number.unwrap_or(u32::MAX),
+            )
+        });
+
+        for season in seasons {
+            let series_id = id.clone();
+            let season_id = season.id;
+            let episodes = match spawn_tokio(async move {
+                JELLYFIN_CLIENT
+                    .get_episodes(&series_id, &season_id, 0)
+                    .await
+            })
+            .await
+            {
+                Ok(episodes) => episodes,
+                Err(error) => {
+                    tracing::warn!(
+                        series_id = %id,
+                        %error,
+                        "Unable to load episodes while selecting the first episode"
+                    );
+                    continue;
                 }
             };
 
-        let next_up_item = next_up.items.into_iter().next()?;
+            if let Some(first_episode) = episodes.items.into_iter().min_by_key(|episode| {
+                (
+                    episode.parent_index_number.unwrap_or(u32::MAX),
+                    episode.index_number.unwrap_or(u32::MAX),
+                )
+            }) {
+                let tu_item = TuItem::from_simple(first_episode);
+                self.set_now_item::<false>(&tu_item);
+                return Some(tu_item);
+            }
+        }
 
-        let tu_item = TuItem::from_simple(next_up_item);
-
-        self.set_now_item::<false>(&tu_item);
-
-        Some(tu_item)
+        None
     }
 
     fn set_now_item<const IS_VIDEO: bool>(&self, item: &TuItem) {
@@ -823,16 +884,6 @@ impl ItemPage {
             .imp()
             .backrevealer
             .set_reveal_child(true);
-        spawn(glib::clone!(
-            #[weak(rename_to = obj)]
-            self,
-            async move {
-                let Some(window) = obj.root().and_downcast::<super::window::Window>() else {
-                    return;
-                };
-                window.set_rootpic(file);
-            }
-        ));
     }
 
     pub async fn add_backdrops(&self, image_tags: Vec<String>, id: &str) {

@@ -57,10 +57,6 @@
       <default>true</default>
       <summary>Whether to override the system accent color</summary>
     </key>
-    <key name="root-pic" type="s">
-      <default>""</default>
-      <summary>Default Background Path</summary>
-    </key>
     <key name="mpv-seek-forward-step" type="i">
       <default>20</default>
       <summary>Default mpv-seek-forward-step</summary>
@@ -81,14 +77,6 @@
       <default>1</default>
       <summary>Default threads</summary>
     </key>
-    <key name="pic-opacity" type="i">
-      <default>15</default>
-      <summary>Background Opacity</summary>
-    </key>
-    <key name="pic-blur" type="i">
-      <default>15</default>
-      <summary>Background Blur Radius</summary>
-    </key>
     <key name="list-sort-order" type="i">
       <default>0</default>
       <summary>Default list sort</summary>
@@ -97,17 +85,9 @@
       <default>5</default>
       <summary>Default list sort</summary>
     </key>
-    <key name="is-blurenabled" type="b">
-      <default>false</default>
-      <summary>Whether to enable blur background</summary>
-    </key>
     <key name="mpv-config" type="b">
       <default>false</default>
       <summary>Whether to use external mpv config</summary>
-    </key>
-    <key name="is-backgroundenabled" type="b">
-      <default>true</default>
-      <summary>Whether to enable background</summary>
     </key>
     <key name="mpv-deband" type="b">
       <default>false</default>

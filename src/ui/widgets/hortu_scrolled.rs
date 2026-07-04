@@ -29,7 +29,7 @@ use crate::{
     },
 };
 
-pub const SHOW_BUTTON_ANIMATION_DURATION: u32 = 500;
+pub const SHOW_BUTTON_ANIMATION_DURATION: u32 = 120;
 static FIRST_POSTER_MODEL_READY: std::sync::atomic::AtomicBool =
     std::sync::atomic::AtomicBool::new(false);
 

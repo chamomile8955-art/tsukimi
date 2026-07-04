@@ -26,7 +26,7 @@
 .app-window .app-shell > overlay,
 .app-window .app-shell > stack,
 .app-window .window-stack > box {
-	background-color: #2f2f2f;
+	background-color: #111111;
 	background-image: none;
 }
 
@@ -36,7 +36,7 @@
 }
 
 .app-window .window-background {
-	background-color: #2f2f2f;
+	background-color: #111111;
 	background-image: none;
 	opacity: 1;
 }
@@ -64,7 +64,7 @@
 
 .app-window .source-panel,
 .app-window .main-surface {
-	background-color: #242424;
+	background-color: #181818;
 	background-image: none;
 	background-clip: padding-box;
 	border: 1px solid alpha(@window_fg_color, 0.10);
@@ -82,7 +82,7 @@
 	padding-bottom: 12px;
 	padding-left: 16px;
 	padding-right: 16px;
-	background-color: #242424;
+	background-color: #181818;
 	background-image: none;
 	border: none;
 	border-bottom: none;
@@ -128,7 +128,7 @@
 .app-window toolbarview,
 .app-window toolbarview > box,
 .app-window toolbarview > box > box {
-	background-color: #242424;
+	background-color: #181818;
 	background-image: none;
 	border: none;
 	border-bottom: none;
@@ -156,11 +156,40 @@
 	padding-bottom: 32px;
 }
 
+.app-window button,
+.app-window togglebutton,
+.app-window menubutton > button {
+	min-height: 40px;
+	padding: 0 12px;
+	border: 1px solid alpha(@window_fg_color, 0.10);
+	border-radius: 12px;
+	background-color: #202020;
+	background-image: none;
+	background-clip: padding-box;
+	box-shadow: none;
+	-gtk-icon-size: 18px;
+}
+
+.app-window button.suggested-action,
+.app-window button.accent,
+.app-window togglebutton.suggested-action,
+.app-window togglebutton.accent {
+	background-color: @accent_bg_color;
+	border-color: alpha(@accent_color, 0.72);
+	color: @accent_fg_color;
+}
+
+.app-window button.destructive-action {
+	background-color: @error_bg_color;
+	border-color: alpha(@error_color, 0.72);
+	color: @error_fg_color;
+}
+
 /* Split-view wrapper nodes must not tint the sidebar differently. */
 .sidebar-pane,
 .content-pane,
 .app-window .app-shell > .background {
-	background-color: #2f2f2f;
+	background-color: #111111;
 	background-image: none;
 	box-shadow: none;
 }
@@ -175,7 +204,7 @@
 	margin-bottom: 0;
 	padding: 0;
 	border-radius: 999px;
-	background-color: #242424;
+	background-color: #202020;
 	background-image: none;
 	background-clip: padding-box;
 	border: 1px solid alpha(@window_fg_color, 0.10);
@@ -184,6 +213,29 @@
 	text-shadow: none;
 	color: @window_fg_color;
 	-gtk-icon-size: 20px;
+}
+
+.app-window button.glass-button.circular,
+.app-window togglebutton.glass-button.circular,
+.app-window menubutton.glass-button.circular > button {
+	min-width: 40px;
+	min-height: 40px;
+	padding: 0;
+	border-radius: 999px;
+}
+
+.app-window button.circular-icon-button,
+.app-window togglebutton.circular-icon-button,
+.app-window menubutton.circular-icon-button > button {
+	min-width: 52px;
+	min-height: 52px;
+}
+
+.app-window button.glass-button.circular.circular-icon-button,
+.app-window togglebutton.glass-button.circular.circular-icon-button,
+.app-window menubutton.glass-button.circular.circular-icon-button > button {
+	min-width: 52px;
+	min-height: 52px;
 }
 
 /* Text glass buttons keep their natural width and padding. */
@@ -202,24 +254,27 @@
 }
 
 button.glass-button:hover,
+togglebutton.glass-button:hover,
 menubutton.glass-button > button:hover,
 .app-window button.circular-icon-button:hover,
 .app-window togglebutton.circular-icon-button:hover,
 .app-window menubutton.circular-icon-button > button:hover {
-	background-color: #303030;
+	background-color: #282828;
 	background-image: none;
 	box-shadow: none;
 }
 
 button.glass-button:active,
 button.glass-button:checked,
+togglebutton.glass-button:active,
+togglebutton.glass-button:checked,
 menubutton.glass-button > button:active,
 .app-window button.circular-icon-button:active,
 .app-window button.circular-icon-button:checked,
 .app-window togglebutton.circular-icon-button:active,
 .app-window togglebutton.circular-icon-button:checked,
 .app-window menubutton.circular-icon-button > button:active {
-	background-color: #363636;
+	background-color: #303030;
 	background-image: none;
 	box-shadow: none;
 }
@@ -247,7 +302,7 @@ menubutton.glass-button > button:focus-visible {
 /* Center navigation */
 .app-window button.segment-button,
 .app-window togglebutton.segment-button {
-	min-height: 42px;
+	min-height: 44px;
 	margin-top: 0;
 	margin-bottom: 0;
 	padding-top: 0;
@@ -332,7 +387,7 @@ dialog.floating-dialog windowcontrols button {
 	box-shadow: none;
 	outline: none;
 	color: transparent;
-	-gtk-icon-size: 0;
+	-gtk-icon-size: 1px;
 }
 
 .app-window windowcontrols button image,
@@ -340,11 +395,11 @@ dialog.floating-dialog windowcontrols button {
 window.floating-dialog windowcontrols button image,
 dialog.floating-dialog windowcontrols button image {
 	opacity: 0;
-	min-width: 0;
-	min-height: 0;
+	min-width: 1px;
+	min-height: 1px;
 	margin: 0;
 	padding: 0;
-	-gtk-icon-size: 0;
+	-gtk-icon-size: 1px;
 	-gtk-icon-shadow: none;
 }
 
@@ -431,7 +486,7 @@ popover.menu.floating-dialog contents,
 popover.menu contents > *,
 popover.floating-menu contents > * {
 	min-width: 220px;
-	background-color: #2f2f2f;
+	background-color: #1b1b1b;
 	background-image: none;
 	background-clip: padding-box;
 	border: 1px solid alpha(@window_fg_color, 0.10);
@@ -445,7 +500,7 @@ popover.menu.glass-popover contents > *,
 popover.floating-dialog contents > *,
 popover.menu.floating-dialog contents > * {
 	min-width: 280px;
-	background-color: #2f2f2f;
+	background-color: #1b1b1b;
 	background-image: none;
 	background-clip: padding-box;
 	border: 1px solid alpha(@window_fg_color, 0.10);
@@ -473,7 +528,7 @@ popover.floating-menu arrow {
 .app-window .settings-dialog,
 window.floating-dialog,
 window.settings-dialog {
-	background-color: #2f2f2f;
+	background-color: #1b1b1b;
 	background-image: none;
 	border: 1px solid alpha(@window_fg_color, 0.10);
 	border-radius: 22px;
@@ -498,7 +553,7 @@ dialog.add-server-dialog floating-sheet > dimming {
 
 dialog.add-server-dialog floating-sheet > sheet,
 dialog.add-server-dialog sheet {
-	background-color: #2f2f2f;
+	background-color: #1b1b1b;
 	background-image: none;
 	background-clip: padding-box;
 	border: 1px solid alpha(@window_fg_color, 0.12);
@@ -517,7 +572,7 @@ dialog.add-server-dialog sheet {
 .glass-dialog stack,
 .glass-dialog scrolledwindow,
 .glass-dialog viewport {
-	background-color: #2f2f2f;
+	background-color: #1b1b1b;
 	background-image: none;
 	color: @window_fg_color;
 }
@@ -529,7 +584,7 @@ dialog.add-server-dialog sheet {
 .add-server-dialog stack,
 .add-server-dialog scrolledwindow,
 .add-server-dialog viewport {
-	background-color: #2f2f2f;
+	background-color: #1b1b1b;
 	background-image: none;
 	color: @window_fg_color;
 }
@@ -557,25 +612,28 @@ dialog.add-server-dialog sheet {
 .glass-dialog .boxed-list {
 	border: 1px solid alpha(@window_fg_color, 0.10);
 	border-radius: 14px;
-	background-color: #242424;
+	background-color: #202020;
 	box-shadow: none;
 }
 
 .account-settings button.flat,
 .glass-dialog button.flat {
+	min-width: 40px;
+	min-height: 40px;
+	padding: 0 12px;
 	border: 1px solid alpha(@window_fg_color, 0.10);
-	border-radius: 10px;
-	background-color: #242424;
+	border-radius: 12px;
+	background-color: #202020;
 }
 
 .account-settings button.flat:hover,
 .glass-dialog button.flat:hover {
-	background-color: #303030;
+	background-color: #282828;
 }
 
 .account-settings button.flat:active,
 .glass-dialog button.flat:active {
-	background-color: #363636;
+	background-color: #303030;
 }
 
 .account-settings button.suggested-action,

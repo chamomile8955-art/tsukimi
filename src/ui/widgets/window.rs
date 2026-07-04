@@ -1,8 +1,5 @@
-use std::path::PathBuf;
-
 use adw::prelude::*;
 use gettextrs::gettext;
-use gio::Settings;
 use gtk::{
     Widget,
     subclass::prelude::*,
@@ -44,7 +41,6 @@ mod imp {
                 utils::TuItemBuildExt,
             },
         },
-        utils::spawn,
     };
 
     // Object holding the state
@@ -58,8 +54,6 @@ mod imp {
         #[template_child]
         pub insidestack: TemplateChild<gtk::Stack>,
         #[template_child]
-        pub backgroundstack: TemplateChild<gtk::Stack>,
-        #[template_child]
         pub popbutton: TemplateChild<gtk::Button>,
         #[template_child]
         pub split_view: TemplateChild<adw::OverlaySplitView>,
@@ -67,8 +61,6 @@ mod imp {
         pub navipage: TemplateChild<adw::NavigationPage>,
         #[template_child]
         pub toast: TemplateChild<adw::ToastOverlay>,
-        #[template_child]
-        pub rootpic: TemplateChild<gtk::Picture>,
         #[template_child]
         pub player_toolbar_box: TemplateChild<PlayerToolbarBox>,
         #[template_child]
@@ -245,6 +237,13 @@ mod imp {
             obj.setup_route_action();
             obj.setup_mpv_sidebar_dismissal();
             obj.rebuild_main_menu();
+            obj.sync_window_state_classes();
+            obj.connect_maximized_notify(|window| {
+                window.sync_window_state_classes();
+            });
+            obj.connect_fullscreened_notify(|window| {
+                window.sync_window_state_classes();
+            });
         }
     }
 
@@ -279,7 +278,6 @@ use super::{
     utils::GlobalToast,
 };
 use crate::{
-    APP_ID,
     client::{
         Account,
         jellyfin_client::JELLYFIN_CLIENT,
@@ -317,6 +315,20 @@ static STARTUP_SERVER_RESTORE_RECORDED: std::sync::atomic::AtomicBool =
 
 #[template_callbacks]
 impl Window {
+    fn sync_window_state_classes(&self) {
+        if self.is_maximized() {
+            self.add_css_class("maximized");
+        } else {
+            self.remove_css_class("maximized");
+        }
+
+        if self.is_fullscreen() {
+            self.add_css_class("fullscreen");
+        } else {
+            self.remove_css_class("fullscreen");
+        }
+    }
+
     fn log_shell_state(&self, stage: &str, saved_server_count: usize) {
         let imp = self.imp();
         let split_sidebar = imp.split_view.sidebar();
@@ -402,7 +414,6 @@ impl Window {
             self,
             async move {
                 obj.set_servers().await;
-                obj.setup_rootpic();
             },
         ));
     }
@@ -1108,72 +1119,6 @@ impl Window {
 
     pub fn set_progressbar_opacity(&self, opacity: f64) {
         self.imp().progressbar.set_opacity(opacity);
-    }
-
-    pub fn set_rootpic(&self, file: gio::File) {
-        let settings = Settings::new(APP_ID);
-
-        if !settings.boolean("is-backgroundenabled") {
-            return;
-        }
-
-        let backgroundstack = &self.imp().backgroundstack;
-        let pic: gtk::Picture = if settings.boolean("is-blurenabled") {
-            let paintbale =
-                crate::ui::provider::background_paintable::BackgroundPaintable::default();
-            paintbale.set_pic(file);
-            gtk::Picture::builder()
-                .paintable(&paintbale)
-                .halign(gtk::Align::Fill)
-                .valign(gtk::Align::Fill)
-                .hexpand(true)
-                .vexpand(true)
-                .content_fit(gtk::ContentFit::Cover)
-                .build()
-        } else {
-            gtk::Picture::builder()
-                .halign(gtk::Align::Fill)
-                .valign(gtk::Align::Fill)
-                .hexpand(true)
-                .vexpand(true)
-                .content_fit(gtk::ContentFit::Cover)
-                .file(&file)
-                .build()
-        };
-        let opacity = settings.int("pic-opacity");
-        pic.set_opacity(opacity as f64 / 100.0);
-        backgroundstack.add_child(&pic);
-        backgroundstack.set_visible_child(&pic);
-
-        if backgroundstack.observe_children().n_items() > 2
-            && let Some(child) = backgroundstack.first_child()
-        {
-            backgroundstack.remove(&child);
-        }
-    }
-
-    pub fn setup_rootpic(&self) {
-        let pic = SETTINGS.root_pic();
-        let pathbuf = PathBuf::from(pic);
-        if pathbuf.exists() {
-            let file = gio::File::for_path(&pathbuf);
-            self.set_rootpic(file);
-        }
-    }
-
-    pub fn set_picopacity(&self, opacity: i32) {
-        if let Some(child) = self.imp().backgroundstack.last_child() {
-            let pic = child.downcast::<gtk::Picture>().unwrap();
-            pic.set_opacity(opacity as f64 / 100.0);
-        }
-    }
-
-    pub fn clear_pic(&self) {
-        let imp = self.imp();
-        let backgroundstack = imp.backgroundstack.get();
-        if let Some(child) = backgroundstack.last_child() {
-            backgroundstack.remove(&child);
-        }
     }
 
     pub fn new_account(&self) {
