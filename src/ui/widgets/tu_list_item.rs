@@ -22,6 +22,7 @@ use crate::ui::{
     widgets::utils::{
         TU_ITEM_BANNER_SIZE,
         TU_ITEM_VIDEO_SIZE,
+        run_time_ticks_to_label,
     },
 };
 
@@ -86,7 +87,15 @@ pub mod imp {
         #[template_child]
         pub title: TemplateChild<gtk::Label>,
         #[template_child]
+        pub subtitle: TemplateChild<gtk::Label>,
+        #[template_child]
         pub overlay: TemplateChild<gtk::Overlay>,
+        #[template_child]
+        pub rating_label: TemplateChild<gtk::Label>,
+        #[template_child]
+        pub playback_label: TemplateChild<gtk::Label>,
+        #[template_child]
+        pub progress_bar: TemplateChild<gtk::ProgressBar>,
         #[property(get, set = Self::set_progress)]
         pub progress: Cell<f64>,
         #[template_child]
@@ -126,47 +135,10 @@ pub mod imp {
         fn constructed(&self) {
             self.parent_constructed();
 
-            let style_manager = adw::StyleManager::default();
-            self.is_dark.set(style_manager.is_dark());
             let obj = self.obj();
             obj.set_overflow(gtk::Overflow::Visible);
 
-            style_manager.connect_dark_notify(glib::clone!(
-                #[weak]
-                obj,
-                move |sm| {
-                    obj.imp().is_dark.set(sm.is_dark());
-                    obj.queue_draw();
-                }
-            ));
-
-            style_manager.connect_accent_color_rgba_notify(glib::clone!(
-                #[weak]
-                obj,
-                move |_| {
-                    obj.queue_draw();
-                }
-            ));
-
-            self.hover_scale.set_underlay(glib::clone!(
-                #[weak]
-                obj,
-                move |snapshot| {
-                    obj.imp().draw_backdrop_and_progress(snapshot);
-                }
-            ));
-
-            let obj = self.obj();
             obj.add_controller(obj.gesture_click());
-            obj.set_has_tooltip(true);
-            obj.connect_query_tooltip(|obj, _, _, _, tooltip| {
-                let name = obj.item().name();
-                if name.is_empty() {
-                    return false;
-                }
-                tooltip.set_text(Some(&name));
-                true
-            });
         }
 
         fn dispose(&self) {
@@ -178,6 +150,7 @@ pub mod imp {
 
     impl WidgetImpl for TuListItem {}
 
+    #[allow(dead_code)]
     impl TuListItem {
         fn draw_backdrop_and_progress(&self, snapshot: &gtk::Snapshot) {
             if !self.title.is_visible() {
@@ -408,13 +381,16 @@ impl TuListItem {
 
     fn set_progress_anim(&self, percentage: f64) {
         let start_value = self.imp().progress_inside.get();
+        self.imp()
+            .progress_bar
+            .set_visible(percentage > 0.0 && percentage < 1.0);
 
         let target = adw::CallbackAnimationTarget::new(glib::clone!(
             #[weak(rename_to = this)]
             self,
             move |p| {
                 this.imp().progress_inside.set(p);
-                this.queue_draw();
+                this.imp().progress_bar.set_fraction(p.clamp(0.0, 1.0));
             }
         ));
 
@@ -457,11 +433,44 @@ impl TuListItem {
         imp.direct_play_button
             .set_visible(item.has_direct_play_mark());
 
-        if let Some(title) = item.list_item_title() {
-            imp.title.set_text(&title);
-            imp.title.set_visible(true);
+        let title = item.fmt_title();
+        imp.title.set_text(&title);
+        imp.title.set_visible(!title.is_empty());
+
+        let subtitle = item.fmt_subtitle();
+        imp.subtitle.set_text(&subtitle);
+        imp.subtitle.set_visible(!subtitle.is_empty());
+
+        self.refresh_progress_metadata();
+    }
+
+    pub fn refresh_progress_metadata(&self) {
+        let imp = self.imp();
+        let item = self.item();
+        let show_playback = item.is_resume()
+            && item.playback_position_ticks() > 0
+            && item.run_time_ticks() > 0;
+
+        if show_playback {
+            let position = item
+                .playback_position_ticks()
+                .min(item.run_time_ticks());
+            imp.playback_label.set_text(&format!(
+                "▶ {} / {}",
+                run_time_ticks_to_label(position),
+                run_time_ticks_to_label(item.run_time_ticks())
+            ));
+        }
+        imp.playback_label.set_visible(show_playback);
+
+        let rating = (!show_playback)
+            .then(|| item.fmt_rating())
+            .flatten();
+        if let Some(rating) = rating {
+            imp.rating_label.set_text(&rating);
+            imp.rating_label.set_visible(true);
         } else {
-            imp.title.set_visible(false);
+            imp.rating_label.set_visible(false);
         }
     }
 

@@ -86,7 +86,8 @@ mod imp {
                 status,
                 #[upgrade_or]
                 glib::ControlFlow::Break,
-                move |_, _| {
+                move |splash_window, _| {
+                    center_window(splash_window.upcast_ref());
                     crate::log_startup_timing("first frame shown");
                     crate::log_startup_timing("splash first frame shown");
                     app.imp().create_main_window(splash, status);
@@ -112,6 +113,7 @@ mod imp {
             window.recalculate_layout("UI preview window restored");
             window.start_ui_preview();
             window.add_tick_callback(|window, _| {
+                center_window(window.upcast_ref());
                 window.recalculate_layout("UI preview first frame");
                 crate::log_startup_timing("UI preview ready");
                 glib::ControlFlow::Break
@@ -173,7 +175,7 @@ mod imp {
                 .build();
 
             let logo = gtk::Image::from_resource(
-                "/moe/tsuna/tsukimi/icons/scalable/actions/tsukimi",
+                "/moe/tsuna/tsukimi/icons/scalable/actions/moe.tsuna.tsukimi.svg",
             );
             logo.set_pixel_size(72);
             content.append(&logo);
@@ -186,8 +188,9 @@ mod imp {
             message.add_css_class("startup-message");
             content.append(&message);
 
-            let spinner = adw::Spinner::new();
+            let spinner = gtk::Spinner::new();
             spinner.set_size_request(30, 30);
+            spinner.start();
             content.append(&spinner);
 
             let status = gtk::Label::new(Some("正在加载配置..."));
@@ -206,10 +209,17 @@ mod imp {
                 .default_width(width)
                 .default_height(height)
                 .decorated(false)
-                .resizable(false)
                 .title("Tsukimi")
                 .build();
             splash.add_css_class("startup-splash");
+            let is_maximized = SETTINGS.is_maximized();
+            if is_maximized {
+                splash.maximize();
+            }
+            let is_fullscreen = SETTINGS.is_fullscreen();
+            if is_fullscreen {
+                splash.fullscreen();
+            }
 
             (splash, status)
         }
@@ -222,11 +232,11 @@ mod imp {
                 // Yield after each status change so the splash is painted
                 // before synchronous GTK/libmpv object construction begins.
                 status.set_text("正在加载配置...");
-                glib::timeout_future(std::time::Duration::from_millis(16)).await;
+                glib::timeout_future(std::time::Duration::from_millis(50)).await;
                 app.imp().initialize_settings();
 
                 status.set_text("正在准备媒体库...");
-                glib::timeout_future(std::time::Duration::from_millis(16)).await;
+                glib::timeout_future(std::time::Duration::from_millis(50)).await;
 
                 let window_started = std::time::Instant::now();
                 crate::ui::widgets::init();
@@ -240,43 +250,54 @@ mod imp {
                 window.recalculate_layout("window restored");
 
                 status.set_text("正在连接服务器...");
-                splash.set_transient_for(Some(&window));
-                splash.set_modal(true);
+                window.set_opacity(0.0);
+                window.set_transient_for(Some(&splash));
+                window.set_modal(true);
                 window.add_tick_callback(glib::clone!(
                     #[weak]
                     splash,
                     #[upgrade_or]
                     glib::ControlFlow::Break,
                     move |window, _| {
+                        center_window(window.upcast_ref());
                         crate::log_startup_timing("main window first frame shown");
                         window.recalculate_layout("app ready");
                         window.start_background_initialization();
-                        Self::fade_out_splash(&splash);
+                        Self::reveal_main_window(window, &splash);
                         glib::ControlFlow::Break
                     }
                 ));
                 window.present();
-                splash.present();
             });
         }
 
-        fn fade_out_splash(splash: &adw::ApplicationWindow) {
+        fn reveal_main_window(
+            window: &crate::Window, splash: &adw::ApplicationWindow,
+        ) {
             let started = std::time::Instant::now();
-            splash.add_tick_callback(move |window, _| {
-                let progress =
-                    (started.elapsed().as_secs_f64() / 0.22).clamp(0.0, 1.0);
-                let eased = 1.0 - (1.0 - progress).powi(3);
-                window.set_opacity(1.0 - eased);
+            window.add_tick_callback(glib::clone!(
+                #[weak]
+                splash,
+                #[upgrade_or]
+                glib::ControlFlow::Break,
+                move |window, _| {
+                    let progress =
+                        (started.elapsed().as_secs_f64() / 0.22).clamp(0.0, 1.0);
+                    let eased = 1.0 - (1.0 - progress).powi(3);
+                    window.set_opacity(eased);
 
-                if progress >= 1.0 {
-                    window.close();
-                    glib::ControlFlow::Break
-                } else {
-                    glib::ControlFlow::Continue
+                    if progress >= 1.0 {
+                        window.set_opacity(1.0);
+                        window.set_modal(false);
+                        window.set_transient_for(gtk::Window::NONE);
+                        splash.close();
+                        glib::ControlFlow::Break
+                    } else {
+                        glib::ControlFlow::Continue
+                    }
                 }
-            });
+            ));
         }
-
     }
 
     fn restored_window_size() -> (i32, i32) {
@@ -287,6 +308,54 @@ mod imp {
             (1360, 860)
         }
     }
+
+    #[cfg(target_os = "macos")]
+    fn center_window(window: &gtk::Window) {
+        use std::ffi::{
+            c_char,
+            c_void,
+        };
+
+        use glib::translate::ToGlibPtr;
+
+        unsafe extern "C" {
+            fn gdk_macos_surface_get_native_window(
+                surface: *mut gtk::gdk::ffi::GdkSurface,
+            ) -> *mut c_void;
+        }
+        #[link(name = "objc")]
+        #[allow(clashing_extern_declarations)]
+        unsafe extern "C" {
+            fn sel_registerName(name: *const c_char) -> *mut c_void;
+            #[link_name = "objc_msgSend"]
+            fn objc_msg_send_id(receiver: *mut c_void, selector: *mut c_void) -> *mut c_void;
+            #[link_name = "objc_msgSend"]
+            fn objc_msg_send_void(receiver: *mut c_void, selector: *mut c_void);
+        }
+
+        let Some(surface) = window.surface() else {
+            return;
+        };
+        let native_view =
+            unsafe { gdk_macos_surface_get_native_window(surface.to_glib_none().0) };
+        if native_view.is_null() {
+            return;
+        }
+
+        unsafe {
+            let window_selector = sel_registerName(c"window".as_ptr());
+            let native_window = objc_msg_send_id(native_view, window_selector);
+            if native_window.is_null() {
+                return;
+            }
+
+            let center_selector = sel_registerName(c"center".as_ptr());
+            objc_msg_send_void(native_window, center_selector);
+        }
+    }
+
+    #[cfg(not(target_os = "macos"))]
+    fn center_window(_window: &gtk::Window) {}
 }
 
 glib::wrapper! {

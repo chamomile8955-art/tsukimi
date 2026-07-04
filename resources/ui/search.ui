@@ -40,6 +40,9 @@
                       <object class="GtkPopoverMenu" id="view-popover">
                         <property name="menu-model">search-menu</property>
                         <property name="width-request">250</property>
+                        <style>
+                          <class name="floating-menu"/>
+                        </style>
                         <child type="search-menu-panel">
                           <object class="GtkListBox">
                             <property name="selection-mode">none</property>

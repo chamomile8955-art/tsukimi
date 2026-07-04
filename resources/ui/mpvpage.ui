@@ -101,7 +101,6 @@
                         <property name="valign">center</property>
                         <child>
                           <object class="GtkButton" id="_back_button">
-                            <property name="tooltip_text" translatable="yes">Stop and quit</property>
                             <property name="icon-name">arrow4-left-symbolic</property>
                             <property name="valign">center</property>
                             <signal name="clicked" handler="on_stop_clicked" swapped="yes" />
@@ -160,7 +159,6 @@
                           <object class="GtkToggleButton">
                             <property name="valign">center</property>
                             <property name="icon-name">keyboard-shortcuts-symbolic</property>
-                            <property name="tooltip_text" translatable="yes">Shortcuts</property>
                             <property name="action-name">win.show-help-overlay</property>
                             <style>
                               <class name="flat" />
@@ -175,7 +173,6 @@
                             <property name="icon-name">view-dual-symbolic</property>
                             <property name="focusable">True</property>
                             <property name="receives_default">True</property>
-                            <property name="tooltip_text" translatable="yes">Playlist</property>
                             <signal name="clicked" handler="on_playlist_clicked" swapped="yes" />
                             <style>
                               <class name="flat" />
@@ -190,7 +187,6 @@
                             <property name="icon-name">help-about-symbolic</property>
                             <property name="focusable">True</property>
                             <property name="receives_default">True</property>
-                            <property name="tooltip_text" translatable="yes">Media info (MPV)</property>
                             <signal name="clicked" handler="on_info_clicked" swapped="yes" />
                             <style>
                               <class name="flat" />
@@ -254,7 +250,6 @@
                             </child>
                             <child>
                               <object class="GtkButton">
-                                <property name="tooltip-text" translatable="yes">Backward</property>
                                 <property name="action_name">mpv.backward</property>
                                 <property name="valign">center</property>
                                 <child>
@@ -279,7 +274,6 @@
                                 <property name="focusable">True</property>
                                 <property name="receives_default">True</property>
                                 <property name="valign">center</property>
-                                <property name="tooltip_text" translatable="yes">Pause</property>
                                 <signal name="clicked" handler="on_play_pause_clicked" swapped="yes" />
                                 <child>
                                   <object class="GtkImage" id="play_pause_image">
@@ -299,7 +293,6 @@
                             </child>
                             <child>
                               <object class="GtkButton">
-                                <property name="tooltip-text" translatable="yes">Forward</property>
                                 <property name="action_name">mpv.forward</property>
                                 <property name="valign">center</property>
                                 <child>
@@ -363,7 +356,6 @@
                                   <object class="GtkMenuButton" id="audio_tracks_menu_button">
                                     <property name="popover">audio_tracks_popover</property>
                                     <property name="icon-name">audio-x-generic-symbolic</property>
-                                    <property name="tooltip-text" translatable="yes">Audio</property>
                                     <property name="valign">center</property>
                                     <style>
                                       <class name="flat" />
@@ -376,7 +368,6 @@
                                   <object class="GtkMenuButton" id="subtitle_tracks_menu_button">
                                     <property name="popover">subtitle_tracks_popover</property>
                                     <property name="icon-name">media-view-subtitles-symbolic</property>
-                                    <property name="tooltip-text" translatable="yes">Subtitle</property>
                                     <property name="valign">center</property>
                                     <style>
                                       <class name="flat" />
@@ -389,7 +380,6 @@
                                     <object class="GtkMenuButton" id="volume_button">
                                         <property name="popover">volume_adj_popover</property>
                                         <property name="icon-name">audio-volume-high-symbolic</property>
-                                        <property name="tooltip-text" translatable="yes">Adjust Volume</property>
                                         <property name="valign">center</property>
                                         <style>
                                             <class name="flat" />
@@ -402,7 +392,6 @@
                                   <object class="GtkButton">
                                     <property name="icon-name">settings-symbolic</property>
                                     <property name="action-name">mpv.show-settings</property>
-                                    <property name="tooltip-text" translatable="yes">Advanced settings</property>
                                     <property name="valign">center</property>
                                     <style>
                                       <class name="flat" />
@@ -416,7 +405,6 @@
                                     <property name="visible" bind-source="MPVPage" bind-property="fullscreened" bind-flags="sync-create|invert-boolean"/>
                                     <property name="icon-name">view-fullscreen-symbolic</property>
                                     <property name="action-name">win.toggle-fullscreen</property>
-                                    <property name="tooltip-text" translatable="yes">Fullscreen</property>
                                     <property name="valign">center</property>
                                     <accessibility>
                                         <property name="label" translatable="yes">Fullscreen</property>
@@ -434,7 +422,6 @@
                                     <property name="icon-name">view-restore-symbolic</property>
                                     <property name="action-name">win.toggle-fullscreen</property>
                                     <property name="valign">center</property>
-                                    <property name="tooltip-text" translatable="yes">Exit Fullscreen</property>
                                     <accessibility>
                                       <property name="label" translatable="yes">Exit Fullscreen</property>
                                     </accessibility>
@@ -530,8 +517,10 @@
     <property name="width-request">320</property>
     <property name="position">top</property>
     <property name="has-arrow">true</property>
+    <property name="autohide">true</property>
     <style>
       <class name="mpv-player-popover"/>
+      <class name="track-list-popover"/>
     </style>
     <child>
       <object class="GtkScrolledWindow">
@@ -552,8 +541,10 @@
     <property name="width-request">320</property>
     <property name="position">top</property>
     <property name="has-arrow">true</property>
+    <property name="autohide">true</property>
     <style>
       <class name="mpv-player-popover"/>
+      <class name="track-list-popover"/>
     </style>
     <child>
       <object class="GtkScrolledWindow">
@@ -573,6 +564,7 @@
   <object class="GtkPopover" id="volume_adj_popover">
     <property name="position">top</property>
     <property name="has-arrow">true</property>
+    <property name="autohide">true</property>
     <style>
       <class name="mpv-player-popover"/>
     </style>

@@ -61,6 +61,9 @@
                                                 <child type="suffix">
                                                   <object class="GtkDropDown" id="server_type">
                                                     <property name="valign">center</property>
+                                                    <style>
+                                                      <class name="server-type-selector"/>
+                                                    </style>
                                                     <property name="model">
                                                       <object class="GtkStringList">
                                                         <items>

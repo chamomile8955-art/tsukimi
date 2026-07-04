@@ -304,7 +304,9 @@ menubutton.glass-button > button:focus-visible {
 
 /* Apple-like traffic light window controls */
 .app-window windowcontrols,
-.app-window .macos-window-controls {
+.app-window .macos-window-controls,
+window.floating-dialog windowcontrols,
+dialog.floating-dialog windowcontrols {
 	min-height: 52px;
 	margin: 0;
 	padding: 0 8px;
@@ -315,7 +317,9 @@ menubutton.glass-button > button:focus-visible {
 }
 
 .app-window windowcontrols button,
-.app-window .macos-window-controls button {
+.app-window .macos-window-controls button,
+window.floating-dialog windowcontrols button,
+dialog.floating-dialog windowcontrols button {
 	min-width: 18px;
 	min-height: 18px;
 	margin: 17px 5px;
@@ -332,7 +336,9 @@ menubutton.glass-button > button:focus-visible {
 }
 
 .app-window windowcontrols button image,
-.app-window .macos-window-controls button image {
+.app-window .macos-window-controls button image,
+window.floating-dialog windowcontrols button image,
+dialog.floating-dialog windowcontrols button image {
 	opacity: 0;
 	min-width: 0;
 	min-height: 0;
@@ -343,7 +349,9 @@ menubutton.glass-button > button:focus-visible {
 }
 
 .app-window windowcontrols button.close:hover,
-.app-window .macos-window-controls button.close:hover {
+.app-window .macos-window-controls button.close:hover,
+window.floating-dialog windowcontrols button.close:hover,
+dialog.floating-dialog windowcontrols button.close:hover {
 	background-color: #ff5f57;
 	border-color: #e0443e;
 }
@@ -361,7 +369,9 @@ menubutton.glass-button > button:focus-visible {
 }
 
 .app-window windowcontrols button.close:active,
-.app-window .macos-window-controls button.close:active {
+.app-window .macos-window-controls button.close:active,
+window.floating-dialog windowcontrols button.close:active,
+dialog.floating-dialog windowcontrols button.close:active {
 	background-color: #bf4943;
 }
 
@@ -379,6 +389,10 @@ menubutton.glass-button > button:focus-visible {
 .app-window popover,
 .app-window popover.background,
 .app-window popover.menu,
+popover.menu,
+popover.menu.background,
+popover.floating-menu,
+popover.floating-menu.background,
 popover.glass-popover,
 popover.glass-popover.background,
 popover.menu.glass-popover,
@@ -396,6 +410,8 @@ popover.menu.floating-dialog,
 
 .app-window popover contents,
 .app-window popover.menu contents,
+popover.menu contents,
+popover.floating-menu contents,
 popover.glass-popover contents,
 popover.menu.glass-popover contents,
 popover.floating-dialog contents,
@@ -408,6 +424,20 @@ popover.menu.floating-dialog contents,
 	background-image: none;
 	border: none;
 	box-shadow: none;
+}
+
+/* Every PopoverMenu, including generated context menus and submenus, gets
+ * the same solid floating surface regardless of its widget ancestry. */
+popover.menu contents > *,
+popover.floating-menu contents > * {
+	min-width: 220px;
+	background-color: #2f2f2f;
+	background-image: none;
+	background-clip: padding-box;
+	border: 1px solid alpha(@window_fg_color, 0.10);
+	border-radius: 18px;
+	box-shadow: 0 18px 42px rgba(0, 0, 0, 0.24);
+	color: @window_fg_color;
 }
 
 popover.glass-popover contents > *,
@@ -427,7 +457,9 @@ popover.menu.floating-dialog contents > * {
 popover.glass-popover arrow,
 popover.menu.glass-popover arrow,
 popover.floating-dialog arrow,
-popover.menu.floating-dialog arrow {
+popover.menu.floating-dialog arrow,
+popover.menu arrow,
+popover.floating-menu arrow {
 	min-width: 0;
 	min-height: 0;
 	padding: 0;
@@ -500,6 +532,25 @@ dialog.add-server-dialog sheet {
 	background-color: #2f2f2f;
 	background-image: none;
 	color: @window_fg_color;
+}
+
+/* Keep the server-type selector visually inside its entry row instead of
+ * drawing a second, mismatched button surface around “Emby/Jellyfin”. */
+.add-server-dialog dropdown.server-type-selector,
+.add-server-dialog dropdown.server-type-selector > button {
+	background-color: transparent;
+	background-image: none;
+	border: none;
+	box-shadow: none;
+}
+
+.add-server-dialog dropdown.server-type-selector > button:hover {
+	background-color: @glass_hover;
+}
+
+.add-server-dialog dropdown.server-type-selector > button:active,
+.add-server-dialog dropdown.server-type-selector > button:checked {
+	background-color: @glass_pressed;
 }
 
 .account-settings .boxed-list,

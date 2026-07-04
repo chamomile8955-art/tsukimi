@@ -56,6 +56,7 @@ impl OnSameKey for TuObject {
         list_item
             .item()
             .set_playback_position_ticks(self.item().playback_position_ticks());
+        list_item.refresh_progress_metadata();
     }
 }
 

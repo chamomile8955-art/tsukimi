@@ -159,6 +159,7 @@ where
                             .halign(gtk::Align::Start)
                             .has_arrow(false)
                             .build();
+                        new_popover.add_css_class("floating-menu");
 
                         let menu_info = MenuInfo::new();
                         menu_info.set_title(obj.item().fmt_title());

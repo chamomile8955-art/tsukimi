@@ -9,7 +9,6 @@
         <property name="halign">center</property>
         <child>
           <object class="GtkButton">
-            <property name="tooltip-text" translatable="yes">Backward</property>
             <property name="icon-name">media-seek-backward-symbolic</property>
             <property name="action_name">mpv.backward</property>
             <layout>
@@ -24,7 +23,6 @@
         </child>
         <child>
           <object class="GtkButton" id="play_pause_button">
-            <property name="tooltip-text" translatable="yes">Play</property>
             <property name="icon_name">media-playback-start-symbolic</property>
             <property name="action_name">mpv.play-pause</property>
             <layout>
@@ -39,7 +37,6 @@
         </child>
         <child>
           <object class="GtkButton">
-            <property name="tooltip-text" translatable="yes">Forward</property>
             <property name="icon-name">media-seek-forward-symbolic</property>
             <property name="action_name">mpv.forward</property>
             <layout>

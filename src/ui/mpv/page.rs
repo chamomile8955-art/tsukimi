@@ -134,7 +134,6 @@ mod imp {
     };
 
     use adw::prelude::*;
-    use gettextrs::gettext;
     use glib::subclass::InitializingObject;
     use gtk::{
         CompositeTemplate,
@@ -419,14 +418,10 @@ mod imp {
             let menu_actions_play_pause_button = self.menu_actions.imp().play_pause_button.get();
             if paused {
                 play_pause_image.set_icon_name(Some("media-playback-start-symbolic"));
-                play_pause_image.set_tooltip_text(Some(&gettext("Play")));
                 menu_actions_play_pause_button.set_icon_name("media-playback-start-symbolic");
-                menu_actions_play_pause_button.set_tooltip_text(Some(&gettext("Play")));
             } else {
                 play_pause_image.set_icon_name(Some("media-playback-pause-symbolic"));
-                play_pause_image.set_tooltip_text(Some(&gettext("Pause")));
                 menu_actions_play_pause_button.set_icon_name("media-playback-pause-symbolic");
-                menu_actions_play_pause_button.set_tooltip_text(Some(&gettext("Pause")));
             }
             self.paused.set(paused);
         }
@@ -865,7 +860,10 @@ impl MPVPage {
         let track_id = self.imp().video.get_track_id(kind.property());
 
         let row = CheckRow::new();
-        row.set_title("None");
+        row.set_title(&match kind {
+            MpvTrackKind::Audio => gettext("No Audio"),
+            MpvTrackKind::Subtitle => gettext("No Subtitle"),
+        });
         if track_id == 0 {
             row.imp().check.get().set_active(true);
         }
@@ -881,8 +879,10 @@ impl MPVPage {
 
         for track in tracks {
             let row = CheckRow::new();
-            row.set_title(&track.title.replace('&', "&amp;"));
-            row.set_subtitle(&track.lang.replace('&', "&amp;"));
+            let title = glib::markup_escape_text(&track.title);
+            let language = glib::markup_escape_text(&track.lang);
+            row.set_title(&title);
+            row.set_subtitle(&language);
             row.imp().track_id.replace(track.id);
             let check = &row.imp().check.get();
             check.set_group(Some(none_check));
@@ -910,6 +910,13 @@ impl MPVPage {
         self.imp()
             .video
             .set_property(kind.property(), track.to_string());
+
+        match kind {
+            MpvTrackKind::Audio => self.imp().audio_tracks_menu_button.set_active(false),
+            MpvTrackKind::Subtitle => {
+                self.imp().subtitle_tracks_menu_button.set_active(false);
+            }
+        }
     }
 
     async fn load_video(&self, offset: isize) {
@@ -1518,6 +1525,8 @@ impl MPVPage {
                     .halign(gtk::Align::Start)
                     .has_arrow(false)
                     .build();
+                popover.add_css_class("floating-menu");
+                popover.add_css_class("mpv-player-popover");
                 popover.set_parent(self);
                 popover.add_child(&imp.menu_actions, "menu-actions");
                 let _ = imp.popover.replace(Some(popover));

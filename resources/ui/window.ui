@@ -469,13 +469,20 @@
                         <property name="name">mpv</property>
                         <property name="child">
                           <object class="AdwOverlaySplitView" id="mpv_view">
-                            <property name="collapsed">False</property>
+                            <property name="collapsed">True</property>
                             <property name="show-sidebar">False</property>
+                            <property name="pin-sidebar">False</property>
                             <property name="sidebar-position">end</property>
+                            <property name="min-sidebar-width">360</property>
+                            <property name="max-sidebar-width">420</property>
+                            <style>
+                              <class name="mpv-overlay-menu"/>
+                            </style>
                             <property name="sidebar">
                               <object class="AdwNavigationPage">
                                 <style>
                                   <class name="osd" />
+                                  <class name="mpv-sidebar-panel"/>
                                 </style>
                                 <property name="title" translatable="yes">Playlist</property>
                                 <property name="child">

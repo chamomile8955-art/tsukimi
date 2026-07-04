@@ -17,7 +17,10 @@ use crate::{
 };
 
 mod imp {
-    use std::ffi::c_void;
+    use std::{
+        cell::OnceCell as LocalOnceCell,
+        ffi::c_void,
+    };
 
     #[cfg(target_os = "linux")]
     use gdk_wayland::{
@@ -57,7 +60,7 @@ mod imp {
 
     #[derive(Default)]
     pub struct MPVGLArea {
-        pub mpv: TsukimiMPV,
+        pub mpv: LocalOnceCell<TsukimiMPV>,
 
         pub ctx: OnceCell<glow::Context>,
     }
@@ -75,7 +78,9 @@ mod imp {
         }
 
         fn dispose(&self) {
-            self.mpv().shutdown_event_thread();
+            if let Some(mpv) = self.mpv.get() {
+                mpv.shutdown_event_thread();
+            }
         }
     }
 
@@ -134,7 +139,7 @@ mod imp {
 
     impl MPVGLArea {
         pub fn mpv(&self) -> &TsukimiMPV {
-            &self.mpv
+            self.mpv.get_or_init(TsukimiMPV::default)
         }
 
         fn setup_mpv(&self, gl_context: GLContext, display: Display) {

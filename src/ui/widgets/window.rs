@@ -243,6 +243,7 @@ mod imp {
             obj.bind_about_action();
             obj.setup_server_context_menu();
             obj.setup_route_action();
+            obj.setup_mpv_sidebar_dismissal();
             obj.rebuild_main_menu();
         }
     }
@@ -1400,15 +1401,55 @@ impl Window {
     }
 
     pub fn view_playlist(&self) {
-        let imp = self.imp();
-        imp.mpv_view.set_show_sidebar(!imp.mpv_view.shows_sidebar());
-        imp.mpv_view_stack.set_visible_child_name("playlist");
+        self.toggle_mpv_sidebar_page("playlist");
     }
 
     pub fn view_control_sidebar(&self) {
+        self.toggle_mpv_sidebar_page("control-bar");
+    }
+
+    fn toggle_mpv_sidebar_page(&self, page: &str) {
         let imp = self.imp();
-        imp.mpv_view.set_show_sidebar(!imp.mpv_view.shows_sidebar());
-        imp.mpv_view_stack.set_visible_child_name("control-bar");
+        let page_is_visible =
+            imp.mpv_view_stack.visible_child_name().as_deref() == Some(page);
+
+        if imp.mpv_view.shows_sidebar() && page_is_visible {
+            imp.mpv_view.set_show_sidebar(false);
+            return;
+        }
+
+        imp.mpv_view_stack.set_visible_child_name(page);
+        imp.mpv_view.set_show_sidebar(true);
+    }
+
+    fn setup_mpv_sidebar_dismissal(&self) {
+        let view = self.imp().mpv_view.get();
+        let gesture = gtk::GestureClick::new();
+        gesture.set_propagation_phase(gtk::PropagationPhase::Capture);
+        gesture.connect_pressed(glib::clone!(
+            #[weak]
+            view,
+            move |gesture, _press_count, x, y| {
+                if !view.shows_sidebar() {
+                    return;
+                }
+
+                let Some(sidebar) = view.sidebar() else {
+                    return;
+                };
+                let clicked_inside_sidebar = view
+                    .pick(x, y, gtk::PickFlags::DEFAULT)
+                    .is_some_and(|widget| {
+                        widget == sidebar || widget.is_ancestor(&sidebar)
+                    });
+
+                if !clicked_inside_sidebar {
+                    view.set_show_sidebar(false);
+                    gesture.set_state(gtk::EventSequenceState::Claimed);
+                }
+            }
+        ));
+        view.add_controller(gesture);
     }
 
     #[template_callback]

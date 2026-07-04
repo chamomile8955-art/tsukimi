@@ -3,6 +3,9 @@
   <template parent="AdwNavigationPage" class="MPVControlSidebar">
     <property name="name">playlist</property>
     <property name="title" translatable="yes">Advanced Settings</property>
+    <style>
+      <class name="mpv-settings-panel"/>
+    </style>
     <property name="child">
       <object class="GtkScrolledWindow">
         <property name="hexpand">true</property>
