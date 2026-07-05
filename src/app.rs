@@ -301,12 +301,17 @@ mod imp {
     }
 
     fn restored_window_size() -> (i32, i32) {
-        let (width, height) = SETTINGS.window_dismension();
-        if width >= 900 && height >= 600 {
-            (width, height)
-        } else {
-            (1360, 860)
-        }
+        (1152, 648)
+    }
+
+    fn fit_window_to_monitor(window: &gtk::Window) -> Option<(gtk::gdk::Rectangle, i32, i32)> {
+        let surface = window.surface()?;
+        let monitor = surface.display().monitor_at_surface(&surface)?;
+        let geometry = monitor.geometry();
+        let width = (geometry.width() as f64 * 0.60).round() as i32;
+        let height = (geometry.height() as f64 * 0.60).round() as i32;
+        window.set_default_size(width, height);
+        Some((geometry, width, height))
     }
 
     #[cfg(target_os = "macos")]
@@ -333,6 +338,7 @@ mod imp {
             fn objc_msg_send_void(receiver: *mut c_void, selector: *mut c_void);
         }
 
+        let _ = fit_window_to_monitor(window);
         let Some(surface) = window.surface() else {
             return;
         };
@@ -354,8 +360,54 @@ mod imp {
         }
     }
 
-    #[cfg(not(target_os = "macos"))]
-    fn center_window(_window: &gtk::Window) {}
+    #[cfg(target_os = "windows")]
+    fn center_window(window: &gtk::Window) {
+        use std::ffi::c_void;
+
+        unsafe extern "C" {
+            fn gdk_win32_surface_get_handle(surface: *mut c_void) -> *mut c_void;
+        }
+        #[link(name = "user32")]
+        unsafe extern "system" {
+            fn SetWindowPos(
+                hwnd: *mut c_void, insert_after: *mut c_void, x: i32, y: i32, width: i32,
+                height: i32, flags: u32,
+            ) -> i32;
+        }
+
+        const SWP_NOZORDER: u32 = 0x0004;
+        const SWP_NOACTIVATE: u32 = 0x0010;
+
+        let Some((geometry, width, height)) = fit_window_to_monitor(window) else {
+            return;
+        };
+        let Some(surface) = window.surface() else {
+            return;
+        };
+        let hwnd =
+            unsafe { gdk_win32_surface_get_handle(surface.as_ptr().cast::<c_void>()) };
+        if hwnd.is_null() {
+            return;
+        }
+        let x = geometry.x() + (geometry.width() - width) / 2;
+        let y = geometry.y() + (geometry.height() - height) / 2;
+        unsafe {
+            SetWindowPos(
+                hwnd,
+                std::ptr::null_mut(),
+                x,
+                y,
+                width,
+                height,
+                SWP_NOZORDER | SWP_NOACTIVATE,
+            );
+        }
+    }
+
+    #[cfg(not(any(target_os = "macos", target_os = "windows")))]
+    fn center_window(window: &gtk::Window) {
+        let _ = fit_window_to_monitor(window);
+    }
 }
 
 glib::wrapper! {

@@ -106,7 +106,7 @@
                                             <property name="height-request">52</property>
                                             <property name="valign">center</property>
                                             <property name="icon-name">list-add-symbolic</property>
-                                            <property name="tooltip-text" translatable="yes">Add Server</property>
+                                            <property name="tooltip-text">添加服务器</property>
                                             <property name="action-name">win.add-server</property>
                                             <style>
                                               <class name="flat"/>
@@ -207,6 +207,18 @@
                                                 <property name="label" translatable="yes">Home</property>
                                                 <property name="action-name">win.home</property>
                                                 <property name="active">True</property>
+                                                <style>
+                                                  <class name="flat"/>
+                                                  <class name="pill"/>
+                                                  <class name="segment-button"/>
+                                                </style>
+                                              </object>
+                                            </child>
+                                            <child>
+                                              <object class="GtkToggleButton" id="recommend_nav">
+                                                <property name="label" translatable="yes">Recommend</property>
+                                                <property name="action-name">win.recommend</property>
+                                                <property name="group">home_nav</property>
                                                 <style>
                                                   <class name="flat"/>
                                                   <class name="pill"/>
@@ -409,6 +421,20 @@
                                                     </child>
                                                     <child>
                                                       <object class="GtkStackPage">
+                                                        <property name="name">recommendpage</property>
+                                                        <property name="child">
+                                                          <object class="AdwStatusPage">
+                                                            <property name="valign">center</property>
+                                                            <property name="vexpand">True</property>
+                                                            <property name="icon-name">starred-symbolic</property>
+                                                            <property name="title">AI 每日推荐</property>
+                                                            <property name="description">推荐入口已预留，后续将在这里接入每日 AI 影视推荐。</property>
+                                                          </object>
+                                                        </property>
+                                                      </object>
+                                                    </child>
+                                                    <child>
+                                                      <object class="GtkStackPage">
                                                         <property name="name">likedpage</property>
                                                         <property name="child">
                                                           <object class="AdwBin" id="likedpage"/>
@@ -435,7 +461,7 @@
                                                             <property name="description" translatable="yes">Add a server from the Sources sidebar to begin.</property>
                                                             <property name="child">
                                                               <object class="GtkButton">
-                                                                <property name="label" translatable="yes">Add Server</property>
+                                                                <property name="label">添加服务器</property>
                                                                 <property name="halign">center</property>
                                                                 <property name="action-name">win.add-server</property>
                                                                 <style>
@@ -482,6 +508,7 @@
                             </style>
                             <property name="sidebar">
                               <object class="AdwNavigationPage">
+                                <property name="overflow">hidden</property>
                                 <style>
                                   <class name="osd" />
                                   <class name="mpv-sidebar-panel"/>
@@ -543,6 +570,31 @@
                                             <property name="title" translatable="yes">Advanced Settings</property>
                                             <property name="child">
                                               <object class="MPVControlSidebar" id="mpv_control_sidebar"/>
+                                            </property>
+                                          </object>
+                                        </child>
+                                        <child>
+                                          <object class="AdwViewStackPage">
+                                            <property name="name">shortcuts</property>
+                                            <property name="icon-name">keyboard-shortcuts-symbolic</property>
+                                            <property name="title">快捷键</property>
+                                            <property name="child">
+                                              <object class="GtkScrolledWindow">
+                                                <property name="hscrollbar-policy">never</property>
+                                                <child>
+                                                  <object class="GtkBox" id="mpv_shortcuts_box">
+                                                    <property name="orientation">vertical</property>
+                                                    <property name="spacing">16</property>
+                                                    <property name="margin-start">20</property>
+                                                    <property name="margin-end">20</property>
+                                                    <property name="margin-top">18</property>
+                                                    <property name="margin-bottom">32</property>
+                                                    <style>
+                                                      <class name="mpv-shortcuts-panel"/>
+                                                    </style>
+                                                  </object>
+                                                </child>
+                                              </object>
                                             </property>
                                           </object>
                                         </child>

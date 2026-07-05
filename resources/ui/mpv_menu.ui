@@ -52,7 +52,7 @@
     <section>
       <item>
         <attribute name="label" translatable="yes">_Keyboard shortcuts</attribute>
-        <attribute name="action">win.show-help-overlay</attribute>
+        <attribute name="action">win.mpv-shortcuts</attribute>
         <attribute name="accel">F1</attribute>
       </item>
     </section>

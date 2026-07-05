@@ -22,7 +22,6 @@ use crate::ui::{
     widgets::utils::{
         TU_ITEM_BANNER_SIZE,
         TU_ITEM_VIDEO_SIZE,
-        run_time_ticks_to_label,
     },
 };
 
@@ -430,8 +429,9 @@ impl TuListItem {
 
         imp.folder_mark.set_visible(item.has_folder_mark());
 
-        imp.direct_play_button
-            .set_visible(item.has_direct_play_mark());
+        // Poster cards keep the lower-left corner visually empty. Playback
+        // remains available through activation/context actions.
+        imp.direct_play_button.set_visible(false);
 
         let title = item.fmt_title();
         imp.title.set_text(&title);
@@ -447,25 +447,9 @@ impl TuListItem {
     pub fn refresh_progress_metadata(&self) {
         let imp = self.imp();
         let item = self.item();
-        let show_playback = item.is_resume()
-            && item.playback_position_ticks() > 0
-            && item.run_time_ticks() > 0;
+        imp.playback_label.set_visible(false);
 
-        if show_playback {
-            let position = item
-                .playback_position_ticks()
-                .min(item.run_time_ticks());
-            imp.playback_label.set_text(&format!(
-                "▶ {} / {}",
-                run_time_ticks_to_label(position),
-                run_time_ticks_to_label(item.run_time_ticks())
-            ));
-        }
-        imp.playback_label.set_visible(show_playback);
-
-        let rating = (!show_playback)
-            .then(|| item.fmt_rating())
-            .flatten();
+        let rating = item.fmt_rating();
         if let Some(rating) = rating {
             imp.rating_label.set_text(&rating);
             imp.rating_label.set_visible(true);

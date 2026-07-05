@@ -227,6 +227,9 @@
                                             <child>
                                               <object class="GtkDropDown" id="namedropdown">
                                                 <property name="width-request">300</property>
+                                                <style>
+                                                  <class name="media-choice-dropdown"/>
+                                                </style>
                                               </object>
                                             </child>
                                           </object>
@@ -247,6 +250,9 @@
                                             <child>
                                               <object class="GtkDropDown" id="subdropdown">
                                                 <property name="width-request">300</property>
+                                                <style>
+                                                  <class name="media-choice-dropdown"/>
+                                                </style>
                                               </object>
                                             </child>
                                           </object>

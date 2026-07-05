@@ -49,8 +49,8 @@
 
 /* Floating panels */
 .app-window .window-frame {
-	border: 1px solid alpha(@window_fg_color, 0.10);
-	border-radius: 34px;
+	border: none;
+	border-radius: 0;
 	box-shadow: none;
 }
 
@@ -176,6 +176,19 @@ window.app-window.windows-native-frame .window-frame {
 	-gtk-icon-size: 18px;
 }
 
+.app-window button label,
+.app-window togglebutton label,
+.app-window menubutton > button label {
+	margin: 0;
+	padding: 0;
+	font-size: 0.95em;
+}
+
+.app-window button.circular label,
+.app-window togglebutton.circular label {
+	font-size: 0.9em;
+}
+
 .app-window dropdown > button {
 	min-height: 40px;
 	padding: 0 14px;
@@ -184,6 +197,17 @@ window.app-window.windows-native-frame .window-frame {
 	background-color: #202020;
 	background-image: none;
 	box-shadow: none;
+}
+
+.app-window dropdown.media-choice-dropdown > button {
+	min-height: 46px;
+	padding-left: 20px;
+	padding-right: 20px;
+}
+
+.app-window dropdown.media-choice-dropdown label {
+	font-size: 0.95em;
+	font-weight: 600;
 }
 
 .app-window button.suggested-action,

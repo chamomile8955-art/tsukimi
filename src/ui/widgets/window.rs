@@ -94,11 +94,15 @@ mod imp {
         pub mpv_view: TemplateChild<adw::OverlaySplitView>,
         #[template_child]
         pub mpv_view_stack: TemplateChild<adw::ViewStack>,
+        #[template_child]
+        pub mpv_shortcuts_box: TemplateChild<gtk::Box>,
 
         #[template_child]
         pub main_menu_button: TemplateChild<gtk::MenuButton>,
         #[template_child]
         pub home_nav: TemplateChild<gtk::ToggleButton>,
+        #[template_child]
+        pub recommend_nav: TemplateChild<gtk::ToggleButton>,
         #[template_child]
         pub favorites_nav: TemplateChild<gtk::ToggleButton>,
         #[template_child]
@@ -166,6 +170,9 @@ mod imp {
             klass.install_action("win.home", None, |obj, _, _| {
                 obj.homepage();
             });
+            klass.install_action("win.recommend", None, |obj, _, _| {
+                obj.recommendpage();
+            });
             klass.install_action("win.favorites", None, |obj, _, _| {
                 obj.likedpage();
             });
@@ -190,6 +197,9 @@ mod imp {
             klass.install_action("win.next-server", None, |obj, _, _| {
                 obj.select_next_server();
             });
+            klass.install_action("win.mpv-shortcuts", None, |obj, _, _| {
+                obj.view_shortcuts();
+            });
         }
 
         fn instance_init(obj: &InitializingObject<Self>) {
@@ -203,6 +213,9 @@ mod imp {
             self.parent_constructed();
 
             let obj = self.obj();
+            obj.connect_realize(|window| {
+                window.apply_startup_size();
+            });
             #[cfg(target_os = "windows")]
             {
                 obj.add_css_class("windows-native-frame");
@@ -221,6 +234,7 @@ mod imp {
             ));
             self.mpv_control_sidebar
                 .set_player(Some(&self.mpvnav.imp().video.get()));
+            obj.setup_mpv_shortcuts_panel();
 
             self.sidebar_breakpoint.connect_apply(glib::clone!(
                 #[weak]
@@ -322,6 +336,26 @@ static STARTUP_SERVER_RESTORE_RECORDED: std::sync::atomic::AtomicBool =
 
 #[template_callbacks]
 impl Window {
+    fn apply_startup_size(&self) {
+        let Some(surface) = self.surface() else {
+            return;
+        };
+        let Some(monitor) = surface.display().monitor_at_surface(&surface) else {
+            return;
+        };
+        let geometry = monitor.geometry();
+        let width = (geometry.width() as f64 * 0.60).round() as i32;
+        let height = (geometry.height() as f64 * 0.60).round() as i32;
+        self.set_default_size(width, height);
+        tracing::info!(
+            width,
+            height,
+            monitor_width = geometry.width(),
+            monitor_height = geometry.height(),
+            "Applied 60% startup window size"
+        );
+    }
+
     #[cfg(target_os = "windows")]
     fn configure_windows_native_frame(&self) {
         use std::ffi::c_void;
@@ -441,6 +475,7 @@ impl Window {
             circular_icon_button_count = circular_count,
             main_menu_classes = ?self.imp().main_menu_button.css_classes(),
             home_nav_classes = ?self.imp().home_nav.css_classes(),
+            recommend_nav_classes = ?self.imp().recommend_nav.css_classes(),
             favorites_nav_classes = ?self.imp().favorites_nav.css_classes(),
             search_nav_classes = ?self.imp().search_nav.css_classes(),
             "Runtime window template diagnostics"
@@ -486,7 +521,7 @@ impl Window {
             Some("win.server-delete"),
         );
         menu.append(
-            Some(&gettext("Add New Server")),
+            Some(&gettext("Add Server")),
             Some("win.add-server"),
         );
         self.imp().servers_section.set_menu_model(Some(&menu));
@@ -838,6 +873,21 @@ impl Window {
         imp.mainview.pop_to_tag("mainpage");
         imp.insidestack.set_visible_child_name("likedpage");
         imp.popbutton.set_visible(false);
+        imp.last_content_list_selection.replace(Some(2));
+    }
+
+    pub fn recommendpage(&self) {
+        if !self.has_active_server() {
+            self.show_no_server_state();
+            return;
+        }
+
+        let imp = self.imp();
+        imp.recommend_nav.set_active(true);
+        imp.navipage.set_title(&gettext("Recommend"));
+        imp.mainview.pop_to_tag("mainpage");
+        imp.insidestack.set_visible_child_name("recommendpage");
+        imp.popbutton.set_visible(false);
         imp.last_content_list_selection.replace(Some(1));
     }
 
@@ -856,7 +906,7 @@ impl Window {
         imp.mainview.pop_to_tag("mainpage");
         imp.insidestack.set_visible_child_name("searchpage");
         imp.popbutton.set_visible(false);
-        imp.last_content_list_selection.replace(Some(2));
+        imp.last_content_list_selection.replace(Some(3));
     }
 
     #[template_callback]
@@ -1057,44 +1107,23 @@ impl Window {
     }
 
     pub fn load_window_state(&self) {
-        let (saved_width, saved_height) = SETTINGS.window_dismension();
-        let (width, height) = if saved_width >= 900 && saved_height >= 600 {
-            (saved_width, saved_height)
-        } else {
-            (1360, 860)
-        };
+        let (width, height) = (1152, 648);
         self.set_default_size(width, height);
         tracing::info!(
-            saved_width,
-            saved_height,
             width,
             height,
-            "Startup window size restored"
+            "Using startup fallback size until monitor geometry is available"
         );
         crate::log_startup_timing("window restored");
-
-        if SETTINGS.is_maximized() {
-            self.maximize();
-        }
-
-        if SETTINGS.is_fullscreen() {
-            self.fullscreen();
-        }
 
         self.overlay_sidebar(SETTINGS.is_overlay());
     }
 
     pub fn new(app: &crate::Application) -> Self {
-        let (saved_width, saved_height) = SETTINGS.window_dismension();
-        let (width, height) = if saved_width >= 900 && saved_height >= 600 {
-            (saved_width, saved_height)
-        } else {
-            (1360, 860)
-        };
         Object::builder()
             .property("application", app)
-            .property("default-width", width)
-            .property("default-height", height)
+            .property("default-width", 1152)
+            .property("default-height", 648)
             .build()
     }
 
@@ -1403,6 +1432,87 @@ impl Window {
 
     pub fn view_control_sidebar(&self) {
         self.toggle_mpv_sidebar_page("control-bar");
+    }
+
+    pub fn view_shortcuts(&self) {
+        self.toggle_mpv_sidebar_page("shortcuts");
+    }
+
+    fn setup_mpv_shortcuts_panel(&self) {
+        const GROUPS: &[(&str, &[(&str, &str)])] = &[
+            (
+                "Playback",
+                &[
+                    ("Pause / Resume", "Space"),
+                    ("Seek Forward 5 Seconds", "→"),
+                    ("Seek Backward 5 Seconds", "←"),
+                    ("Seek Forward 60 Seconds", "↑"),
+                    ("Seek Backward 60 Seconds", "↓"),
+                    ("Step One Frame Forward", "."),
+                    ("Step One Frame Backward", ","),
+                ],
+            ),
+            (
+                "Playback Speed",
+                &[
+                    ("Decrease Speed by 10%", "["),
+                    ("Increase Speed by 10%", "]"),
+                    ("Halve Playback Speed", "{"),
+                    ("Double Playback Speed", "}"),
+                    ("Reset Playback Speed", "Backspace"),
+                ],
+            ),
+            (
+                "Volume",
+                &[
+                    ("Increase Volume", "0"),
+                    ("Decrease Volume", "9"),
+                    ("Mute / Unmute", "M"),
+                ],
+            ),
+            (
+                "Subtitles",
+                &[
+                    ("Cycle Subtitle Tracks Forward", "J"),
+                    ("Cycle Subtitle Tracks Backward", "Shift+J"),
+                    ("Toggle Subtitle Visibility", "V"),
+                    ("Decrease Subtitle Delay", "Z"),
+                    ("Increase Subtitle Delay", "X"),
+                ],
+            ),
+            (
+                "General",
+                &[
+                    ("Previous Chapter", "Page Up"),
+                    ("Next Chapter", "Page Down"),
+                    ("Toggle Fullscreen", "F"),
+                    ("Display Statistics", "I"),
+                    ("Quit", "Q"),
+                ],
+            ),
+        ];
+
+        let container = self.imp().mpv_shortcuts_box.get();
+        for (title, shortcuts) in GROUPS {
+            let group = adw::PreferencesGroup::builder()
+                .title(gettext(*title))
+                .build();
+            group.add_css_class("mpv-settings-group");
+
+            for (label, accelerator) in *shortcuts {
+                let row = adw::ActionRow::builder()
+                    .title(gettext(*label))
+                    .build();
+                let key = gtk::Label::builder()
+                    .label(*accelerator)
+                    .valign(gtk::Align::Center)
+                    .build();
+                key.add_css_class("shortcut-key");
+                row.add_suffix(&key);
+                group.add(&row);
+            }
+            container.append(&group);
+        }
     }
 
     fn toggle_mpv_sidebar_page(&self, page: &str) {

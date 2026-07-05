@@ -4,7 +4,7 @@
     <property name="content-width">520</property>
     <property name="content-height">760</property>
     <property name="presentation-mode">floating</property>
-    <property name="title" translatable="yes">Add a New Server</property>
+    <property name="title">添加服务器</property>
     <style>
       <class name="glass-dialog"/>
       <class name="floating-dialog"/>
@@ -23,7 +23,7 @@
             <child>
               <object class="AdwNavigationPage" id="nav">
                 <property name="tag">main</property>
-                <property name="title" translatable="yes">Add a New Server</property>
+                <property name="title">添加服务器</property>
                 <property name="child">
                   <object class="AdwToolbarView">
                     <child type="top">

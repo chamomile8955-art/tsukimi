@@ -624,8 +624,8 @@ window.app-window.solid-csd {
 
 /* Floating panels */
 .app-window .window-frame {
-  border: 1px solid @glass_border;
-  border-radius: 34px;
+  border: none;
+  border-radius: 0;
   box-shadow: none;
 }
 
@@ -755,6 +755,19 @@ window.app-window.windows-native-frame .window-frame {
   -gtk-icon-size: 18px;
 }
 
+.app-window button label,
+.app-window togglebutton label,
+.app-window menubutton > button label {
+  margin: 0;
+  padding: 0;
+  font-size: 0.95em;
+}
+
+.app-window button.circular label,
+.app-window togglebutton.circular label {
+  font-size: 0.9em;
+}
+
 .app-window dropdown > button {
   min-height: 40px;
   padding: 0 14px;
@@ -763,6 +776,17 @@ window.app-window.windows-native-frame .window-frame {
   background-color: @glass_fill;
   background-image: none;
   box-shadow: none;
+}
+
+.app-window dropdown.media-choice-dropdown > button {
+  min-height: 46px;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.app-window dropdown.media-choice-dropdown label {
+  font-size: 0.95em;
+  font-weight: 600;
 }
 
 .app-window button.suggested-action,
@@ -1556,6 +1580,13 @@ popover.floating-menu separator {
   background-color: rgba(255, 255, 255, 0.16);
 }
 
+.app-window .mpv-player button.mpv-info-button,
+.app-window .mpv-player button.mpv-info-button label,
+.app-window .mpv-player button.mpv-info-button image,
+.app-window .mpv-player .speed-label {
+  color: #f5f6f7;
+}
+
 .app-window .mpv-player windowcontrols button {
   border-color: rgba(255, 255, 255, 0.10);
   background-color: rgba(255, 255, 255, 0.34);
@@ -1676,10 +1707,12 @@ popover.track-list-popover checkbutton {
 /* The playback utility pane is an overlay menu and therefore uses the
  * player's dark surface in both application color schemes. */
 .app-window overlay-split-view.mpv-overlay-menu > widget.background {
-  background-color: #1a1b1d;
+  margin: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 24px;
+  background-color: rgba(16, 17, 20, 0.84);
   background-image: none;
-  border-left: 1px solid rgba(255, 255, 255, 0.10);
-  box-shadow: -18px 0 42px rgba(0, 0, 0, 0.34);
+  box-shadow: 0 20px 52px rgba(0, 0, 0, 0.42);
 }
 
 .app-window .mpv-sidebar-panel,
@@ -1689,8 +1722,8 @@ popover.track-list-popover checkbutton {
 .app-window .mpv-sidebar-panel scrolledwindow,
 .app-window .mpv-sidebar-panel viewport,
 .app-window .mpv-settings-panel {
-  background-color: #151619;
-  background-image: linear-gradient(to bottom, #1b1c20, #151619 220px);
+  background-color: transparent;
+  background-image: none;
   color: #f5f6f7;
 }
 
@@ -1735,9 +1768,22 @@ popover.track-list-popover checkbutton {
 
 .app-window .mpv-settings-scroller,
 .app-window .mpv-settings-scroller viewport,
-.app-window .mpv-settings-content {
+.app-window .mpv-settings-content,
+.app-window .mpv-shortcuts-panel {
   background-color: transparent;
   background-image: none;
+}
+
+.app-window .shortcut-key {
+  min-width: 32px;
+  min-height: 24px;
+  padding: 2px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.09);
+  color: #f5f6f7;
+  font-size: 0.84em;
+  font-weight: 650;
 }
 
 .app-window .mpv-settings-group {
