@@ -41,27 +41,36 @@
                               </object>
                             </child>
                             <child>
-                              <object class="GtkButton">
-                                <property name="valign">center</property>
-                                <property name="icon-name">view-refresh-symbolic</property>
-                                <property name="tooltip-text" translatable="yes">Restart Server</property>
-                                <signal name="clicked" handler="on_restart" swapped="yes"/>
+                              <object class="GtkBox">
+                                <property name="orientation">horizontal</property>
+                                <property name="spacing">0</property>
                                 <style>
-                                  <class name="accent" />
-                                  <class name="glass-button" />
+                                  <class name="control-group"/>
                                 </style>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="GtkButton">
-                                <property name="valign">center</property>
-                                <property name="icon-name">system-shutdown-symbolic</property>
-                                <property name="tooltip-text" translatable="yes">Shutdown Server</property>
-                                <signal name="clicked" handler="on_shutdown" swapped="yes"/>
-                                <style>
-                                  <class name="accent" />
-                                  <class name="glass-button" />
-                                </style>
+                                <child>
+                                  <object class="GtkButton">
+                                    <property name="valign">center</property>
+                                    <property name="icon-name">view-refresh-symbolic</property>
+                                    <property name="tooltip-text" translatable="yes">Restart Server</property>
+                                    <signal name="clicked" handler="on_restart" swapped="yes"/>
+                                    <style>
+                                      <class name="accent" />
+                                      <class name="glass-button" />
+                                    </style>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkButton">
+                                    <property name="valign">center</property>
+                                    <property name="icon-name">system-shutdown-symbolic</property>
+                                    <property name="tooltip-text" translatable="yes">Shutdown Server</property>
+                                    <signal name="clicked" handler="on_shutdown" swapped="yes"/>
+                                    <style>
+                                      <class name="accent" />
+                                      <class name="glass-button" />
+                                    </style>
+                                  </object>
+                                </child>
                               </object>
                             </child>
                           </object>

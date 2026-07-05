@@ -312,6 +312,8 @@ impl ServerPanel {
                 .build();
 
             button.add_css_class("accent");
+            button.add_css_class("circular");
+            button.add_css_class("glass-button");
 
             button.connect_clicked(glib::clone!(
                 #[weak(rename_to = obj)]

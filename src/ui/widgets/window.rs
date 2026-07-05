@@ -203,6 +203,13 @@ mod imp {
             self.parent_constructed();
 
             let obj = self.obj();
+            #[cfg(target_os = "windows")]
+            {
+                obj.add_css_class("windows-native-frame");
+                obj.connect_realize(|window| {
+                    window.configure_windows_native_frame();
+                });
+            }
             obj.log_ui_runtime_diagnostics();
 
             let store = gtk::gio::ListStore::new::<TuObject>();
@@ -315,6 +322,51 @@ static STARTUP_SERVER_RESTORE_RECORDED: std::sync::atomic::AtomicBool =
 
 #[template_callbacks]
 impl Window {
+    #[cfg(target_os = "windows")]
+    fn configure_windows_native_frame(&self) {
+        use std::ffi::c_void;
+
+        #[link(name = "dwmapi")]
+        unsafe extern "system" {
+            fn DwmSetWindowAttribute(
+                hwnd: *mut c_void, attribute: u32, value: *const c_void, value_size: u32,
+            ) -> i32;
+        }
+
+        unsafe extern "C" {
+            fn gdk_win32_surface_get_handle(surface: *mut c_void) -> *mut c_void;
+        }
+
+        const DWMWA_WINDOW_CORNER_PREFERENCE: u32 = 33;
+        const DWMWCP_ROUND: i32 = 2;
+
+        let Some(surface) = self.surface() else {
+            return;
+        };
+        let hwnd =
+            unsafe { gdk_win32_surface_get_handle(surface.as_ptr().cast::<c_void>()) };
+        if hwnd.is_null() {
+            tracing::warn!("Unable to get the Win32 window handle for native rounded corners");
+            return;
+        }
+
+        let preference = DWMWCP_ROUND;
+        let result = unsafe {
+            DwmSetWindowAttribute(
+                hwnd,
+                DWMWA_WINDOW_CORNER_PREFERENCE,
+                (&preference as *const i32).cast::<c_void>(),
+                std::mem::size_of_val(&preference) as u32,
+            )
+        };
+        if result < 0 {
+            tracing::debug!(
+                hresult = result,
+                "Windows DWM rounded corners are unavailable; using the system default frame"
+            );
+        }
+    }
+
     fn sync_window_state_classes(&self) {
         if self.is_maximized() {
             self.add_css_class("maximized");

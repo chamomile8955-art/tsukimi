@@ -595,7 +595,7 @@ impl AccountSettings {
             let edit_button = gtk::Button::builder()
                 .icon_name("document-edit-symbolic")
                 .valign(gtk::Align::Center)
-                .css_classes(["flat"])
+                .css_classes(["flat", "circular", "glass-button"])
                 .build();
 
             edit_button.connect_clicked(glib::clone!(
@@ -626,7 +626,7 @@ impl AccountSettings {
             let delete_button = gtk::Button::builder()
                 .icon_name("user-trash-symbolic")
                 .valign(gtk::Align::Center)
-                .css_classes(["flat"])
+                .css_classes(["flat", "circular", "glass-button"])
                 .build();
 
             delete_button.connect_clicked(glib::clone!(

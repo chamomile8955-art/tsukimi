@@ -637,6 +637,14 @@ window.app-window.solid-csd {
   box-shadow: none;
 }
 
+/* Windows owns the outer frame geometry. Keeping the application-drawn
+ * 34px clip here creates a second outline inside the native DWM frame. */
+window.app-window.windows-native-frame .window-frame {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
 .app-window .source-panel,
 .app-window .main-surface {
   background-color: @tsukimi_panel_bg_light;
@@ -739,7 +747,7 @@ window.app-window.solid-csd {
   min-height: 40px;
   padding: 0 12px;
   border: 1px solid alpha(@glass_border, 0.72);
-  border-radius: 12px;
+  border-radius: 999px;
   background-color: @glass_fill;
   background-image: none;
   background-clip: padding-box;
@@ -747,13 +755,47 @@ window.app-window.solid-csd {
   -gtk-icon-size: 18px;
 }
 
+.app-window dropdown > button {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid alpha(@glass_border, 0.72);
+  border-radius: 999px;
+  background-color: @glass_fill;
+  background-image: none;
+  box-shadow: none;
+}
+
 .app-window button.suggested-action,
 .app-window button.accent,
 .app-window togglebutton.suggested-action,
 .app-window togglebutton.accent {
-  background-color: @accent_bg_color;
-  border-color: alpha(@accent_color, 0.72);
-  color: @accent_fg_color;
+  background-color: rgba(255, 255, 255, 0.78);
+  border-color: alpha(@window_fg_color, 0.10);
+  color: @window_fg_color;
+  border-radius: 999px;
+}
+
+.app-window row.suggested-action,
+.account-settings row.suggested-action,
+.glass-dialog row.suggested-action {
+  border: 1px solid alpha(@window_fg_color, 0.10);
+  border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.78);
+  background-image: none;
+  box-shadow: none;
+  color: @window_fg_color;
+}
+
+.app-window row.suggested-action:hover,
+.account-settings row.suggested-action:hover,
+.glass-dialog row.suggested-action:hover {
+  background-color: rgba(0, 0, 0, 0.075);
+}
+
+.app-window row.suggested-action:active,
+.account-settings row.suggested-action:active,
+.glass-dialog row.suggested-action:active {
+  background-color: rgba(0, 0, 0, 0.11);
 }
 
 .app-window button.destructive-action {
@@ -885,6 +927,79 @@ menubutton.glass-button > button:focus-visible {
   padding: 0;
 }
 
+/* Reusable grouped controls. The outer capsule owns the outline while its
+ * children only paint hover and selected states. */
+.app-window .segmented-control,
+.app-window .control-group,
+.app-window box.linked {
+  padding: 5px;
+  border: 1px solid alpha(@window_fg_color, 0.06);
+  border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.72);
+  background-image: none;
+  box-shadow: none;
+}
+
+.app-window .segmented-control > button,
+.app-window stackswitcher.segmented-control > button,
+.app-window .control-group > button,
+.app-window .control-group > togglebutton,
+.app-window .control-group > menubutton > button,
+.app-window box.linked > button,
+.app-window box.linked > togglebutton,
+.app-window box.linked > menubutton > button {
+  min-height: 42px;
+  margin: 0;
+  padding-left: 18px;
+  padding-right: 18px;
+  border: none;
+  border-radius: 999px;
+  background-color: transparent;
+  background-image: none;
+  box-shadow: none;
+}
+
+.app-window .segmented-control > button:hover,
+.app-window stackswitcher.segmented-control > button:hover,
+.app-window .control-group > button:hover,
+.app-window .control-group > togglebutton:hover,
+.app-window .control-group > menubutton > button:hover,
+.app-window box.linked > button:hover,
+.app-window box.linked > togglebutton:hover,
+.app-window box.linked > menubutton > button:hover {
+  background-color: rgba(0, 0, 0, 0.055);
+}
+
+.app-window .segmented-control > button:checked,
+.app-window stackswitcher.segmented-control > button:checked,
+.app-window .control-group > togglebutton:checked,
+.app-window box.linked > togglebutton:checked {
+  background-color: rgba(0, 0, 0, 0.095);
+}
+
+.app-window .control-group > button,
+.app-window .control-group > menubutton,
+.app-window box.linked > button,
+.app-window box.linked > menubutton {
+  min-width: 42px;
+}
+
+.app-window box.linked > entry {
+  min-height: 42px;
+  border: none;
+  border-radius: 999px;
+  background-color: transparent;
+  background-image: none;
+  box-shadow: none;
+}
+
+.app-window button.tag-button {
+  min-height: 40px;
+  padding-left: 16px;
+  padding-right: 16px;
+  border-radius: 999px;
+}
+
 .app-window button,
 .app-window button label,
 .app-window button.pill label,
@@ -901,6 +1016,19 @@ menubutton.glass-button > button:focus-visible {
 .app-window button image,
 .app-window togglebutton image,
 .app-window menubutton > button image {
+  color: @window_fg_color;
+}
+
+.app-window button.suggested-action,
+.app-window button.suggested-action label,
+.app-window button.suggested-action image,
+.app-window button.accent,
+.app-window button.accent label,
+.app-window button.accent image,
+.app-window togglebutton.suggested-action,
+.app-window togglebutton.suggested-action label,
+.app-window togglebutton.accent,
+.app-window togglebutton.accent label {
   color: @window_fg_color;
 }
 
@@ -1194,8 +1322,17 @@ dialog.add-server-dialog sheet {
   min-height: 40px;
   padding: 0 12px;
   border: 1px solid @glass_border;
-  border-radius: 12px;
+  border-radius: 999px;
   background-color: @glass_fill;
+}
+
+.account-settings button,
+.glass-dialog button,
+window.floating-dialog button,
+dialog.floating-dialog button {
+  border-radius: 999px;
+  background-image: none;
+  box-shadow: none;
 }
 
 .account-settings button.flat:hover,
@@ -1210,7 +1347,10 @@ dialog.add-server-dialog sheet {
 
 .account-settings button.suggested-action,
 .glass-dialog button.suggested-action {
-  border-radius: 10px;
+  border: 1px solid alpha(@window_fg_color, 0.10);
+  border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.78);
+  color: @window_fg_color;
   box-shadow: none;
 }
 
@@ -1245,13 +1385,14 @@ popover.glass-popover label {
 .media-playback-badge {
   padding: 3px 7px;
   border-radius: 8px;
-  background-color: rgba(14, 15, 17, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.20);
+  background-color: rgba(8, 9, 11, 0.92);
   background-image: none;
   color: #ffffff;
   font-size: 0.88em;
-  font-weight: 600;
-  text-shadow: none;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.24);
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.72);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.32);
 }
 
 .media-card-progress > trough {
@@ -1548,9 +1689,73 @@ popover.track-list-popover checkbutton {
 .app-window .mpv-sidebar-panel scrolledwindow,
 .app-window .mpv-sidebar-panel viewport,
 .app-window .mpv-settings-panel {
-  background-color: #1a1b1d;
-  background-image: none;
+  background-color: #151619;
+  background-image: linear-gradient(to bottom, #1b1c20, #151619 220px);
   color: #f5f6f7;
+}
+
+.app-window .mpv-sidebar-panel headerbar {
+  min-height: 68px;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background-color: rgba(255, 255, 255, 0.025);
+  background-image: none;
+  box-shadow: none;
+}
+
+.app-window .mpv-sidebar-switcher {
+  padding: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.055);
+  background-image: none;
+}
+
+.app-window .mpv-sidebar-switcher button,
+.app-window .mpv-sidebar-switcher togglebutton {
+  min-height: 38px;
+  margin: 0;
+  padding: 0 14px;
+  border: none;
+  border-radius: 999px;
+  background-color: transparent;
+  background-image: none;
+  box-shadow: none;
+}
+
+.app-window .mpv-sidebar-switcher button:hover,
+.app-window .mpv-sidebar-switcher togglebutton:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.app-window .mpv-sidebar-switcher button:checked,
+.app-window .mpv-sidebar-switcher togglebutton:checked {
+  background-color: rgba(255, 255, 255, 0.14);
+}
+
+.app-window .mpv-settings-scroller,
+.app-window .mpv-settings-scroller viewport,
+.app-window .mpv-settings-content {
+  background-color: transparent;
+  background-image: none;
+}
+
+.app-window .mpv-settings-group {
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 20px;
+  background-color: rgba(255, 255, 255, 0.045);
+  background-image: none;
+  box-shadow: none;
+}
+
+.app-window .mpv-settings-group > label,
+.app-window .mpv-settings-group .heading {
+  margin-left: 4px;
+  margin-bottom: 8px;
+  color: rgba(245, 246, 247, 0.88);
+  font-size: 1.04em;
+  font-weight: 650;
 }
 
 .app-window .mpv-sidebar-panel label,
@@ -1568,6 +1773,8 @@ popover.track-list-popover checkbutton {
 .app-window .mpv-settings-panel togglebutton,
 .app-window .mpv-settings-panel spinbutton,
 .app-window .mpv-settings-panel entry {
+  min-height: 38px;
+  border-radius: 999px;
   background-color: rgba(255, 255, 255, 0.06);
   background-image: none;
   border-color: rgba(255, 255, 255, 0.10);
@@ -1590,6 +1797,9 @@ popover.track-list-popover checkbutton {
 }
 
 .app-window .mpv-settings-panel switch {
+  min-width: 42px;
+  min-height: 24px;
+  border-radius: 999px;
   background-color: rgba(255, 255, 255, 0.12);
   background-image: none;
   border-color: rgba(255, 255, 255, 0.10);
@@ -1603,15 +1813,25 @@ popover.track-list-popover checkbutton {
 .app-window .mpv-settings-panel row,
 .app-window .mpv-sidebar-panel .boxed-list,
 .app-window .mpv-settings-panel .boxed-list {
-  background-color: #242629;
+  background-color: rgba(255, 255, 255, 0.055);
   background-image: none;
   border-color: rgba(255, 255, 255, 0.10);
+  border-radius: 14px;
   color: #f5f6f7;
+}
+
+.app-window .mpv-settings-group .boxed-list {
+  border: none;
+  background-color: transparent;
+}
+
+.app-window .mpv-settings-group row {
+  min-height: 52px;
 }
 
 .app-window .mpv-sidebar-panel row:hover,
 .app-window .mpv-settings-panel row:hover {
-  background-color: #2d3034;
+  background-color: rgba(255, 255, 255, 0.09);
 }
 
 /* Fullscreen playback must cover the native content area without an inner

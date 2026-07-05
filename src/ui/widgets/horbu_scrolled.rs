@@ -118,6 +118,7 @@ impl HorbuScrolled {
                     }
 
                     let button = gtk::Button::builder().child(&buttoncontent).build();
+                    button.add_css_class("tag-button");
 
                     let type_ = type_.to_string();
                     button.connect_clicked(glib::clone!(
@@ -164,6 +165,7 @@ impl HorbuScrolled {
                         .build();
 
                     let button = gtk::Button::builder().child(&buttoncontent).build();
+                    button.add_css_class("tag-button");
 
                     button.connect_clicked(move |_| {
                         let _ = gio::AppInfo::launch_default_for_uri(

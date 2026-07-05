@@ -313,6 +313,11 @@
                             <property name="halign">start</property>
                             <signal name="clicked" handler="on_season_view_more_clicked" swapped="yes"/>
                             <property name="tooltip-text" translatable="yes">View this season</property>
+                            <style>
+                              <class name="flat"/>
+                              <class name="circular"/>
+                              <class name="glass-button"/>
+                            </style>
                           </object>
                         </child>
                         <child>

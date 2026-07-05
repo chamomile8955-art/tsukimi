@@ -142,8 +142,8 @@ mod imp {
             self.mpv.get_or_init(TsukimiMPV::default)
         }
 
-        fn setup_mpv(&self, gl_context: GLContext, display: Display) {
-            let mut render_params = vec![
+        fn setup_mpv(&self, gl_context: GLContext, _display: Display) {
+            let render_params = vec![
                 RenderParam::ApiType(RenderParamApiType::OpenGl),
                 RenderParam::InitParams(OpenGLInitParams {
                     get_proc_address,

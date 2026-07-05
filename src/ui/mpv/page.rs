@@ -143,10 +143,9 @@ mod imp {
     };
     #[cfg(target_os = "linux")]
     use mpris_server::LocalServer;
-    use once_cell::sync::OnceCell;
+    
 
     use crate::{
-        APP_ID,
         client::structs::{
             Back,
             MediaSegment,
@@ -1600,7 +1599,7 @@ impl MPVPage {
         self.notify_mpris_paused();
     }
 
-    pub fn notify_volume_changed(&self, volume: f64) {
+    pub fn notify_volume_changed(&self, _volume: f64) {
         #[cfg(target_os = "linux")]
         self.notify_mpris_volume(volume);
     }
@@ -1610,7 +1609,7 @@ impl MPVPage {
         self.notify_mpris_stopped();
     }
 
-    pub fn notify_seeked(&self, position: i64) {
+    pub fn notify_seeked(&self, _position: i64) {
         #[cfg(target_os = "linux")]
         self.notify_mpris_seeked(position);
     }

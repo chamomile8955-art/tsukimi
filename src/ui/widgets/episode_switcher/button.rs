@@ -36,6 +36,7 @@ pub(crate) mod imp {
             let length = obj.length();
 
             obj.add_css_class("flat");
+            obj.add_css_class("segment-button");
             obj.set_label(&format!("{} - {}", start_index + 1, start_index + length));
         }
     }

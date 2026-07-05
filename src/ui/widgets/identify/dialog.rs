@@ -150,6 +150,7 @@ impl IdentifyDialog {
                 let button = gtk::Button::builder()
                     .icon_name("external-link-symbolic")
                     .valign(gtk::Align::Center)
+                    .css_classes(["flat", "circular", "glass-button"])
                     .build();
 
                 let url = url.to_owned();

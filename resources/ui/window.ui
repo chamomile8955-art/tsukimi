@@ -196,10 +196,11 @@
                                         <property name="title-widget">
                                           <object class="GtkBox">
                                             <property name="orientation">horizontal</property>
-                                            <property name="spacing">8</property>
+                                            <property name="spacing">0</property>
                                             <property name="valign">center</property>
                                             <style>
                                               <class name="top-navigation"/>
+                                              <class name="segmented-control"/>
                                             </style>
                                             <child>
                                               <object class="GtkToggleButton" id="home_nav">
@@ -494,6 +495,9 @@
                                         <property name="title-widget">
                                           <object class="AdwViewSwitcher">
                                             <property name="stack">mpv_view_stack</property>
+                                            <style>
+                                              <class name="mpv-sidebar-switcher"/>
+                                            </style>
                                           </object>
                                         </property>
                                         <style>

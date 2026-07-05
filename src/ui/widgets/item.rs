@@ -334,7 +334,7 @@ impl ItemPage {
                 #[strong]
                 series_id,
                 async move {
-                    let Some(intro) = obj.set_shows_next_up(&series_id).await else {
+                    let Some(intro) = obj.set_first_episode(&series_id).await else {
                         obj.imp()
                             .buttoncontent
                             .set_label(&gettext("Select an episode"));
@@ -382,7 +382,7 @@ impl ItemPage {
     pub async fn update_intro(&self) {
         let item = self.item();
 
-        if item.item_type() == "Series" || item.item_type() == "Episode" {
+        if item.item_type() == "Series" {
             let series_id = item.series_id().unwrap_or(item.id());
 
             spawn(glib::clone!(
@@ -391,7 +391,7 @@ impl ItemPage {
                 #[strong]
                 series_id,
                 async move {
-                    let Some(intro) = obj.set_shows_next_up(&series_id).await else {
+                    let Some(intro) = obj.set_first_episode(&series_id).await else {
                         return;
                     };
                     obj.set_intro::<false>(&intro).await;
@@ -662,30 +662,8 @@ impl ItemPage {
         self.set_episode_list(list.items);
     }
 
-    async fn set_shows_next_up(&self, id: &str) -> Option<TuItem> {
+    async fn set_first_episode(&self, id: &str) -> Option<TuItem> {
         let id = id.to_string();
-        let next_up_id = id.clone();
-        match spawn_tokio(async move {
-            JELLYFIN_CLIENT.get_shows_next_up(&next_up_id).await
-        })
-        .await
-        {
-            Ok(next_up) => {
-                if let Some(next_up_item) = next_up.items.into_iter().next() {
-                    let tu_item = TuItem::from_simple(next_up_item);
-                    self.set_now_item::<false>(&tu_item);
-                    return Some(tu_item);
-                }
-            }
-            Err(error) => {
-                tracing::warn!(
-                    series_id = %id,
-                    %error,
-                    "Unable to load next-up episode; falling back to the first episode"
-                );
-            }
-        }
-
         let seasons_id = id.clone();
         let mut seasons = match spawn_tokio(async move {
             JELLYFIN_CLIENT.get_season_list(&seasons_id).await
@@ -936,8 +914,27 @@ impl ItemPage {
                         &names,
                     );
                     imp.seasonshortu.set_items(season_list.to_owned());
+                    let first_season = if self.item().item_type() == "Series" {
+                        season_list
+                            .iter()
+                            .enumerate()
+                            .filter(|(_, season)| season.index_number.unwrap_or(0) > 0)
+                            .min_by_key(|(_, season)| season.index_number.unwrap_or(u32::MAX))
+                            .map(|(index, _)| index + 1)
+                            .unwrap_or(1)
+                            .min(season_list.len())
+                    } else {
+                        // Opening an individual episode keeps the legacy
+                        // current-season selection and scroll behavior.
+                        0
+                    };
                     imp.season_list_vec.replace(season_list);
-                    self.on_season_selected(None, imp.seasonlist.get()).await;
+                    let first_season = first_season as u32;
+                    if imp.seasonlist.selected() == first_season {
+                        self.on_season_selected(None, imp.seasonlist.get()).await;
+                    } else {
+                        imp.seasonlist.set_selected(first_season);
+                    }
                 }
                 CacheEvent::Error(e) => {
                     self.toast(e.to_user_facing());

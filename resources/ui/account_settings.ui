@@ -527,6 +527,10 @@
               <object class="GtkButton">
                 <property name="label" translatable="yes">Cancel</property>
                 <property name="action-name">window.close</property>
+                <style>
+                  <class name="flat"/>
+                  <class name="glass-button"/>
+                </style>
               </object>
             </child>
             <child type="end">
@@ -637,6 +641,10 @@
               <object class="GtkButton">
                 <property name="label" translatable="yes">Cancel</property>
                 <property name="action-name">window.close</property>
+                <style>
+                  <class name="flat"/>
+                  <class name="glass-button"/>
+                </style>
               </object>
             </child>
             <child type="end">

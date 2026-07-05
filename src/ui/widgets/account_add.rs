@@ -5,7 +5,6 @@ use gettextrs::gettext;
 use glib::Object;
 use gtk::{
     glib,
-    prelude::*,
     subclass::prelude::*,
     template_callbacks,
 };
@@ -422,8 +421,8 @@ impl AccountWindow {
                     .expect("Failed to update preferred server name");
             }
 
-            if editing_active {
-                if let Err(error) = JELLYFIN_CLIENT.init(&account).await {
+            if editing_active
+                && let Err(error) = JELLYFIN_CLIENT.init(&account).await {
                     tracing::warn!(
                         server = %account.servername,
                         %error,
@@ -431,7 +430,6 @@ impl AccountWindow {
                     );
                     imp.stack.toast(error.to_string());
                 }
-            }
             self.close_dialog(&gettext("Server edited successfully"))
                 .await;
             return;

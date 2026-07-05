@@ -16,6 +16,10 @@
               <object class="GtkStackSwitcher">
                 <property name="halign">center</property>
                 <property name="stack">stack</property>
+                <style>
+                  <class name="segmented-control"/>
+                  <class name="library-tabs"/>
+                </style>
               </object>
             </child>
             <style>

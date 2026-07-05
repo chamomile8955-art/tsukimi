@@ -62,6 +62,12 @@
 	box-shadow: none;
 }
 
+window.app-window.windows-native-frame .window-frame {
+	border: none;
+	border-radius: 0;
+	box-shadow: none;
+}
+
 .app-window .source-panel,
 .app-window .main-surface {
 	background-color: #181818;
@@ -162,7 +168,7 @@
 	min-height: 40px;
 	padding: 0 12px;
 	border: 1px solid alpha(@window_fg_color, 0.10);
-	border-radius: 12px;
+	border-radius: 999px;
 	background-color: #202020;
 	background-image: none;
 	background-clip: padding-box;
@@ -170,13 +176,47 @@
 	-gtk-icon-size: 18px;
 }
 
+.app-window dropdown > button {
+	min-height: 40px;
+	padding: 0 14px;
+	border: 1px solid alpha(@window_fg_color, 0.10);
+	border-radius: 999px;
+	background-color: #202020;
+	background-image: none;
+	box-shadow: none;
+}
+
 .app-window button.suggested-action,
 .app-window button.accent,
 .app-window togglebutton.suggested-action,
 .app-window togglebutton.accent {
-	background-color: @accent_bg_color;
-	border-color: alpha(@accent_color, 0.72);
-	color: @accent_fg_color;
+	background-color: #282828;
+	border-color: alpha(@window_fg_color, 0.14);
+	color: @window_fg_color;
+	border-radius: 999px;
+}
+
+.app-window row.suggested-action,
+.account-settings row.suggested-action,
+.glass-dialog row.suggested-action {
+	border: 1px solid alpha(@window_fg_color, 0.14);
+	border-radius: 999px;
+	background-color: #282828;
+	background-image: none;
+	box-shadow: none;
+	color: @window_fg_color;
+}
+
+.app-window row.suggested-action:hover,
+.account-settings row.suggested-action:hover,
+.glass-dialog row.suggested-action:hover {
+	background-color: #303030;
+}
+
+.app-window row.suggested-action:active,
+.account-settings row.suggested-action:active,
+.glass-dialog row.suggested-action:active {
+	background-color: #363636;
 }
 
 .app-window button.destructive-action {
@@ -318,6 +358,77 @@ menubutton.glass-button > button:focus-visible {
 	padding: 0;
 }
 
+.app-window .segmented-control,
+.app-window .control-group,
+.app-window box.linked {
+	padding: 5px;
+	border: 1px solid alpha(@window_fg_color, 0.14);
+	border-radius: 999px;
+	background-color: #202020;
+	background-image: none;
+	box-shadow: none;
+}
+
+.app-window .segmented-control > button,
+.app-window stackswitcher.segmented-control > button,
+.app-window .control-group > button,
+.app-window .control-group > togglebutton,
+.app-window .control-group > menubutton > button,
+.app-window box.linked > button,
+.app-window box.linked > togglebutton,
+.app-window box.linked > menubutton > button {
+	min-height: 42px;
+	margin: 0;
+	padding-left: 18px;
+	padding-right: 18px;
+	border: none;
+	border-radius: 999px;
+	background-color: transparent;
+	background-image: none;
+	box-shadow: none;
+}
+
+.app-window .segmented-control > button:hover,
+.app-window stackswitcher.segmented-control > button:hover,
+.app-window .control-group > button:hover,
+.app-window .control-group > togglebutton:hover,
+.app-window .control-group > menubutton > button:hover,
+.app-window box.linked > button:hover,
+.app-window box.linked > togglebutton:hover,
+.app-window box.linked > menubutton > button:hover {
+	background-color: rgba(255, 255, 255, 0.08);
+}
+
+.app-window .segmented-control > button:checked,
+.app-window stackswitcher.segmented-control > button:checked,
+.app-window .control-group > togglebutton:checked,
+.app-window box.linked > togglebutton:checked {
+	background-color: rgba(255, 255, 255, 0.13);
+}
+
+.app-window .control-group > button,
+.app-window .control-group > menubutton,
+.app-window box.linked > button,
+.app-window box.linked > menubutton {
+	min-width: 42px;
+}
+
+.app-window box.linked > entry {
+	min-height: 42px;
+	border: none;
+	border-radius: 999px;
+	background-color: transparent;
+	background-image: none;
+	box-shadow: none;
+}
+
+.app-window button.tag-button {
+	min-height: 40px;
+	padding-left: 16px;
+	padding-right: 16px;
+	border-radius: 999px;
+}
+
 .app-window button,
 .app-window button label,
 .app-window button image,
@@ -329,6 +440,19 @@ menubutton.glass-button > button:focus-visible {
 .app-window togglebutton image,
 .app-window menubutton > button,
 .app-window menubutton > button image {
+	color: @window_fg_color;
+}
+
+.app-window button.suggested-action,
+.app-window button.suggested-action label,
+.app-window button.suggested-action image,
+.app-window button.accent,
+.app-window button.accent label,
+.app-window button.accent image,
+.app-window togglebutton.suggested-action,
+.app-window togglebutton.suggested-action label,
+.app-window togglebutton.accent,
+.app-window togglebutton.accent label {
 	color: @window_fg_color;
 }
 
@@ -622,8 +746,17 @@ dialog.add-server-dialog sheet {
 	min-height: 40px;
 	padding: 0 12px;
 	border: 1px solid alpha(@window_fg_color, 0.10);
-	border-radius: 12px;
+	border-radius: 999px;
 	background-color: #202020;
+}
+
+.account-settings button,
+.glass-dialog button,
+window.floating-dialog button,
+dialog.floating-dialog button {
+	border-radius: 999px;
+	background-image: none;
+	box-shadow: none;
 }
 
 .account-settings button.flat:hover,
@@ -638,7 +771,10 @@ dialog.add-server-dialog sheet {
 
 .account-settings button.suggested-action,
 .glass-dialog button.suggested-action {
-	border-radius: 10px;
+	border: 1px solid alpha(@window_fg_color, 0.14);
+	border-radius: 999px;
+	background-color: #282828;
+	color: @window_fg_color;
 	box-shadow: none;
 }
 

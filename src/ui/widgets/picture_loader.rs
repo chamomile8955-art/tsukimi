@@ -162,7 +162,7 @@ thread_local! {
     static IN_FLIGHT_DECODES: RefCell<HashMap<String, Vec<DecodeWaiter>>> =
         RefCell::new(HashMap::new());
     static PENDING_DECODE_RESULTS: RefCell<Vec<(String, DecodeResult, bool)>> =
-        RefCell::new(Vec::new());
+        const { RefCell::new(Vec::new()) };
     static DECODE_FLUSH_SCHEDULED: Cell<bool> = const { Cell::new(false) };
 }
 
