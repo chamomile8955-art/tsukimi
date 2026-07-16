@@ -24,6 +24,7 @@ use super::{
     utils::{
         TU_ITEM_POST_SIZE,
         TU_ITEM_VIDEO_SIZE,
+        compact_size,
         run_time_ticks_to_label,
     },
 };
@@ -196,14 +197,18 @@ impl TuOverviewItem {
         let item = self.item();
         match self.view_group() {
             ViewGroup::EpisodesView => {
-                imp.listlabel.set_text(&format!(
-                    "S{}E{}: {}",
-                    item.parent_index_number(),
-                    item.index_number(),
-                    item.name()
-                ));
-                imp.overlay
-                    .set_size_request(TU_ITEM_VIDEO_SIZE.0, TU_ITEM_VIDEO_SIZE.1);
+                if item.item_type() == "Episode" {
+                    imp.listlabel.set_text(&format!(
+                        "S{}E{}: {}",
+                        item.parent_index_number(),
+                        item.index_number(),
+                        item.name()
+                    ));
+                } else {
+                    imp.listlabel.set_text(&item.name());
+                }
+                let (w, h) = compact_size(TU_ITEM_VIDEO_SIZE, self);
+                imp.overlay.set_size_request(w, h);
                 if let Some(premiere_date) = item.premiere_date() {
                     imp.time_label.set_visible(true);
                     imp.time_label
@@ -236,12 +241,12 @@ impl TuOverviewItem {
                         item.index_number(),
                         item.name()
                     ));
-                    imp.overlay
-                        .set_size_request(TU_ITEM_VIDEO_SIZE.0, TU_ITEM_VIDEO_SIZE.1);
+                    let (w, h) = compact_size(TU_ITEM_VIDEO_SIZE, self);
+                    imp.overlay.set_size_request(w, h);
                 } else {
                     imp.listlabel.set_text(&item.name());
-                    imp.overlay
-                        .set_size_request(TU_ITEM_POST_SIZE.0, TU_ITEM_POST_SIZE.1);
+                    let (w, h) = compact_size(TU_ITEM_POST_SIZE, self);
+                    imp.overlay.set_size_request(w, h);
                 }
                 let year = if item.production_year() != 0 {
                     item.production_year().to_string()

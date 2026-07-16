@@ -215,6 +215,7 @@ mod imp {
             let obj = self.obj();
             obj.connect_realize(|window| {
                 window.apply_startup_size();
+                window.sync_display_density_class();
             });
             #[cfg(target_os = "windows")]
             {
@@ -344,15 +345,45 @@ impl Window {
             return;
         };
         let geometry = monitor.geometry();
-        let width = (geometry.width() as f64 * 0.60).round() as i32;
-        let height = (geometry.height() as f64 * 0.60).round() as i32;
+        let physical_height = geometry.height() * monitor.scale_factor();
+        let ratio = if physical_height <= 1080 { 0.72 } else { 0.60 };
+        let width = (geometry.width() as f64 * ratio).round() as i32;
+        let height = (geometry.height() as f64 * ratio).round() as i32;
         self.set_default_size(width, height);
         tracing::info!(
             width,
             height,
+            ratio,
             monitor_width = geometry.width(),
             monitor_height = geometry.height(),
-            "Applied 60% startup window size"
+            monitor_scale = monitor.scale_factor(),
+            physical_height,
+            "Applied display-aware startup window size"
+        );
+    }
+
+    fn sync_display_density_class(&self) {
+        let Some(surface) = self.surface() else {
+            return;
+        };
+        let Some(monitor) = surface.display().monitor_at_surface(&surface) else {
+            return;
+        };
+        let geometry = monitor.geometry();
+        let physical_height = geometry.height() * monitor.scale_factor();
+        let compact = physical_height <= 1080;
+        if compact {
+            self.add_css_class("compact-1080");
+        } else {
+            self.remove_css_class("compact-1080");
+        }
+        tracing::info!(
+            compact,
+            monitor_width = geometry.width(),
+            monitor_height = geometry.height(),
+            monitor_scale = monitor.scale_factor(),
+            physical_height,
+            "Synchronized display density class"
         );
     }
 
@@ -1282,7 +1313,7 @@ impl Window {
         let imp = self.imp();
         imp.stack.set_visible_child_name("mpv");
         self.prevent_suspend();
-        self.set_mpv_playlist(&episode_list);
+        self.set_mpv_playlist(&item, &episode_list);
         imp.mpvnav
             .play(selected, item, episode_list, matcher, start_seconds);
     }
@@ -1412,13 +1443,19 @@ impl Window {
         self.add_action_entries([shortcuts_action]);
     }
 
-    pub fn set_mpv_playlist(&self, episode_list: &Vec<TuItem>) {
+    pub fn set_mpv_playlist(&self, current_item: &TuItem, episode_list: &[TuItem]) {
         let model = self.imp().mpv_playlist_selection.model();
         let Some(store) = model.and_downcast_ref::<gio::ListStore>() else {
             return;
         };
 
         store.remove_all();
+
+        if episode_list.is_empty() {
+            let object = TuObject::new(current_item.to_owned());
+            store.append(&object);
+            return;
+        }
 
         for item in episode_list {
             let object = TuObject::new(item.to_owned());

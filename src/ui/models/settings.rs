@@ -34,7 +34,6 @@ impl Settings {
     const KEY_MPV_SEEK_BACKWARD_STEP: &'static str = "mpv-seek-backward-step";
     const KEY_MPV_CONFIG: &'static str = "mpv-config";
     const KEY_MPV_CACHE_SIZE: &'static str = "mpv-cache-size";
-    const KEY_MPV_CACHE_TIME: &'static str = "mpv-cache-time";
     const KEY_MPV_SUBTITLE_SIZE: &'static str = "mpv-subtitle-size"; // i32
     const KEY_MPV_SUBTITLE_FONT: &'static str = "mpv-subtitle-font"; // String
     const KEY_MPV_AUDIO_PREFERRED_LANG: &'static str = "mpv-audio-preferred-lang"; // i32
@@ -343,10 +342,6 @@ impl Settings {
 
     pub fn mpv_action_after_video_end(&self) -> i32 {
         self.int(Self::KEY_MPV_ACTION_AFTER_VIDEO_END)
-    }
-
-    pub fn mpv_cache_time(&self) -> i32 {
-        self.int(Self::KEY_MPV_CACHE_TIME)
     }
 
     pub fn mpv_cache_size(&self) -> i32 {

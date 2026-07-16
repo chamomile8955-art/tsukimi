@@ -567,7 +567,7 @@
                                           <object class="AdwViewStackPage">
                                             <property name="name">control-bar</property>
                                             <property name="icon-name">settings-symbolic</property>
-                                            <property name="title" translatable="yes">Advanced Settings</property>
+                                            <property name="title" translatable="yes">Settings</property>
                                             <property name="child">
                                               <object class="MPVControlSidebar" id="mpv_control_sidebar"/>
                                             </property>

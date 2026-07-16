@@ -13,6 +13,7 @@ use super::tsukimi_mpv::{
 };
 use crate::{
     client::jellyfin_client::JELLYFIN_CLIENT,
+    ui::models::SETTINGS,
     utils::spawn,
 };
 
@@ -228,6 +229,7 @@ impl MPVGLArea {
                 let url = JELLYFIN_CLIENT.get_streaming_url(&url).await;
 
                 info!("Now Playing: {}", url);
+                mpv.configure_cache(SETTINGS.mpv_cache_size());
                 mpv.set_start(start_seconds);
 
                 mpv.load_video(&url);
@@ -310,5 +312,9 @@ impl MPVGLArea {
         V: SetData + Send + 'static,
     {
         self.imp().mpv().set_property(property, value)
+    }
+
+    pub fn configure_cache(&self, size_mib: i32) {
+        self.imp().mpv().configure_cache(size_mib)
     }
 }

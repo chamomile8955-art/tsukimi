@@ -156,38 +156,10 @@
                             </object>
                         </child>
                         <child>
-                          <object class="GtkButton">
+                          <object class="GtkMenuButton" id="player_settings_menu_button">
                             <property name="valign">center</property>
-                            <property name="icon-name">keyboard-shortcuts-symbolic</property>
-                            <property name="action-name">win.mpv-shortcuts</property>
-                            <style>
-                              <class name="flat" />
-                              <class name="circular" />
-                              <class name="mpv-control-button" />
-                            </style>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkButton" id="_playlist_button">
-                            <property name="valign">center</property>
-                            <property name="icon-name">view-dual-symbolic</property>
-                            <property name="focusable">True</property>
-                            <property name="receives_default">True</property>
-                            <signal name="clicked" handler="on_playlist_clicked" swapped="yes" />
-                            <style>
-                              <class name="flat" />
-                              <class name="circular" />
-                              <class name="mpv-control-button" />
-                            </style>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkButton" id="_media_info_button">
-                            <property name="valign">center</property>
-                            <property name="icon-name">help-about-symbolic</property>
-                            <property name="focusable">True</property>
-                            <property name="receives_default">True</property>
-                            <signal name="clicked" handler="on_info_clicked" swapped="yes" />
+                            <property name="icon-name">settings-symbolic</property>
+                            <property name="menu-model">mpv-header-settings-menu</property>
                             <style>
                               <class name="flat" />
                               <class name="circular" />
@@ -396,8 +368,8 @@
                                 </child>
                                 <child>
                                   <object class="GtkButton">
-                                    <property name="icon-name">settings-symbolic</property>
-                                    <property name="action-name">mpv.show-settings</property>
+                                    <property name="icon-name">view-dual-symbolic</property>
+                                    <property name="action-name">mpv.show-playlist</property>
                                     <property name="valign">center</property>
                                     <style>
                                       <class name="flat" />
@@ -683,8 +655,23 @@
     <widgets>
       <widget name="_back_button" />
       <widget name="network_speed_label_2" />
-      <widget name="_media_info_button" />
-      <widget name="_playlist_button" />
+      <widget name="player_settings_menu_button" />
     </widgets>
   </object>
+  <menu id="mpv-header-settings-menu">
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">Settings</attribute>
+        <attribute name="action">mpv.show-settings</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Keyboard shortcuts</attribute>
+        <attribute name="action">win.mpv-shortcuts</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Media info</attribute>
+        <attribute name="action">mpv.show-info</attribute>
+      </item>
+    </section>
+  </menu>
 </interface>

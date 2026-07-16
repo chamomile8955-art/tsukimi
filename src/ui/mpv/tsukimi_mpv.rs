@@ -114,7 +114,6 @@ impl Default for TsukimiMPV {
                 "demuxer-max-bytes",
                 format!("{}MiB", SETTINGS.mpv_cache_size()),
             )?;
-            init.set_property("cache-secs", (SETTINGS.mpv_cache_time()) as i64)?;
             init.set_property("volume-max", MAX_VOLUME)?;
             init.set_property("volume", SETTINGS.mpv_default_volume() as i64)?;
             init.set_property("sub-font-size", SETTINGS.mpv_subtitle_size() as i64)?;
@@ -246,6 +245,13 @@ impl TsukimiMPV {
 
     pub fn load_video(&self, url: &str) {
         self.command("loadfile", &[url, "replace"]);
+    }
+
+    pub fn configure_cache(&self, size_mib: i32) {
+        let size_mib = size_mib.max(1);
+        self.set_property("cache", true);
+        self.set_property("demuxer-max-bytes", format!("{size_mib}MiB"));
+        self.set_property("demuxer-max-back-bytes", 0_i64);
     }
 
     pub fn set_start(&self, start_seconds: f64) {

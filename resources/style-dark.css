@@ -11,7 +11,23 @@
  * Do not append duplicate final blocks after this section.
  */
 
+window.app-window,
+window.app-window.background,
+window.app-window.csd,
+window.app-window.solid-csd,
+window.app-window > contents {
+	background-color: #111111;
+	background-image: none;
+	background-clip: border-box;
+	border: none;
+	outline: none;
+	box-shadow: none;
+}
+
 /* Solid single-color dark background */
+window.app-window,
+window.app-window.background,
+window.app-window > contents,
 .app-window,
 .app-window.background,
 .app-window .window-background,
@@ -25,6 +41,8 @@
 .app-window .app-shell > box,
 .app-window .app-shell > overlay,
 .app-window .app-shell > stack,
+.app-window .app-shell > widget.background,
+.app-window overlay-split-view > widget.background,
 .app-window .window-stack > box {
 	background-color: #111111;
 	background-image: none;
@@ -480,6 +498,57 @@ menubutton.glass-button > button:focus-visible {
 	color: @window_fg_color;
 }
 
+.app-window .poster-info-overlay label,
+.app-window .poster-info-overlay image,
+.app-window .media-choice-panel label,
+.app-window .media-choice-panel image {
+	color: #ffffff;
+	text-shadow: 0 2px 6px rgba(0, 0, 0, 0.72);
+}
+
+.app-window .poster-info-overlay button,
+.app-window .poster-info-overlay togglebutton,
+.app-window .poster-info-overlay menubutton > button,
+.app-window .media-choice-panel dropdown > button {
+	background-color: rgba(0, 0, 0, 0.42);
+	background-image: none;
+	border-color: rgba(255, 255, 255, 0.22);
+	color: #ffffff;
+}
+
+.app-window .poster-info-overlay button label,
+.app-window .poster-info-overlay button image,
+.app-window .poster-info-overlay togglebutton label,
+.app-window .poster-info-overlay togglebutton image,
+.app-window .poster-info-overlay menubutton > button label,
+.app-window .poster-info-overlay menubutton > button image,
+.app-window .media-choice-panel dropdown label {
+	color: #ffffff;
+}
+
+.app-window .poster-info-overlay button:hover,
+.app-window .poster-info-overlay togglebutton:hover,
+.app-window .poster-info-overlay menubutton > button:hover,
+.app-window .media-choice-panel dropdown > button:hover {
+	background-color: rgba(0, 0, 0, 0.54);
+}
+
+.app-window .poster-info-overlay button.suggested-action {
+	background-color: rgba(255, 255, 255, 0.92);
+	border-color: rgba(255, 255, 255, 0.32);
+	color: #111111;
+}
+
+.app-window .poster-info-overlay button.suggested-action label,
+.app-window .poster-info-overlay button.suggested-action image {
+	color: #111111;
+	text-shadow: none;
+}
+
+.app-window .media-choice-row > label {
+	margin-right: 4px;
+}
+
 /* Source footer / settings placement support */
 .app-window .source-footer,
 .app-window .source-bottom-bar,
@@ -810,4 +879,130 @@ popover.floating-dialog label,
 popover.menu.floating-dialog label,
 popover.glass-popover label {
 	color: @window_fg_color;
+}
+
+window.app-window.compact-1080 .source-panel {
+	margin-top: 8px;
+	margin-bottom: 8px;
+	margin-left: 8px;
+	margin-right: 6px;
+}
+
+window.app-window.compact-1080 .main-surface {
+	margin-top: 8px;
+	margin-bottom: 8px;
+	margin-left: 3px;
+	margin-right: 8px;
+}
+
+window.app-window.compact-1080 .source-panel,
+window.app-window.compact-1080 .main-surface {
+	border-radius: 24px;
+}
+
+window.app-window.compact-1080 .source-header,
+window.app-window.compact-1080 .main-header,
+window.app-window.compact-1080 .window-titlebar {
+	min-height: 64px;
+	padding: 8px 12px;
+}
+
+window.app-window.compact-1080 .main-toolbar {
+	border-radius: 24px 24px 0 0;
+}
+
+window.app-window.compact-1080 .main-content-pane,
+window.app-window.compact-1080 .main-navigation,
+window.app-window.compact-1080 .main-page,
+window.app-window.compact-1080 .content-stack {
+	border-radius: 0 0 24px 24px;
+}
+
+window.app-window.compact-1080 .top-navigation {
+	min-height: 44px;
+}
+
+window.app-window.compact-1080 .media-library-content {
+	padding-top: 4px;
+	padding-bottom: 22px;
+}
+
+window.app-window.compact-1080 .media-section {
+	margin-top: 12px;
+	margin-bottom: 12px;
+	margin-left: 24px;
+	margin-right: 24px;
+}
+
+window.app-window.compact-1080 button.circular-icon-button,
+window.app-window.compact-1080 togglebutton.circular-icon-button,
+window.app-window.compact-1080 menubutton.circular-icon-button > button,
+window.app-window.compact-1080 .source-footer button.circular-icon-button,
+window.app-window.compact-1080 .source-bottom-bar button.circular-icon-button,
+window.app-window.compact-1080 .source-bottom button.circular-icon-button,
+window.app-window.compact-1080 .source-actions button.circular-icon-button,
+window.app-window.compact-1080 .bottom-navigation button.circular-icon-button {
+	min-width: 44px;
+	min-height: 44px;
+	-gtk-icon-size: 18px;
+}
+
+window.app-window.compact-1080 .segmented-control,
+window.app-window.compact-1080 .control-group,
+window.app-window.compact-1080 box.linked {
+	padding: 4px;
+}
+
+window.app-window.compact-1080 button.segment-button,
+window.app-window.compact-1080 togglebutton.segment-button,
+window.app-window.compact-1080 .segmented-control > button,
+window.app-window.compact-1080 stackswitcher.segmented-control > button,
+window.app-window.compact-1080 .control-group > button,
+window.app-window.compact-1080 .control-group > togglebutton,
+window.app-window.compact-1080 .control-group > menubutton > button,
+window.app-window.compact-1080 box.linked > button,
+window.app-window.compact-1080 box.linked > togglebutton,
+window.app-window.compact-1080 box.linked > menubutton > button {
+	min-height: 36px;
+	padding-left: 14px;
+	padding-right: 14px;
+}
+
+window.app-window.compact-1080 button.add-server-button {
+	min-width: 112px;
+	min-height: 38px;
+	padding: 0 18px;
+}
+
+window.app-window.compact-1080 .source-footer,
+window.app-window.compact-1080 .source-bottom-bar,
+window.app-window.compact-1080 .source-bottom,
+window.app-window.compact-1080 .source-actions,
+window.app-window.compact-1080 .bottom-navigation {
+	padding-left: 12px;
+	padding-right: 12px;
+	padding-bottom: 12px;
+}
+
+window.app-window.compact-1080 .mpv-player headerbar.mpv-top-bar,
+window.app-window.compact-1080 .mpv-player .mpv-top-bar {
+	min-height: 62px;
+	padding: 8px 18px;
+}
+
+window.app-window.compact-1080 .mpv-player .mpv-bottom-bar {
+	padding: 14px 24px 18px;
+}
+
+window.app-window.compact-1080 .mpv-player button.mpv-control-button,
+window.app-window.compact-1080 .mpv-player togglebutton.mpv-control-button,
+window.app-window.compact-1080 .mpv-player menubutton.mpv-control-button > button {
+	min-width: 44px;
+	min-height: 44px;
+	-gtk-icon-size: 18px;
+}
+
+window.app-window.compact-1080 .mpv-player button.mpv-play-button {
+	min-width: 48px;
+	min-height: 48px;
 }

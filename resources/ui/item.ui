@@ -54,6 +54,9 @@
                                 <property name="orientation">vertical</property>
                                 <property name="valign">end</property>
                                 <property name="hexpand">true</property>
+                                <style>
+                                  <class name="poster-info-overlay" />
+                                </style>
 
                                 <child>
                                   <object class="GtkBox">
@@ -211,14 +214,22 @@
                                         <property name="margin-end">50</property>
                                         <property name="margin-bottom">20</property>
                                         <property name="margin-top">20</property>
+                                        <style>
+                                          <class name="media-choice-panel" />
+                                        </style>
                                         <child>
                                           <object class="GtkBox">
                                             <property name="orientation">horizontal</property>
                                             <property name="halign">end</property>
                                             <property name="spacing">6</property>
+                                            <style>
+                                              <class name="media-choice-row" />
+                                            </style>
                                             <child>
                                               <object class="GtkLabel">
                                                 <property name="label" translatable="yes">Video: </property>
+                                                <property name="width-request">86</property>
+                                                <property name="xalign">1</property>
                                                 <attributes>
                                                   <attribute name="weight" value="PANGO_WEIGHT_BOLD" />
                                                 </attributes>
@@ -239,9 +250,14 @@
                                             <property name="orientation">horizontal</property>
                                             <property name="halign">end</property>
                                             <property name="spacing">6</property>
+                                            <style>
+                                              <class name="media-choice-row" />
+                                            </style>
                                             <child>
                                               <object class="GtkLabel">
                                                 <property name="label" translatable="yes">Subtitle: </property>
+                                                <property name="width-request">86</property>
+                                                <property name="xalign">1</property>
                                                 <attributes>
                                                   <attribute name="weight" value="PANGO_WEIGHT_BOLD" />
                                                 </attributes>

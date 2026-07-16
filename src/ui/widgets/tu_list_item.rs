@@ -22,6 +22,7 @@ use crate::ui::{
     widgets::utils::{
         TU_ITEM_BANNER_SIZE,
         TU_ITEM_VIDEO_SIZE,
+        compact_size,
     },
 };
 
@@ -189,7 +190,7 @@ pub mod imp {
         }
 
         fn progress_fill_color(&self) -> Option<gdk::RGBA> {
-            Some(adw::StyleManager::default().accent_color_rgba())
+            Some(gdk::RGBA::new(1.0, 1.0, 1.0, 1.0))
         }
 
         fn compute_blur_info(&self) -> Option<(gdk::Paintable, graphene::Rect)> {
@@ -293,17 +294,19 @@ pub mod imp {
             // Keep playback progress as a quiet edge indicator. Filling the
             // whole blurred title backdrop produced the red/colored block
             // that could look like a poster replacement during hover.
-            const PROGRESS_HEIGHT: f32 = 4.0;
-            const CORNER_RADIUS: f32 = 2.0;
-            let fill_w = (cache.widget_w * progress).min(cache.widget_w);
-            let progress_y = cache.backdrop_y + 6.0;
+            const PROGRESS_HEIGHT: f32 = 5.0;
+            const CORNER_RADIUS: f32 = 2.5;
+            const HORIZONTAL_INSET: f32 = 8.0;
+            let track_w = (cache.widget_w - HORIZONTAL_INSET * 2.0).max(0.0);
+            let fill_w = (track_w * progress).min(track_w);
+            let progress_y = cache.backdrop_y + 8.0;
             let fill_rect =
-                graphene::Rect::new(0.0, progress_y, fill_w, PROGRESS_HEIGHT);
+                graphene::Rect::new(HORIZONTAL_INSET, progress_y, fill_w, PROGRESS_HEIGHT);
             let fill_clip = gsk::RoundedRect::new(
                 graphene::Rect::new(
-                    0.0,
+                    HORIZONTAL_INSET,
                     progress_y,
-                    cache.widget_w,
+                    track_w,
                     PROGRESS_HEIGHT,
                 ),
                 graphene::Size::new(CORNER_RADIUS, CORNER_RADIUS),
@@ -467,11 +470,12 @@ impl TuListItem {
     }
 
     fn size_hint(&self) -> (i32, i32) {
-        match self.poster_type() {
+        let size = match self.poster_type() {
             PosterType::Banner => TU_ITEM_BANNER_SIZE,
             PosterType::Backdrop => TU_ITEM_VIDEO_SIZE,
             _ => self.item().size_hint(),
-        }
+        };
+        compact_size(size, self)
     }
 
     #[template_callback]

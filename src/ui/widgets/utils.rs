@@ -75,6 +75,26 @@ pub const TU_ITEM_VIDEO_SIZE: (i32, i32) = (320, 180);
 pub const TU_ITEM_SQUARE_SIZE: (i32, i32) = (232, 232);
 pub const TU_ITEM_BANNER_SIZE: (i32, i32) = (440, 82);
 
+const COMPACT_1080_SCALE: f64 = 0.86;
+
+pub fn compact_size(size: (i32, i32), widget: &impl IsA<gtk::Widget>) -> (i32, i32) {
+    if uses_compact_1080_layout(widget) {
+        (
+            (size.0 as f64 * COMPACT_1080_SCALE).round() as i32,
+            (size.1 as f64 * COMPACT_1080_SCALE).round() as i32,
+        )
+    } else {
+        size
+    }
+}
+
+pub fn uses_compact_1080_layout(widget: &impl IsA<gtk::Widget>) -> bool {
+    widget
+        .as_ref()
+        .root()
+        .is_some_and(|root| root.has_css_class("compact-1080"))
+}
+
 pub trait GlobalToast {
     fn toast(&self, message: impl Into<String>);
 

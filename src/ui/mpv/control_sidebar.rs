@@ -47,8 +47,6 @@ mod imp {
         pub buffer_switchrow: TemplateChild<adw::SwitchRow>,
         #[template_child]
         pub cache_size_adj: TemplateChild<gtk::Adjustment>,
-        #[template_child]
-        pub cache_time_adj: TemplateChild<gtk::Adjustment>,
 
         #[template_child]
         pub brightness_adj: TemplateChild<gtk::Adjustment>,
@@ -269,9 +267,6 @@ impl MPVControlSidebar {
             .bind("mpv-cache-size", &imp.cache_size_adj.get(), "value")
             .build();
         SETTINGS
-            .bind("mpv-cache-time", &imp.cache_time_adj.get(), "value")
-            .build();
-        SETTINGS
             .bind("mpv-deband", &imp.deband_switch.get(), "active")
             .build();
         SETTINGS
@@ -364,12 +359,9 @@ impl MPVControlSidebar {
 
     #[template_callback]
     pub fn on_cache_size(&self, _param: glib::ParamSpec, spin: adw::SpinRow) {
-        self.set_mpv_property("demuxer-max-bytes", format!("{}MiB", spin.value()));
-    }
-
-    #[template_callback]
-    pub fn on_cache_time(&self, _param: glib::ParamSpec, spin: adw::SpinRow) {
-        self.set_mpv_property("cache-secs", spin.value());
+        if let Some(player) = self.player() {
+            player.configure_cache(spin.value().round() as i32);
+        }
     }
 
     #[template_callback]
