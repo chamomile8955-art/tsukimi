@@ -10,6 +10,10 @@
 	padding: 4px 10px 22px;
 }
 
+.item-hero {
+	min-height: 560px;
+}
+
 .media-info-source {
 	padding: 0;
 }
@@ -212,6 +216,12 @@ window.app-window > contents {
 /* Solid single-color dark background */
 window.app-window,
 window.app-window.background,
+window.app-window:backdrop,
+window.app-window.background:backdrop,
+window.app-window.csd,
+window.app-window.csd:backdrop,
+window.app-window.solid-csd,
+window.app-window.solid-csd:backdrop,
 window.app-window > contents,
 .app-window,
 .app-window.background,
@@ -229,7 +239,7 @@ window.app-window > contents,
 .app-window .app-shell > widget.background,
 .app-window overlay-split-view > widget.background,
 .app-window .window-stack > box {
-	background-color: #111111;
+	background-color: #181818;
 	background-image: none;
 }
 
@@ -253,7 +263,9 @@ window.app-window > contents,
 /* Floating panels */
 .app-window .window-frame {
 	border: none;
-	border-radius: 0;
+	border-radius: 32px;
+	background-color: #181818;
+	background-clip: padding-box;
 	box-shadow: none;
 }
 
@@ -1167,6 +1179,10 @@ window.app-window.compact-1080 .main-surface {
 	border-radius: 24px;
 }
 
+window.app-window.compact-1080 .window-frame {
+	border-radius: 24px;
+}
+
 window.app-window.compact-1080 .source-header,
 window.app-window.compact-1080 .main-header,
 window.app-window.compact-1080 .window-titlebar {
@@ -1272,104 +1288,4 @@ window.app-window.compact-1080 .mpv-player menubutton.mpv-control-button > butto
 window.app-window.compact-1080 .mpv-player button.mpv-play-button {
 	min-width: 48px;
 	min-height: 48px;
-}
-
-/* Edge opacity fixes: keep the native window and playback settings drawer
- * fully opaque in dark and compact modes. */
-window.app-window .source-panel,
-window.app-window .main-surface,
-window.app-window.compact-1080 .source-panel,
-window.app-window.compact-1080 .main-surface {
-	margin-top: 0;
-	margin-bottom: 0;
-	margin-left: 0;
-	margin-right: 0;
-	border: none;
-	border-radius: 0;
-	background-clip: border-box;
-}
-
-window.app-window .main-toolbar,
-window.app-window.compact-1080 .main-toolbar,
-window.app-window .main-content-pane,
-window.app-window .main-navigation,
-window.app-window .main-page,
-window.app-window .content-stack,
-window.app-window.compact-1080 .main-content-pane,
-window.app-window.compact-1080 .main-navigation,
-window.app-window.compact-1080 .main-page,
-window.app-window.compact-1080 .content-stack {
-	border-radius: 0;
-}
-
-window.app-window overlay-split-view.mpv-overlay-menu > widget.background {
-	margin: 0;
-	border: none;
-	border-radius: 0;
-	background-color: #101114;
-	background-image: none;
-	box-shadow: none;
-}
-
-window.app-window .mpv-sidebar-panel,
-window.app-window .mpv-sidebar-panel.osd,
-window.app-window .mpv-sidebar-stack,
-window.app-window .mpv-settings-shell,
-window.app-window .mpv-settings-shell.osd,
-window.app-window .mpv-sidebar-panel toolbarview,
-window.app-window .mpv-sidebar-panel toolbarview.osd,
-window.app-window .mpv-sidebar-panel headerbar,
-window.app-window .mpv-sidebar-panel viewstack,
-window.app-window .mpv-sidebar-panel stack,
-window.app-window .mpv-sidebar-panel scrolledwindow,
-window.app-window .mpv-playlist-scroller,
-window.app-window .mpv-sidebar-panel viewport,
-window.app-window .mpv-settings-panel,
-window.app-window .mpv-settings-scroller,
-window.app-window .mpv-settings-scroller viewport,
-window.app-window .mpv-settings-content,
-window.app-window .mpv-info-panel,
-window.app-window .mpv-shortcuts-panel {
-	background-color: #101114;
-	background-image: none;
-	border: none;
-	box-shadow: none;
-}
-
-window.app-window .mpv-sidebar-panel headerbar {
-	background-color: #101114;
-}
-
-/* Outermost window guard: prevent GTK/CSD decorations or backdrop state from
- * drawing a translucent rim around the application content. */
-window.app-window,
-window.app-window:backdrop,
-window.app-window.background,
-window.app-window.background:backdrop,
-window.app-window.csd,
-window.app-window.csd:backdrop,
-window.app-window.solid-csd,
-window.app-window.solid-csd:backdrop,
-window.app-window > contents,
-window.app-window > contents > *,
-window.app-window decoration,
-window.app-window.csd decoration,
-window.app-window.solid-csd decoration,
-window.app-window .window-frame,
-window.app-window .window-root-overlay,
-window.app-window .window-toast-overlay,
-window.app-window .window-stack,
-window.app-window .app-shell,
-window.app-window .app-shell > widget.background,
-window.app-window overlay-split-view > widget.background {
-	margin: 0;
-	padding: 0;
-	border: none;
-	border-radius: 0;
-	outline: none;
-	box-shadow: none;
-	background-color: #111111;
-	background-image: none;
-	background-clip: border-box;
-	opacity: 1;
 }

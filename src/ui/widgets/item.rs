@@ -138,6 +138,8 @@ pub(crate) mod imp {
         #[template_child]
         pub mediainforevealer: TemplateChild<gtk::Revealer>,
         #[template_child]
+        pub detail_scrolled: TemplateChild<gtk::ScrolledWindow>,
+        #[template_child]
         pub scrolled: TemplateChild<gtk::ScrolledWindow>,
 
         #[template_child]
@@ -310,6 +312,8 @@ impl ItemPage {
     }
 
     pub async fn setup(&self) {
+        self.reset_detail_scroll_to_top();
+
         let item = self.item();
         let type_ = item.item_type();
         let imp = self.imp();
@@ -417,6 +421,8 @@ impl ItemPage {
     }
 
     async fn setup_item(&self, id: &str) {
+        self.reset_detail_scroll_to_top();
+
         let id = id.to_string();
         let id_clone = id.to_owned();
 
@@ -431,6 +437,17 @@ impl ItemPage {
         self.setup_background(&id).await;
         self.set_overview(&id).await;
         self.set_lists(&id).await;
+    }
+
+    fn reset_detail_scroll_to_top(&self) {
+        let scrolled = self.imp().detail_scrolled.get();
+        let adj = scrolled.vadjustment();
+        adj.set_value(adj.lower());
+
+        glib::idle_add_local_once(move || {
+            let adj = scrolled.vadjustment();
+            adj.set_value(adj.lower());
+        });
     }
 
     async fn set_intro<const IS_VIDEO: bool>(&self, intro: &TuItem) {

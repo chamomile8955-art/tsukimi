@@ -6,7 +6,7 @@
 
       <object class="AdwToolbarView">
         <child>
-          <object class="GtkScrolledWindow">
+          <object class="GtkScrolledWindow" id="detail_scrolled">
             <property name="hscrollbar-policy">never</property>
             <property name="vscrollbar-policy">automatic</property>
             <property name="overlay-scrolling">true</property>
@@ -24,9 +24,11 @@
                     <property name="vexpand">true</property>
                     <child>
                       <object class="GtkOverlay">
+                        <property name="height-request">560</property>
                         <property name="overflow">hidden</property>
                         <style>
                           <class name="boxshadow" />
+                          <class name="item-hero" />
                         </style>
                         <child>
                           <object class="ItemCarousel" id="carousel">
