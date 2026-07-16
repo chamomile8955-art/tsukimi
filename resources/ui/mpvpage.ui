@@ -156,10 +156,11 @@
                             </object>
                         </child>
                         <child>
-                          <object class="GtkMenuButton" id="player_settings_menu_button">
+                          <object class="GtkButton" id="player_settings_menu_button">
                             <property name="valign">center</property>
                             <property name="icon-name">settings-symbolic</property>
-                            <property name="menu-model">mpv-header-settings-menu</property>
+                            <property name="tooltip-text" translatable="yes">Settings</property>
+                            <property name="action-name">mpv.show-settings</property>
                             <style>
                               <class name="flat" />
                               <class name="circular" />
@@ -658,20 +659,4 @@
       <widget name="player_settings_menu_button" />
     </widgets>
   </object>
-  <menu id="mpv-header-settings-menu">
-    <section>
-      <item>
-        <attribute name="label" translatable="yes">Settings</attribute>
-        <attribute name="action">mpv.show-settings</attribute>
-      </item>
-      <item>
-        <attribute name="label" translatable="yes">_Keyboard shortcuts</attribute>
-        <attribute name="action">win.mpv-shortcuts</attribute>
-      </item>
-      <item>
-        <attribute name="label" translatable="yes">Media info</attribute>
-        <attribute name="action">mpv.show-info</attribute>
-      </item>
-    </section>
-  </menu>
 </interface>

@@ -56,8 +56,6 @@ use glib::Object;
 use gtk::{
     ListScrollFlags,
     ListView,
-    PositionType,
-    ScrolledWindow,
     gio,
     glib,
     template_callbacks,
@@ -191,9 +189,6 @@ pub(crate) mod imp {
 
         pub videoselection: gtk::SingleSelection,
         pub subselection: gtk::SingleSelection,
-
-        #[template_child]
-        pub main_carousel: TemplateChild<adw::Carousel>,
 
         #[template_child]
         pub left_button: TemplateChild<gtk::Button>,
@@ -1068,147 +1063,290 @@ impl ItemPage {
         }
 
         for mediasource in media_sources {
-            let singlebox = gtk::Box::new(gtk::Orientation::Vertical, 5);
-            let info = format!(
-                "{}\n{} {} {}\n{}",
-                mediasource.path.unwrap_or_default(),
-                mediasource.container.unwrap_or_default().to_uppercase(),
-                bytefmt::format(mediasource.size.unwrap_or_default()),
-                dt(date_created),
-                mediasource.name
-            );
-            let label = gtk::Label::builder()
-                .label(&info)
-                .halign(gtk::Align::Start)
-                .margin_start(15)
-                .valign(gtk::Align::Start)
-                .margin_top(5)
-                .ellipsize(gtk::pango::EllipsizeMode::End)
+            let singlebox = gtk::Box::builder()
+                .orientation(gtk::Orientation::Vertical)
+                .spacing(16)
                 .build();
-            label.add_css_class("caption-heading");
-            singlebox.append(&label);
+            singlebox.add_css_class("media-info-source");
 
             let mediascrolled = gtk::ScrolledWindow::builder()
                 .hscrollbar_policy(gtk::PolicyType::Automatic)
                 .vscrollbar_policy(gtk::PolicyType::Never)
-                .margin_start(15)
-                .margin_end(15)
                 .overlay_scrolling(true)
                 .build();
 
             let mediascrolled = mediascrolled.fix();
+            mediascrolled.add_css_class("media-info-streams-scroll");
 
             let mediabox = gtk::Box::builder()
                 .orientation(gtk::Orientation::Horizontal)
                 .halign(gtk::Align::Start)
-                .spacing(5)
+                .spacing(18)
                 .build();
-            for mediapart in mediasource.media_streams {
+            mediabox.add_css_class("media-info-streams");
+            for mediapart in &mediasource.media_streams {
                 if mediapart.stream_type == "Attachment" {
                     continue;
                 }
-                let mediapartbox = gtk::Box::builder()
-                    .orientation(gtk::Orientation::Vertical)
-                    .spacing(0)
-                    .width_request(300)
-                    .build();
-                let icon = gtk::Image::builder().margin_end(5).build();
-                if mediapart.stream_type == "Video" {
-                    icon.set_icon_name(Some("video-x-generic-symbolic"))
-                } else if mediapart.stream_type == "Audio" {
-                    icon.set_icon_name(Some("audio-x-generic-symbolic"))
-                } else if mediapart.stream_type == "Subtitle" {
-                    icon.set_icon_name(Some("media-view-subtitles-symbolic"))
-                } else {
-                    icon.set_icon_name(Some("text-x-generic-symbolic"))
-                }
-                let typebox = gtk::Box::builder()
-                    .orientation(gtk::Orientation::Horizontal)
-                    .spacing(5)
-                    .build();
-                typebox.append(&icon);
-                let label = gtk::Label::builder()
-                    .label(gettext(mediapart.stream_type))
-                    .attributes(
-                        &gtk::pango::AttrList::from_string("0 4294967295 weight bold")
-                            .expect("Failed to create attribute list"),
-                    )
-                    .build();
-                typebox.append(&label);
-                let mut str: String = Default::default();
-                if let Some(codec) = mediapart.codec {
-                    str.push_str(format!("{}: {}", gettext("Codec"), codec).as_str());
-                }
-                if let Some(language) = mediapart.display_language {
-                    str.push_str(format!("\n{}: {}", gettext("Language"), language).as_str());
-                }
-                if let Some(title) = mediapart.title {
-                    str.push_str(format!("\n{}: {}", gettext("Title"), title).as_str());
-                }
-                if let Some(bitrate) = mediapart.bit_rate {
-                    str.push_str(
-                        format!("\n{}: {}it/s", gettext("Bitrate"), bytefmt::format(bitrate))
-                            .as_str(),
-                    );
-                }
-                if let Some(bitdepth) = mediapart.bit_depth {
-                    str.push_str(format!("\n{}: {} bit", gettext("BitDepth"), bitdepth).as_str());
-                }
-                if let Some(samplerate) = mediapart.sample_rate {
-                    str.push_str(
-                        format!("\n{}: {} Hz", gettext("SampleRate"), samplerate).as_str(),
-                    );
-                }
-                if let Some(height) = mediapart.height {
-                    str.push_str(format!("\n{}: {}", gettext("Height"), height).as_str());
-                }
-                if let Some(width) = mediapart.width {
-                    str.push_str(format!("\n{}: {}", gettext("Width"), width).as_str());
-                }
-                if let Some(colorspace) = mediapart.color_space {
-                    str.push_str(format!("\n{}: {}", gettext("ColorSpace"), colorspace).as_str());
-                }
-                if let Some(displaytitle) = mediapart.display_title {
-                    str.push_str(
-                        format!("\n{}: {}", gettext("DisplayTitle"), displaytitle).as_str(),
-                    );
-                }
-                if let Some(channel) = mediapart.channels {
-                    str.push_str(format!("\n{}: {}", gettext("Channel"), channel).as_str());
-                }
-                if let Some(channellayout) = mediapart.channel_layout {
-                    str.push_str(
-                        format!("\n{}: {}", gettext("ChannelLayout"), channellayout).as_str(),
-                    );
-                }
-                if let Some(averageframerate) = mediapart.average_frame_rate {
-                    str.push_str(
-                        format!("\n{}: {}", gettext("AverageFrameRate"), averageframerate).as_str(),
-                    );
-                }
-                if let Some(pixelformat) = mediapart.pixel_format {
-                    str.push_str(format!("\n{}: {}", gettext("PixelFormat"), pixelformat).as_str());
-                }
-                let inscription = gtk::Inscription::builder()
-                    .text(&str)
-                    .min_lines(14)
-                    .hexpand(true)
-                    .margin_start(15)
-                    .margin_end(15)
-                    .yalign(0.0)
-                    .build();
-                mediapartbox.append(&typebox);
-                mediapartbox.append(&inscription);
-                mediapartbox.add_css_class("card");
-                mediapartbox.add_css_class("sbackground");
-                mediabox.append(&mediapartbox);
+                mediabox.append(&Self::media_stream_card(mediapart));
             }
 
             mediascrolled.set_child(Some(&mediabox));
             singlebox.append(mediascrolled);
+            singlebox.append(&Self::media_source_summary(&mediasource, date_created));
             mediainfobox.append(&singlebox);
         }
         mediainforevealer.set_reveal_child(true);
+    }
+
+    fn media_stream_card(stream: &MediaStream) -> gtk::Box {
+        let card = gtk::Box::builder()
+            .orientation(gtk::Orientation::Vertical)
+            .spacing(14)
+            .width_request(360)
+            .build();
+        card.add_css_class("media-info-card");
+
+        let header = gtk::Box::builder()
+            .orientation(gtk::Orientation::Horizontal)
+            .spacing(10)
+            .build();
+        header.add_css_class("media-info-card-header");
+
+        let icon = gtk::Image::builder()
+            .icon_name(Self::media_stream_icon(&stream.stream_type))
+            .valign(gtk::Align::Center)
+            .build();
+        header.append(&icon);
+
+        let stream_type = gettext(stream.stream_type.as_str());
+        let title = gtk::Label::builder()
+            .label(&stream_type)
+            .xalign(0.0)
+            .hexpand(true)
+            .ellipsize(gtk::pango::EllipsizeMode::End)
+            .build();
+        title.add_css_class("media-info-card-title");
+        header.append(&title);
+        card.append(&header);
+
+        if let Some(display_title) = stream.display_title.as_ref().filter(|s| !s.is_empty()) {
+            let subtitle = gtk::Label::builder()
+                .label(display_title)
+                .xalign(0.0)
+                .wrap(true)
+                .wrap_mode(gtk::pango::WrapMode::WordChar)
+                .build();
+            subtitle.add_css_class("media-info-card-subtitle");
+            card.append(&subtitle);
+        }
+
+        let grid = gtk::Grid::builder()
+            .column_spacing(16)
+            .row_spacing(8)
+            .hexpand(true)
+            .build();
+        grid.add_css_class("media-info-grid");
+        let mut row = 0;
+
+        Self::append_media_info_row(&grid, &mut row, &gettext("Title"), stream.title.as_deref());
+        Self::append_media_info_row(&grid, &mut row, &gettext("Codec"), stream.codec.as_deref());
+        Self::append_media_info_row(
+            &grid,
+            &mut row,
+            &gettext("Language"),
+            stream
+                .display_language
+                .as_deref()
+                .or(stream.language.as_deref()),
+        );
+        if let (Some(width), Some(height)) = (stream.width, stream.height) {
+            let resolution = format!("{width}x{height}");
+            Self::append_media_info_row(
+                &grid,
+                &mut row,
+                &gettext("Resolution"),
+                Some(resolution.as_str()),
+            );
+        }
+        if let Some(frame_rate) = stream.average_frame_rate {
+            let frame_rate = format!("{frame_rate:.2}");
+            Self::append_media_info_row(
+                &grid,
+                &mut row,
+                &gettext("AverageFrameRate"),
+                Some(frame_rate.as_str()),
+            );
+        }
+        if let Some(bit_rate) = stream.bit_rate {
+            let bit_rate = Self::format_bit_rate(bit_rate);
+            Self::append_media_info_row(
+                &grid,
+                &mut row,
+                &gettext("Bitrate"),
+                Some(bit_rate.as_str()),
+            );
+        }
+        if let Some(channel_layout) = stream.channel_layout.as_deref() {
+            Self::append_media_info_row(
+                &grid,
+                &mut row,
+                &gettext("ChannelLayout"),
+                Some(channel_layout),
+            );
+        }
+        if let Some(channels) = stream.channels {
+            let channels = channels.to_string();
+            Self::append_media_info_row(
+                &grid,
+                &mut row,
+                &gettext("Channel"),
+                Some(channels.as_str()),
+            );
+        }
+        if let Some(sample_rate) = stream.sample_rate {
+            let sample_rate = format!("{sample_rate}Hz");
+            Self::append_media_info_row(
+                &grid,
+                &mut row,
+                &gettext("SampleRate"),
+                Some(sample_rate.as_str()),
+            );
+        }
+        if let Some(bit_depth) = stream.bit_depth {
+            let bit_depth = bit_depth.to_string();
+            Self::append_media_info_row(
+                &grid,
+                &mut row,
+                &gettext("BitDepth"),
+                Some(bit_depth.as_str()),
+            );
+        }
+        Self::append_media_info_row(
+            &grid,
+            &mut row,
+            &gettext("ColorSpace"),
+            stream.color_space.as_deref(),
+        );
+        Self::append_media_info_row(
+            &grid,
+            &mut row,
+            &gettext("PixelFormat"),
+            stream.pixel_format.as_deref(),
+        );
+        let external = Self::format_yes_no(stream.is_external);
+        Self::append_media_info_row(
+            &grid,
+            &mut row,
+            &gettext("External"),
+            Some(external.as_str()),
+        );
+
+        card.append(&grid);
+        card
+    }
+
+    fn append_media_info_row(
+        grid: &gtk::Grid, row: &mut i32, key: &str, value: Option<&str>,
+    ) {
+        let Some(value) = value.filter(|value| !value.is_empty()) else {
+            return;
+        };
+
+        let key_label = gtk::Label::builder()
+            .label(key)
+            .xalign(0.0)
+            .valign(gtk::Align::Start)
+            .build();
+        key_label.add_css_class("media-info-key");
+
+        let value_label = gtk::Label::builder()
+            .label(value)
+            .xalign(0.0)
+            .hexpand(true)
+            .wrap(true)
+            .wrap_mode(gtk::pango::WrapMode::WordChar)
+            .valign(gtk::Align::Start)
+            .build();
+        value_label.add_css_class("media-info-value");
+
+        grid.attach(&key_label, 0, *row, 1, 1);
+        grid.attach(&value_label, 1, *row, 1, 1);
+        *row += 1;
+    }
+
+    fn media_source_summary(source: &MediaSource, date_created: Option<DateTime<Utc>>) -> gtk::Box {
+        let summary = gtk::Box::builder()
+            .orientation(gtk::Orientation::Vertical)
+            .spacing(4)
+            .halign(gtk::Align::Fill)
+            .build();
+        summary.add_css_class("media-info-summary");
+
+        let name = if source.name.is_empty() {
+            source
+                .path
+                .as_deref()
+                .and_then(|path| path.rsplit(['/', '\\']).next())
+                .unwrap_or_default()
+                .to_string()
+        } else {
+            source.name.clone()
+        };
+        let title = gtk::Label::builder()
+            .label(&name)
+            .xalign(0.5)
+            .ellipsize(gtk::pango::EllipsizeMode::Middle)
+            .build();
+        title.add_css_class("media-info-summary-title");
+        summary.append(&title);
+
+        let mut details = Vec::new();
+        if let Some(container) = source.container.as_ref().filter(|s| !s.is_empty()) {
+            details.push(container.to_uppercase());
+        }
+        if let Some(size) = source.size {
+            details.push(bytefmt::format(size));
+        }
+        if let Some(bit_rate) = source.bit_rate {
+            details.push(Self::format_bit_rate(bit_rate));
+        }
+        let created = dt(date_created);
+        if !created.is_empty() {
+            details.push(created);
+        }
+        let subtitle = gtk::Label::builder()
+            .label(details.join("  "))
+            .xalign(0.5)
+            .ellipsize(gtk::pango::EllipsizeMode::End)
+            .build();
+        subtitle.add_css_class("media-info-summary-subtitle");
+        summary.append(&subtitle);
+
+        summary
+    }
+
+    fn media_stream_icon(stream_type: &str) -> &'static str {
+        match stream_type {
+            "Video" => "video-x-generic-symbolic",
+            "Audio" => "audio-x-generic-symbolic",
+            "Subtitle" => "media-view-subtitles-symbolic",
+            _ => "text-x-generic-symbolic",
+        }
+    }
+
+    fn format_bit_rate(bit_rate: u64) -> String {
+        if bit_rate >= 1_000_000 {
+            format!("{:.1}Mbps", bit_rate as f64 / 1_000_000.0)
+        } else if bit_rate >= 1_000 {
+            format!("{:.0}Kbps", bit_rate as f64 / 1_000.0)
+        } else {
+            format!("{bit_rate}bps")
+        }
+    }
+
+    fn format_yes_no(value: bool) -> String {
+        if value { gettext("Yes") } else { gettext("No") }
     }
 
     pub async fn setactorscrolled(&self, actors: Vec<SimpleListItem>) {
@@ -1278,16 +1416,6 @@ impl ItemPage {
 
     pub fn window(&self) -> Window {
         self.root().unwrap().downcast::<Window>().unwrap()
-    }
-
-    #[template_callback]
-    fn edge_overshot_cb(&self, pos: PositionType, _window: &ScrolledWindow) {
-        if pos != gtk::PositionType::Top {
-            return;
-        }
-
-        let carousel = self.imp().main_carousel.get();
-        carousel.scroll_to(&carousel.nth_page(0), true);
     }
 
     #[template_callback]
@@ -1367,7 +1495,7 @@ impl ItemPage {
                 .duration(SHOW_BUTTON_ANIMATION_DURATION)
                 .widget(&self.imp().scrolled.get())
                 .target(&target)
-                .value_to(0.7)
+                .value_to(1.)
                 .build()
         })
     }

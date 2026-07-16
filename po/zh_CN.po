@@ -913,6 +913,14 @@ msgstr "年份"
 msgid "External"
 msgstr "外部"
 
+#: src/ui/widgets/item.rs
+msgid "Yes"
+msgstr "是"
+
+#: src/ui/widgets/item.rs
+msgid "No"
+msgstr "否"
+
 #: resources/ui/image_dialog_edit_page.ui:4
 msgid "Edit Image"
 msgstr "编辑图片"
@@ -1019,7 +1027,7 @@ msgstr "季"
 
 #: resources/ui/item.ui:458 resources/ui/other.ui:140
 msgid "Actors"
-msgstr "演员"
+msgstr "演职人员"
 
 #: resources/ui/item.ui:463
 msgid "Recommend"

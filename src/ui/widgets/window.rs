@@ -93,6 +93,8 @@ mod imp {
         #[template_child]
         pub mpv_view: TemplateChild<adw::OverlaySplitView>,
         #[template_child]
+        pub mpv_sidebar_stack: TemplateChild<gtk::Stack>,
+        #[template_child]
         pub mpv_view_stack: TemplateChild<adw::ViewStack>,
         #[template_child]
         pub mpv_shortcuts_box: TemplateChild<gtk::Box>,
@@ -199,6 +201,9 @@ mod imp {
             });
             klass.install_action("win.mpv-shortcuts", None, |obj, _, _| {
                 obj.view_shortcuts();
+            });
+            klass.install_action("win.mpv-info", None, |obj, _, _| {
+                obj.imp().mpvnav.toggle_media_info();
             });
         }
 
@@ -1464,15 +1469,29 @@ impl Window {
     }
 
     pub fn view_playlist(&self) {
-        self.toggle_mpv_sidebar_page("playlist");
+        let imp = self.imp();
+        let playlist_is_visible =
+            imp.mpv_sidebar_stack.visible_child_name().as_deref() == Some("playlist");
+
+        if imp.mpv_view.shows_sidebar() && playlist_is_visible {
+            imp.mpv_view.set_show_sidebar(false);
+            return;
+        }
+
+        imp.mpv_sidebar_stack.set_visible_child_name("playlist");
+        imp.mpv_view.set_show_sidebar(true);
     }
 
     pub fn view_control_sidebar(&self) {
-        self.toggle_mpv_sidebar_page("control-bar");
+        self.toggle_mpv_settings_page("control-bar");
     }
 
     pub fn view_shortcuts(&self) {
-        self.toggle_mpv_sidebar_page("shortcuts");
+        self.toggle_mpv_settings_page("shortcuts");
+    }
+
+    pub fn view_media_info(&self) {
+        self.toggle_mpv_settings_page("media-info");
     }
 
     fn setup_mpv_shortcuts_panel(&self) {
@@ -1552,9 +1571,15 @@ impl Window {
         }
     }
 
-    fn toggle_mpv_sidebar_page(&self, page: &str) {
+    fn toggle_mpv_settings_page(&self, page: &str) {
         let imp = self.imp();
-        let page_is_visible =
+        let settings_panel_is_visible = imp
+            .mpv_sidebar_stack
+            .visible_child_name()
+            .as_deref()
+            == Some("settings-panel");
+        let page_is_visible = settings_panel_is_visible
+            &&
             imp.mpv_view_stack.visible_child_name().as_deref() == Some(page);
 
         if imp.mpv_view.shows_sidebar() && page_is_visible {
@@ -1562,6 +1587,7 @@ impl Window {
             return;
         }
 
+        imp.mpv_sidebar_stack.set_visible_child_name("settings-panel");
         imp.mpv_view_stack.set_visible_child_name(page);
         imp.mpv_view.set_show_sidebar(true);
     }

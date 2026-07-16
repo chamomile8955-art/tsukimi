@@ -74,8 +74,8 @@
                   <object class="GtkButton" id="right_button">
                     <property name="halign">end</property>
                     <property name="valign">center</property>
-                    <property name="height-request">44</property>
-                    <property name="width-request">44</property>
+                    <property name="height-request">48</property>
+                    <property name="width-request">48</property>
                     <property name="margin-end">8</property>
                     <property name="icon-name">go-next-symbolic</property>
                     <property name="opacity">0</property>
@@ -85,6 +85,7 @@
                       <class name="circular" />
                       <class name="osd" />
                       <class name="glass-button" />
+                      <class name="carousel-arrow-button" />
                     </style>
                   </object>
                 </child>
@@ -92,8 +93,8 @@
                   <object class="GtkButton" id="left_button">
                     <property name="halign">start</property>
                     <property name="valign">center</property>
-                    <property name="height-request">44</property>
-                    <property name="width-request">44</property>
+                    <property name="height-request">48</property>
+                    <property name="width-request">48</property>
                     <property name="margin-start">8</property>
                     <property name="icon-name">go-previous-symbolic</property>
                     <property name="opacity">0</property>
@@ -103,6 +104,7 @@
                       <class name="circular" />
                       <class name="osd" />
                       <class name="glass-button" />
+                      <class name="carousel-arrow-button" />
                     </style>
                   </object>
                 </child>

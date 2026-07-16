@@ -18,7 +18,15 @@ use super::tu_item::{
     TuItemOverlayPrelude,
 };
 use crate::ui::{
-    provider::tu_item::TuItem,
+    provider::tu_item::{
+        ACTOR,
+        DIRECTOR,
+        GUEST_STAR,
+        PERSON,
+        PRODUCER,
+        TuItem,
+        WRITER,
+    },
     widgets::utils::{
         TU_ITEM_BANNER_SIZE,
         TU_ITEM_VIDEO_SIZE,
@@ -411,6 +419,23 @@ impl TuListItem {
     pub fn refresh_item(&self) {
         let imp = self.imp();
         let item = self.item();
+        let is_person = Self::is_person_item(&item);
+
+        if is_person {
+            self.add_css_class("person-card");
+            imp.overlay.add_css_class("person-card-image");
+            imp.title.add_css_class("person-card-title");
+            imp.subtitle.add_css_class("person-card-subtitle");
+            imp.title.set_max_width_chars(12);
+            imp.subtitle.set_max_width_chars(12);
+        } else {
+            self.remove_css_class("person-card");
+            imp.overlay.remove_css_class("person-card-image");
+            imp.title.remove_css_class("person-card-title");
+            imp.subtitle.remove_css_class("person-card-subtitle");
+            imp.title.set_max_width_chars(28);
+            imp.subtitle.set_max_width_chars(-1);
+        }
 
         if item.need_animated_picture() {
             self.set_animated_picture()
@@ -470,12 +495,23 @@ impl TuListItem {
     }
 
     fn size_hint(&self) -> (i32, i32) {
+        if Self::is_person_item(&self.item()) {
+            return compact_size((156, 156), self);
+        }
+
         let size = match self.poster_type() {
             PosterType::Banner => TU_ITEM_BANNER_SIZE,
             PosterType::Backdrop => TU_ITEM_VIDEO_SIZE,
             _ => self.item().size_hint(),
         };
         compact_size(size, self)
+    }
+
+    fn is_person_item(item: &TuItem) -> bool {
+        matches!(
+            item.item_type().as_str(),
+            ACTOR | PERSON | DIRECTOR | WRITER | PRODUCER | GUEST_STAR
+        )
     }
 
     #[template_callback]

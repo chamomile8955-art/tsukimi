@@ -6,6 +6,191 @@
 	background-color: rgba(0, 0, 0, 0.5);
 }
 
+.media-info-section {
+	padding: 4px 10px 22px;
+}
+
+.media-info-source {
+	padding: 0;
+}
+
+.media-info-streams-scroll {
+	min-height: 360px;
+}
+
+.media-info-streams {
+	padding: 2px 0 6px;
+}
+
+.media-info-card {
+	min-height: 330px;
+	padding: 22px 24px;
+	border: 1px solid rgba(255, 255, 255, 0.10);
+	border-radius: 24px;
+	background-color: rgba(255, 255, 255, 0.065);
+	background-image: none;
+	box-shadow: none;
+}
+
+.media-info-card-header {
+	min-height: 32px;
+}
+
+.media-info-card-header image {
+	-gtk-icon-size: 22px;
+	color: rgba(255, 255, 255, 0.90);
+}
+
+.media-info-card-title {
+	color: rgba(255, 255, 255, 0.94);
+	font-size: 1.12em;
+	font-weight: 700;
+}
+
+.media-info-card-subtitle {
+	color: rgba(255, 255, 255, 0.76);
+	font-size: 1.02em;
+	font-weight: 650;
+	line-height: 1.35;
+}
+
+.media-info-grid {
+	margin-top: 2px;
+}
+
+.media-info-key {
+	min-width: 72px;
+	color: rgba(255, 255, 255, 0.84);
+	font-size: 0.98em;
+	font-weight: 700;
+	line-height: 1.35;
+}
+
+.media-info-value {
+	color: rgba(255, 255, 255, 0.68);
+	font-size: 0.98em;
+	font-weight: 600;
+	line-height: 1.35;
+}
+
+.media-info-summary {
+	min-height: 70px;
+	padding: 14px 24px;
+	border: 1px solid rgba(255, 255, 255, 0.10);
+	border-radius: 24px;
+	background-color: rgba(255, 255, 255, 0.050);
+	background-image: none;
+}
+
+.media-info-summary-title {
+	color: rgba(255, 255, 255, 0.76);
+	font-size: 0.98em;
+	font-weight: 700;
+}
+
+.media-info-summary-subtitle {
+	color: rgba(255, 255, 255, 0.58);
+	font-size: 0.94em;
+	font-weight: 600;
+}
+
+.app-window button.played-mark {
+	min-width: 28px;
+	min-height: 28px;
+	padding: 0;
+	border: 1px solid rgba(255, 255, 255, 0.24);
+	border-radius: 999px;
+	background-color: #6c5cff;
+	background-image: none;
+	color: #ffffff;
+	box-shadow: 0 3px 12px rgba(0, 0, 0, 0.34);
+	-gtk-icon-size: 16px;
+}
+
+.app-window button.played-mark:hover {
+	background-color: #7a6cff;
+	background-image: none;
+	color: #ffffff;
+}
+
+.app-window button.played-mark:active {
+	background-color: #5849e8;
+	background-image: none;
+	color: #ffffff;
+}
+
+.app-window button.played-mark image {
+	color: #ffffff;
+	-gtk-icon-shadow: none;
+}
+
+.people-section {
+	margin-top: 8px;
+	margin-bottom: 22px;
+}
+
+.people-section .poster-section-title {
+	margin-left: 0;
+	font-size: 1.18em;
+	font-weight: 750;
+	color: rgba(255, 255, 255, 0.94);
+}
+
+.person-card {
+	min-width: 156px;
+}
+
+.person-card .person-card-image,
+.person-card .person-card-image .picture-loader,
+.person-card .person-card-image .picture-loader.inbox,
+.person-card .person-card-image picture {
+	border-radius: 16px;
+	background-clip: padding-box;
+	box-shadow: none;
+}
+
+.person-card .person-card-image {
+	border: none;
+}
+
+.person-card .person-card-title {
+	margin-top: 2px;
+	font-size: 1.02em;
+	font-weight: 750;
+	color: rgba(255, 255, 255, 0.94);
+}
+
+.person-card .person-card-subtitle {
+	font-size: 0.92em;
+	font-weight: 650;
+	color: rgba(255, 255, 255, 0.58);
+}
+
+.episode-card {
+	padding: 0;
+	border-radius: 14px;
+	background-color: transparent;
+	background-image: none;
+	box-shadow: none;
+}
+
+.episode-card .episode-card-image,
+.episode-card .episode-card-image .picture-loader,
+.episode-card .episode-card-image .picture-loader.inbox,
+.episode-card .episode-card-image picture {
+	border-radius: 14px;
+	background-clip: padding-box;
+	box-shadow: none;
+}
+
+.episode-card .episode-card-image {
+	border: none;
+}
+
+.episode-card .episode-card-progress {
+	min-height: 5px;
+}
+
 /* Clean final dark shell/dialog/button rules
  * Keep this section as the only final override area for the main window.
  * Do not append duplicate final blocks after this section.
@@ -320,6 +505,47 @@ window.app-window.windows-native-frame .window-frame {
 	min-height: 52px;
 }
 
+.app-window button.carousel-arrow-button,
+.app-window button.glass-button.carousel-arrow-button,
+.app-window button.osd.carousel-arrow-button {
+	min-width: 48px;
+	min-height: 48px;
+	padding: 0;
+	border-radius: 999px;
+	border: 1px solid rgba(255, 255, 255, 0.38);
+	background-color: rgba(255, 255, 255, 0.90);
+	background-image: none;
+	color: #201f27;
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.42);
+	text-shadow: none;
+	-gtk-icon-size: 24px;
+}
+
+.app-window button.carousel-arrow-button:hover,
+.app-window button.glass-button.carousel-arrow-button:hover,
+.app-window button.osd.carousel-arrow-button:hover {
+	background-color: #ffffff;
+	background-image: none;
+	color: #15141a;
+}
+
+.app-window button.carousel-arrow-button:active,
+.app-window button.glass-button.carousel-arrow-button:active,
+.app-window button.osd.carousel-arrow-button:active {
+	background-color: rgba(235, 232, 245, 0.96);
+	background-image: none;
+	color: #15141a;
+}
+
+.app-window button.carousel-arrow-button image,
+.app-window button.glass-button.carousel-arrow-button image,
+.app-window button.osd.carousel-arrow-button image {
+	margin: 0;
+	padding: 0;
+	color: #201f27;
+	-gtk-icon-shadow: none;
+}
+
 /* Text glass buttons keep their natural width and padding. */
 .app-window button.add-server-button {
 	min-width: 132px;
@@ -547,6 +773,47 @@ menubutton.glass-button > button:focus-visible {
 
 .app-window .media-choice-row > label {
 	margin-right: 4px;
+}
+
+.app-window .poster-info-overlay .media-choice-row {
+	min-height: 46px;
+}
+
+.app-window .poster-info-overlay .media-choice-row > label {
+	min-height: 46px;
+	margin-top: 0;
+	margin-bottom: 0;
+	padding-top: 0;
+	padding-bottom: 0;
+}
+
+.app-window .poster-info-overlay dropdown.media-choice-dropdown > button {
+	min-height: 46px;
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
+.app-window .poster-info-overlay .media-choice-panel,
+.app-window .poster-info-overlay .media-choice-panel label,
+.app-window .poster-info-overlay .media-choice-panel image,
+.app-window .poster-info-overlay .media-choice-row > label,
+.app-window .poster-info-overlay dropdown.media-choice-dropdown,
+.app-window .poster-info-overlay dropdown.media-choice-dropdown label,
+.app-window .poster-info-overlay dropdown.media-choice-dropdown image,
+.app-window .poster-info-overlay dropdown.media-choice-dropdown > button,
+.app-window .poster-info-overlay dropdown.media-choice-dropdown > button label,
+.app-window .poster-info-overlay dropdown.media-choice-dropdown > button image,
+.app-window .poster-info-overlay dropdown.media-choice-dropdown button label,
+.app-window .poster-info-overlay dropdown.media-choice-dropdown button image {
+	color: #ffffff;
+	text-shadow: 0 2px 6px rgba(0, 0, 0, 0.72);
+	-gtk-icon-shadow: none;
+}
+
+.app-window .poster-info-overlay dropdown.media-choice-dropdown > button {
+	border-color: rgba(255, 255, 255, 0.22);
+	background-color: rgba(0, 0, 0, 0.72);
+	background-image: none;
 }
 
 /* Source footer / settings placement support */
@@ -1005,4 +1272,104 @@ window.app-window.compact-1080 .mpv-player menubutton.mpv-control-button > butto
 window.app-window.compact-1080 .mpv-player button.mpv-play-button {
 	min-width: 48px;
 	min-height: 48px;
+}
+
+/* Edge opacity fixes: keep the native window and playback settings drawer
+ * fully opaque in dark and compact modes. */
+window.app-window .source-panel,
+window.app-window .main-surface,
+window.app-window.compact-1080 .source-panel,
+window.app-window.compact-1080 .main-surface {
+	margin-top: 0;
+	margin-bottom: 0;
+	margin-left: 0;
+	margin-right: 0;
+	border: none;
+	border-radius: 0;
+	background-clip: border-box;
+}
+
+window.app-window .main-toolbar,
+window.app-window.compact-1080 .main-toolbar,
+window.app-window .main-content-pane,
+window.app-window .main-navigation,
+window.app-window .main-page,
+window.app-window .content-stack,
+window.app-window.compact-1080 .main-content-pane,
+window.app-window.compact-1080 .main-navigation,
+window.app-window.compact-1080 .main-page,
+window.app-window.compact-1080 .content-stack {
+	border-radius: 0;
+}
+
+window.app-window overlay-split-view.mpv-overlay-menu > widget.background {
+	margin: 0;
+	border: none;
+	border-radius: 0;
+	background-color: #101114;
+	background-image: none;
+	box-shadow: none;
+}
+
+window.app-window .mpv-sidebar-panel,
+window.app-window .mpv-sidebar-panel.osd,
+window.app-window .mpv-sidebar-stack,
+window.app-window .mpv-settings-shell,
+window.app-window .mpv-settings-shell.osd,
+window.app-window .mpv-sidebar-panel toolbarview,
+window.app-window .mpv-sidebar-panel toolbarview.osd,
+window.app-window .mpv-sidebar-panel headerbar,
+window.app-window .mpv-sidebar-panel viewstack,
+window.app-window .mpv-sidebar-panel stack,
+window.app-window .mpv-sidebar-panel scrolledwindow,
+window.app-window .mpv-playlist-scroller,
+window.app-window .mpv-sidebar-panel viewport,
+window.app-window .mpv-settings-panel,
+window.app-window .mpv-settings-scroller,
+window.app-window .mpv-settings-scroller viewport,
+window.app-window .mpv-settings-content,
+window.app-window .mpv-info-panel,
+window.app-window .mpv-shortcuts-panel {
+	background-color: #101114;
+	background-image: none;
+	border: none;
+	box-shadow: none;
+}
+
+window.app-window .mpv-sidebar-panel headerbar {
+	background-color: #101114;
+}
+
+/* Outermost window guard: prevent GTK/CSD decorations or backdrop state from
+ * drawing a translucent rim around the application content. */
+window.app-window,
+window.app-window:backdrop,
+window.app-window.background,
+window.app-window.background:backdrop,
+window.app-window.csd,
+window.app-window.csd:backdrop,
+window.app-window.solid-csd,
+window.app-window.solid-csd:backdrop,
+window.app-window > contents,
+window.app-window > contents > *,
+window.app-window decoration,
+window.app-window.csd decoration,
+window.app-window.solid-csd decoration,
+window.app-window .window-frame,
+window.app-window .window-root-overlay,
+window.app-window .window-toast-overlay,
+window.app-window .window-stack,
+window.app-window .app-shell,
+window.app-window .app-shell > widget.background,
+window.app-window overlay-split-view > widget.background {
+	margin: 0;
+	padding: 0;
+	border: none;
+	border-radius: 0;
+	outline: none;
+	box-shadow: none;
+	background-color: #111111;
+	background-image: none;
+	background-clip: border-box;
+	opacity: 1;
 }

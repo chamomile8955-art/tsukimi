@@ -312,7 +312,7 @@ impl HortuScrolled {
                 .duration(SHOW_BUTTON_ANIMATION_DURATION)
                 .widget(&self.imp().diffview.get())
                 .target(&target)
-                .value_to(0.7)
+                .value_to(1.)
                 .build()
         })
     }
@@ -344,7 +344,7 @@ impl HortuScrolled {
                 .duration(SHOW_BUTTON_ANIMATION_DURATION)
                 .widget(&self.imp().diffview.get())
                 .target(&target)
-                .value_to(0.7)
+                .value_to(1.)
                 .build()
         })
     }
@@ -368,7 +368,7 @@ impl HortuScrolled {
     fn update_left_button(&self, animate: bool) {
         let should_show = self.imp().is_hovering.get() && !self.is_at_lower();
         let current = self.left_opacity();
-        if should_show && current < 0.7 {
+        if should_show && current < 1. {
             self.hide_left_animation().pause();
             self.show_left_animation().set_value_from(current);
             self.show_left_animation().play();
@@ -387,7 +387,7 @@ impl HortuScrolled {
     fn update_right_button(&self, animate: bool) {
         let should_show = self.imp().is_hovering.get() && !self.is_at_upper();
         let current = self.right_opacity();
-        if should_show && current < 0.7 {
+        if should_show && current < 1. {
             self.hide_right_animation().pause();
             self.show_right_animation().set_value_from(current);
             self.show_right_animation().play();

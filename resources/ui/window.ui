@@ -67,10 +67,10 @@
                             <property name="sidebar">
                               <object class="AdwNavigationPage">
                                 <property name="title">Tsukimi</property>
-                                <property name="margin-top">12</property>
-                                <property name="margin-bottom">12</property>
-                                <property name="margin-start">12</property>
-                                <property name="margin-end">8</property>
+                                <property name="margin-top">0</property>
+                                <property name="margin-bottom">0</property>
+                                <property name="margin-start">0</property>
+                                <property name="margin-end">0</property>
                                 <property name="overflow">hidden</property>
                                 <style>
                                   <class name="surface"/>
@@ -165,10 +165,10 @@
                             </property>
                             <property name="content">
                               <object class="AdwNavigationPage" id="navipage">
-                                <property name="margin-top">12</property>
-                                <property name="margin-bottom">12</property>
-                                <property name="margin-start">4</property>
-                                <property name="margin-end">12</property>
+                                <property name="margin-top">0</property>
+                                <property name="margin-bottom">0</property>
+                                <property name="margin-start">0</property>
+                                <property name="margin-end">0</property>
                                 <property name="title" translatable="yes"></property>
                                 <property name="overflow">hidden</property>
                                 <style>
@@ -515,94 +515,161 @@
                                 </style>
                                 <property name="title" translatable="yes">Playlist</property>
                                 <property name="child">
-                                  <object class="AdwToolbarView">
-                                    <child type="top">
-                                      <object class="AdwHeaderBar">
-                                        <property name="show-end-title-buttons">false</property>
-                                        <property name="title-widget">
-                                          <object class="AdwViewSwitcher">
-                                            <property name="stack">mpv_view_stack</property>
+                                  <object class="GtkStack" id="mpv_sidebar_stack">
+                                    <property name="transition-type">crossfade</property>
+                                    <style>
+                                      <class name="mpv-sidebar-stack"/>
+                                    </style>
+                                    <child>
+                                      <object class="GtkStackPage">
+                                        <property name="name">playlist</property>
+                                        <property name="child">
+                                          <object class="GtkScrolledWindow">
+                                            <property name="hscrollbar-policy">never</property>
+                                            <property name="valign">fill</property>
+                                            <property name="margin-bottom">4</property>
+                                            <child>
+                                              <object class="GtkListView" id="mpv_playlist">
+                                                <property name="orientation">vertical</property>
+                                                <property name="single-click-activate">True</property>
+                                                <signal name="activate" handler="on_playlist_item_activated" swapped="yes"/>
+                                                <style>
+                                                  <class name="vertical-listview" />
+                                                  <class name="osd" />
+                                                </style>
+                                              </object>
+                                            </child>
                                             <style>
-                                              <class name="mpv-sidebar-switcher"/>
+                                              <class name="mpv-playlist-scroller"/>
+                                              <class name="undershoot-start" />
+                                              <class name="undershoot-end" />
                                             </style>
                                           </object>
                                         </property>
-                                        <style>
-                                          <class name="flat" />
-                                        </style>
                                       </object>
                                     </child>
-                                    <property name="content">
-                                      <object class="AdwViewStack" id="mpv_view_stack">
-                                        <child>
-                                          <object class="AdwViewStackPage">
-                                            <property name="name">playlist</property>
-                                            <property name="icon-name">view-list-symbolic</property>
-                                            <property name="title" translatable="yes">Playlist</property>
-                                            <property name="child">
-                                              <object class="GtkScrolledWindow">
-                                                <property name="hscrollbar-policy">never</property>
-                                                <property name="valign">fill</property>
-                                                <property name="margin-bottom">4</property>
-                                                <child>
-                                                  <object class="GtkListView" id="mpv_playlist">
-                                                    <property name="orientation">vertical</property>
-                                                    <property name="single-click-activate">True</property>
-                                                    <signal name="activate" handler="on_playlist_item_activated" swapped="yes"/>
+                                    <child>
+                                      <object class="GtkStackPage">
+                                        <property name="name">settings-panel</property>
+                                        <property name="child">
+                                          <object class="AdwToolbarView">
+                                            <child type="top">
+                                              <object class="AdwHeaderBar">
+                                                <property name="show-end-title-buttons">false</property>
+                                                <property name="title-widget">
+                                                  <object class="AdwViewSwitcher">
+                                                    <property name="stack">mpv_view_stack</property>
                                                     <style>
-                                                      <class name="vertical-listview" />
-                                                      <class name="osd" />
+                                                      <class name="mpv-sidebar-switcher"/>
                                                     </style>
                                                   </object>
-                                                </child>
+                                                </property>
                                                 <style>
-                                                  <class name="undershoot-start" />
-                                                  <class name="undershoot-end" />
+                                                  <class name="flat" />
                                                 </style>
                                               </object>
-                                            </property>
-                                          </object>
-                                        </child>
-                                        <child>
-                                          <object class="AdwViewStackPage">
-                                            <property name="name">control-bar</property>
-                                            <property name="icon-name">settings-symbolic</property>
-                                            <property name="title" translatable="yes">Settings</property>
-                                            <property name="child">
-                                              <object class="MPVControlSidebar" id="mpv_control_sidebar"/>
-                                            </property>
-                                          </object>
-                                        </child>
-                                        <child>
-                                          <object class="AdwViewStackPage">
-                                            <property name="name">shortcuts</property>
-                                            <property name="icon-name">keyboard-shortcuts-symbolic</property>
-                                            <property name="title">快捷键</property>
-                                            <property name="child">
-                                              <object class="GtkScrolledWindow">
-                                                <property name="hscrollbar-policy">never</property>
+                                            </child>
+                                            <property name="content">
+                                              <object class="AdwViewStack" id="mpv_view_stack">
                                                 <child>
-                                                  <object class="GtkBox" id="mpv_shortcuts_box">
-                                                    <property name="orientation">vertical</property>
-                                                    <property name="spacing">16</property>
-                                                    <property name="margin-start">20</property>
-                                                    <property name="margin-end">20</property>
-                                                    <property name="margin-top">18</property>
-                                                    <property name="margin-bottom">32</property>
-                                                    <style>
-                                                      <class name="mpv-shortcuts-panel"/>
-                                                    </style>
+                                                  <object class="AdwViewStackPage">
+                                                    <property name="name">control-bar</property>
+                                                    <property name="icon-name">settings-symbolic</property>
+                                                    <property name="title" translatable="yes">Settings</property>
+                                                    <property name="child">
+                                                      <object class="MPVControlSidebar" id="mpv_control_sidebar"/>
+                                                    </property>
+                                                  </object>
+                                                </child>
+                                                <child>
+                                                  <object class="AdwViewStackPage">
+                                                    <property name="name">shortcuts</property>
+                                                    <property name="icon-name">keyboard-shortcuts-symbolic</property>
+                                                    <property name="title">快捷键</property>
+                                                    <property name="child">
+                                                      <object class="GtkScrolledWindow">
+                                                        <property name="hscrollbar-policy">never</property>
+                                                        <child>
+                                                          <object class="GtkBox" id="mpv_shortcuts_box">
+                                                            <property name="orientation">vertical</property>
+                                                            <property name="spacing">16</property>
+                                                            <property name="margin-start">20</property>
+                                                            <property name="margin-end">20</property>
+                                                            <property name="margin-top">18</property>
+                                                            <property name="margin-bottom">32</property>
+                                                            <style>
+                                                              <class name="mpv-shortcuts-panel"/>
+                                                            </style>
+                                                          </object>
+                                                        </child>
+                                                      </object>
+                                                    </property>
+                                                  </object>
+                                                </child>
+                                                <child>
+                                                  <object class="AdwViewStackPage">
+                                                    <property name="name">media-info</property>
+                                                    <property name="icon-name">info-symbolic</property>
+                                                    <property name="title" translatable="yes">Media info</property>
+                                                    <property name="child">
+                                                      <object class="GtkScrolledWindow">
+                                                        <property name="hscrollbar-policy">never</property>
+                                                        <child>
+                                                          <object class="GtkBox">
+                                                            <property name="orientation">vertical</property>
+                                                            <property name="spacing">16</property>
+                                                            <property name="margin-start">20</property>
+                                                            <property name="margin-end">20</property>
+                                                            <property name="margin-top">18</property>
+                                                            <property name="margin-bottom">32</property>
+                                                            <style>
+                                                              <class name="mpv-info-panel"/>
+                                                            </style>
+                                                            <child>
+                                                              <object class="AdwPreferencesGroup">
+                                                                <property name="title" translatable="yes">Media info</property>
+                                                                <style>
+                                                                  <class name="mpv-settings-group"/>
+                                                                </style>
+                                                                <child>
+                                                                  <object class="AdwActionRow">
+                                                                    <property name="title" translatable="yes">Playback statistics</property>
+                                                                    <property name="subtitle" translatable="yes">Show or hide the video information overlay</property>
+                                                                    <child type="prefix">
+                                                                      <object class="GtkImage">
+                                                                        <property name="icon-name">info-symbolic</property>
+                                                                      </object>
+                                                                    </child>
+                                                                    <child type="suffix">
+                                                                      <object class="GtkButton">
+                                                                        <property name="icon-name">view-more-symbolic</property>
+                                                                        <property name="valign">center</property>
+                                                                        <property name="action-name">win.mpv-info</property>
+                                                                        <style>
+                                                                          <class name="flat"/>
+                                                                        </style>
+                                                                      </object>
+                                                                    </child>
+                                                                  </object>
+                                                                </child>
+                                                              </object>
+                                                            </child>
+                                                          </object>
+                                                        </child>
+                                                      </object>
+                                                    </property>
                                                   </object>
                                                 </child>
                                               </object>
                                             </property>
+                                            <style>
+                                              <class name="osd" />
+                                              <class name="mpv-settings-shell"/>
+                                            </style>
                                           </object>
-                                        </child>
+                                        </property>
                                       </object>
-                                    </property>
-                                    <style>
-                                      <class name="osd" />
-                                    </style>
+                                    </child>
                                   </object>
                                 </property>
                               </object>

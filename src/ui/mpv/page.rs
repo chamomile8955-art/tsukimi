@@ -1004,6 +1004,10 @@ impl MPVPage {
         mpv.display_stats_toggle();
     }
 
+    pub fn toggle_media_info(&self) {
+        self.on_info_clicked();
+    }
+
     fn listen_events(&self) {
         glib::spawn_future_local(glib::clone!(
             #[weak(rename_to = obj)]

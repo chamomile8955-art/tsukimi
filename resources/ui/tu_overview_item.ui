@@ -19,6 +19,11 @@
                 <property name="width-request">250</property>
                 <property name="height-request">141</property>
                 <property name="halign">center</property>
+                <property name="overflow">hidden</property>
+                <style>
+                  <class name="media-card-image"/>
+                  <class name="episode-card-image"/>
+                </style>
                 <child type="overlay">
                   <object class="GtkBox" id="overlay_button_box">
                     <property name="orientation">horizontal</property>
@@ -33,10 +38,13 @@
                   <object class="GtkProgressBar" id="progress_bar">
                     <property name="visible">false</property>
                     <property name="valign">end</property>
-                    <property name="margin-start">3</property>
-                    <property name="margin-end">3</property>
+                    <property name="margin-start">8</property>
+                    <property name="margin-end">8</property>
+                    <property name="margin-bottom">8</property>
                     <style>
-                      <class name="accent" />
+                      <class name="accent"/>
+                      <class name="media-card-progress"/>
+                      <class name="episode-card-progress"/>
                     </style>
                   </object>
                 </child>

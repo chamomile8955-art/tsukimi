@@ -197,6 +197,7 @@ impl TuOverviewItem {
         let item = self.item();
         match self.view_group() {
             ViewGroup::EpisodesView => {
+                self.add_css_class("episode-card");
                 if item.item_type() == "Episode" {
                     imp.listlabel.set_text(&format!(
                         "S{}E{}: {}",
@@ -222,9 +223,14 @@ impl TuOverviewItem {
                         .unwrap_or("No Inscription".to_string())
                         .replace(['\n', '\r'], " "),
                 ));
+                self.set_tooltip_text(None);
+                imp.listlabel.set_tooltip_text(None);
+                imp.inline_overview.set_tooltip_text(None);
+                imp.overview.set_tooltip_text(None);
                 self.set_progress(self.item().played_percentage());
             }
             ViewGroup::ListView => {
+                self.remove_css_class("episode-card");
                 imp.overview.set_visible(false);
                 imp.inline_overview.set_visible(true);
                 imp.inline_overview.set_text(
@@ -278,7 +284,12 @@ impl TuOverviewItem {
                 }
             }
         }
-        self.set_picture_with_hover_scale();
-        self.set_tooltip_text(Some(&item.name()));
+        match self.view_group() {
+            ViewGroup::EpisodesView => self.set_picture(),
+            ViewGroup::ListView => self.set_picture_with_hover_scale(),
+        }
+        if self.view_group() == ViewGroup::ListView {
+            self.set_tooltip_text(Some(&item.name()));
+        }
     }
 }
