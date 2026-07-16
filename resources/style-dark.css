@@ -269,6 +269,17 @@ window.app-window > contents,
 	box-shadow: none;
 }
 
+window.app-window > contents,
+.app-window .window-frame,
+.app-window .window-root-overlay,
+.app-window .window-toast-overlay,
+.app-window .window-stack {
+	margin: 0;
+	padding: 0;
+	border: none;
+	outline: none;
+}
+
 .app-window.maximized .window-frame,
 .app-window.fullscreen .window-frame,
 .app-window.tiled .window-frame {
@@ -279,7 +290,9 @@ window.app-window > contents,
 
 window.app-window.windows-native-frame .window-frame {
 	border: none;
-	border-radius: 0;
+	border-radius: 32px;
+	background-color: #181818;
+	background-clip: padding-box;
 	box-shadow: none;
 }
 
@@ -287,9 +300,9 @@ window.app-window.windows-native-frame .window-frame {
 .app-window .main-surface {
 	background-color: #181818;
 	background-image: none;
-	background-clip: padding-box;
-	border: 1px solid alpha(@window_fg_color, 0.10);
-	border-radius: 32px;
+	background-clip: border-box;
+	border: none;
+	border-radius: 0;
 	box-shadow: none;
 	opacity: 1;
 }
@@ -357,14 +370,14 @@ window.app-window.windows-native-frame .window-frame {
 }
 
 .app-window .main-toolbar {
-	border-radius: 32px 32px 0 0;
+	border-radius: 0;
 }
 
 .app-window .main-content-pane,
 .app-window .main-navigation,
 .app-window .main-page,
 .app-window .content-stack {
-	border-radius: 0 0 32px 32px;
+	border-radius: 0;
 }
 
 .media-library-scroll,
@@ -1021,7 +1034,6 @@ popover.floating-menu arrow {
 
 /* Settings is a native floating window. */
 .account-settings,
-.app-window .settings-dialog,
 window.floating-dialog,
 window.settings-dialog {
 	background-color: #1b1b1b;
@@ -1161,22 +1173,23 @@ popover.glass-popover label {
 }
 
 window.app-window.compact-1080 .source-panel {
-	margin-top: 8px;
-	margin-bottom: 8px;
-	margin-left: 8px;
-	margin-right: 6px;
+	margin-top: 0;
+	margin-bottom: 0;
+	margin-left: 0;
+	margin-right: 0;
 }
 
 window.app-window.compact-1080 .main-surface {
-	margin-top: 8px;
-	margin-bottom: 8px;
-	margin-left: 3px;
-	margin-right: 8px;
+	margin-top: 0;
+	margin-bottom: 0;
+	margin-left: 0;
+	margin-right: 0;
 }
 
 window.app-window.compact-1080 .source-panel,
 window.app-window.compact-1080 .main-surface {
-	border-radius: 24px;
+	border: none;
+	border-radius: 0;
 }
 
 window.app-window.compact-1080 .window-frame {
@@ -1191,14 +1204,14 @@ window.app-window.compact-1080 .window-titlebar {
 }
 
 window.app-window.compact-1080 .main-toolbar {
-	border-radius: 24px 24px 0 0;
+	border-radius: 0;
 }
 
 window.app-window.compact-1080 .main-content-pane,
 window.app-window.compact-1080 .main-navigation,
 window.app-window.compact-1080 .main-page,
 window.app-window.compact-1080 .content-stack {
-	border-radius: 0 0 24px 24px;
+	border-radius: 0;
 }
 
 window.app-window.compact-1080 .top-navigation {

@@ -13,6 +13,8 @@
 @define-color tsukimi_panel_bg_dark #181818;
 @define-color tsukimi_base_bg_light #e7e7e7;
 @define-color tsukimi_panel_bg_light #f6f6f6;
+@define-color tsukimi_text_light #111111;
+@define-color window_fg_color @tsukimi_text_light;
 @define-color tsukimi_panel_border alpha(@window_fg_color, 0.08);
 @define-color tsukimi_panel_shadow rgba(0, 0, 0, 0.16);
 
@@ -742,6 +744,17 @@ window.app-window > contents,
   box-shadow: none;
 }
 
+window.app-window > contents,
+.app-window .window-frame,
+.app-window .window-root-overlay,
+.app-window .window-toast-overlay,
+.app-window .window-stack {
+  margin: 0;
+  padding: 0;
+  border: none;
+  outline: none;
+}
+
 .app-window.maximized .window-frame,
 .app-window.fullscreen .window-frame,
 .app-window.tiled .window-frame {
@@ -750,11 +763,11 @@ window.app-window > contents,
   box-shadow: none;
 }
 
-/* Windows owns the outer frame geometry. Keeping the application-drawn
- * 34px clip here creates a second outline inside the native DWM frame. */
 window.app-window.windows-native-frame .window-frame {
   border: none;
-  border-radius: 0;
+  border-radius: 32px;
+  background-color: @tsukimi_panel_bg_light;
+  background-clip: padding-box;
   box-shadow: none;
 }
 
@@ -762,9 +775,9 @@ window.app-window.windows-native-frame .window-frame {
 .app-window .main-surface {
   background-color: @tsukimi_panel_bg_light;
   background-image: none;
-  background-clip: padding-box;
-  border: 1px solid @tsukimi_panel_border;
-  border-radius: 32px;
+  background-clip: border-box;
+  border: none;
+  border-radius: 0;
   box-shadow: none;
   opacity: 1;
 }
@@ -832,14 +845,14 @@ window.app-window.windows-native-frame .window-frame {
 }
 
 .app-window .main-toolbar {
-  border-radius: 32px 32px 0 0;
+  border-radius: 0;
 }
 
 .app-window .main-content-pane,
 .app-window .main-navigation,
 .app-window .main-page,
 .app-window .content-stack {
-  border-radius: 0 0 32px 32px;
+  border-radius: 0;
 }
 
 .media-library-scroll,
@@ -1495,7 +1508,6 @@ popover.floating-menu arrow {
 
 /* Settings is a native floating window. */
 .account-settings,
-.app-window .settings-dialog,
 window.floating-dialog,
 window.settings-dialog {
   background-color: #f7f7f7;
@@ -1665,6 +1677,13 @@ popover.glass-popover label {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.32);
 }
 
+.app-window label.media-rating-badge,
+.app-window label.media-playback-badge {
+  background-color: rgba(8, 9, 11, 0.92);
+  background-image: none;
+  color: #ffffff;
+}
+
 .media-card-progress {
   min-height: 5px;
   padding: 0;
@@ -1781,6 +1800,64 @@ popover.glass-popover label {
   color: alpha(@window_fg_color, 0.58);
 }
 
+/* Light mode text normalization. Keep ordinary UI copy black; specialized
+ * overlays below opt back into white where they sit on dark/image surfaces. */
+.app-window label,
+.app-window inscription,
+.app-window .dimmed,
+.app-window .media-card-title,
+.app-window .media-card-subtitle,
+.app-window .person-card-title,
+.app-window .person-card-subtitle,
+.app-window .media-info-card-title,
+.app-window .media-info-card-subtitle,
+.app-window .media-info-key,
+.app-window .media-info-value,
+.app-window .media-info-summary-title,
+.app-window .media-info-summary-subtitle,
+.account-settings label,
+.add-server-dialog label,
+.glass-dialog label,
+.solid-dialog label,
+.floating-dialog label,
+popover label,
+popover.floating-dialog label,
+popover.menu.floating-dialog label,
+popover.glass-popover label {
+  color: @tsukimi_text_light;
+}
+
+.app-window .poster-info-overlay label,
+.app-window .poster-info-overlay image,
+.app-window .poster-info-overlay button label,
+.app-window .poster-info-overlay button image,
+.app-window .poster-info-overlay togglebutton label,
+.app-window .poster-info-overlay togglebutton image,
+.app-window .poster-info-overlay menubutton > button label,
+.app-window .poster-info-overlay menubutton > button image,
+.app-window .poster-info-overlay .media-choice-panel label,
+.app-window .poster-info-overlay .media-choice-panel image,
+.app-window .poster-info-overlay .media-choice-row > label,
+.app-window .poster-info-overlay dropdown.media-choice-dropdown label,
+.app-window .poster-info-overlay dropdown.media-choice-dropdown image,
+.app-window .poster-info-overlay dropdown.media-choice-dropdown > button label,
+.app-window .poster-info-overlay dropdown.media-choice-dropdown > button image,
+.app-window .poster-info-overlay dropdown.media-choice-dropdown button label,
+.app-window .poster-info-overlay dropdown.media-choice-dropdown button image,
+.app-window label.media-rating-badge,
+.app-window label.media-playback-badge,
+.app-window button.played-mark,
+.app-window button.played-mark image {
+  color: #ffffff;
+}
+
+.app-window .poster-info-overlay button.suggested-action,
+.app-window .poster-info-overlay button.suggested-action label,
+.app-window .poster-info-overlay button.suggested-action image {
+  color: @tsukimi_text_light;
+  text-shadow: none;
+}
+
 button.media-card-play-button {
   min-width: 40px;
   min-height: 40px;
@@ -1790,22 +1867,23 @@ button.media-card-play-button {
 }
 
 window.app-window.compact-1080 .source-panel {
-  margin-top: 8px;
-  margin-bottom: 8px;
-  margin-left: 8px;
-  margin-right: 6px;
+  margin-top: 0;
+  margin-bottom: 0;
+  margin-left: 0;
+  margin-right: 0;
 }
 
 window.app-window.compact-1080 .main-surface {
-  margin-top: 8px;
-  margin-bottom: 8px;
-  margin-left: 3px;
-  margin-right: 8px;
+  margin-top: 0;
+  margin-bottom: 0;
+  margin-left: 0;
+  margin-right: 0;
 }
 
 window.app-window.compact-1080 .source-panel,
 window.app-window.compact-1080 .main-surface {
-  border-radius: 24px;
+  border: none;
+  border-radius: 0;
 }
 
 window.app-window.compact-1080 .window-frame {
@@ -1820,14 +1898,14 @@ window.app-window.compact-1080 .window-titlebar {
 }
 
 window.app-window.compact-1080 .main-toolbar {
-  border-radius: 24px 24px 0 0;
+  border-radius: 0;
 }
 
 window.app-window.compact-1080 .main-content-pane,
 window.app-window.compact-1080 .main-navigation,
 window.app-window.compact-1080 .main-page,
 window.app-window.compact-1080 .content-stack {
-  border-radius: 0 0 24px 24px;
+  border-radius: 0;
 }
 
 window.app-window.compact-1080 .top-navigation {
