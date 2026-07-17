@@ -283,7 +283,27 @@ window.app-window > contents,
 window.app-window.windows-native-frame .window-frame {
 	border: none;
 	border-radius: 0;
+	background-color: transparent;
+	background-image: none;
 	box-shadow: none;
+}
+
+window.app-window.windows-native-frame,
+window.app-window.windows-native-frame.background,
+window.app-window.windows-native-frame > contents,
+window.app-window.windows-native-frame .window-root-overlay,
+window.app-window.windows-native-frame .window-toast-overlay,
+window.app-window.windows-native-frame .window-stack,
+window.app-window.windows-native-frame .app-shell,
+window.app-window.windows-native-frame .window-frame > box,
+window.app-window.windows-native-frame .app-shell > box,
+window.app-window.windows-native-frame .app-shell > overlay,
+window.app-window.windows-native-frame .app-shell > stack,
+window.app-window.windows-native-frame .app-shell > widget.background,
+window.app-window.windows-native-frame overlay-split-view > widget.background,
+window.app-window.windows-native-frame .window-stack > box {
+	background-color: transparent;
+	background-image: none;
 }
 
 .app-window .source-panel,
@@ -297,18 +317,11 @@ window.app-window.windows-native-frame .window-frame {
 	opacity: 1;
 }
 
-.app-window .source-panel {
-	margin-top: 12px;
-	margin-bottom: 12px;
-	margin-left: 12px;
-	margin-right: 6px;
-}
-
-.app-window .main-surface {
-	margin-top: 12px;
-	margin-bottom: 12px;
-	margin-left: 6px;
-	margin-right: 12px;
+window.app-window,
+window.app-window > contents,
+.app-window,
+.app-window label {
+	color: @window_fg_color;
 }
 
 /* Header/content surfaces share the exact panel color. */
@@ -1175,20 +1188,6 @@ popover.floating-dialog label,
 popover.menu.floating-dialog label,
 popover.glass-popover label {
 	color: @window_fg_color;
-}
-
-window.app-window.compact-1080 .source-panel {
-	margin-top: 8px;
-	margin-bottom: 8px;
-	margin-left: 8px;
-	margin-right: 4px;
-}
-
-window.app-window.compact-1080 .main-surface {
-	margin-top: 8px;
-	margin-bottom: 8px;
-	margin-left: 4px;
-	margin-right: 8px;
 }
 
 window.app-window.compact-1080 .source-panel,
