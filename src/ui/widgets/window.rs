@@ -408,7 +408,11 @@ impl Window {
         }
 
         const DWMWA_WINDOW_CORNER_PREFERENCE: u32 = 33;
+        const DWMWA_BORDER_COLOR: u32 = 34;
+        const DWMWA_SYSTEMBACKDROP_TYPE: u32 = 38;
+        const DWMWA_COLOR_NONE: u32 = 0xFFFF_FFFE;
         const DWMWCP_ROUND: i32 = 2;
+        const DWMSBT_NONE: i32 = 1;
 
         let Some(surface) = self.surface() else {
             return;
@@ -433,6 +437,38 @@ impl Window {
             tracing::debug!(
                 hresult = result,
                 "Windows DWM rounded corners are unavailable; using the system default frame"
+            );
+        }
+
+        let backdrop = DWMSBT_NONE;
+        let result = unsafe {
+            DwmSetWindowAttribute(
+                hwnd,
+                DWMWA_SYSTEMBACKDROP_TYPE,
+                (&backdrop as *const i32).cast::<c_void>(),
+                std::mem::size_of_val(&backdrop) as u32,
+            )
+        };
+        if result < 0 {
+            tracing::debug!(
+                hresult = result,
+                "Windows DWM system backdrop override is unavailable"
+            );
+        }
+
+        let border_color = DWMWA_COLOR_NONE;
+        let result = unsafe {
+            DwmSetWindowAttribute(
+                hwnd,
+                DWMWA_BORDER_COLOR,
+                (&border_color as *const u32).cast::<c_void>(),
+                std::mem::size_of_val(&border_color) as u32,
+            )
+        };
+        if result < 0 {
+            tracing::debug!(
+                hresult = result,
+                "Windows DWM border color override is unavailable"
             );
         }
     }

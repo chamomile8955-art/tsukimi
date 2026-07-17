@@ -1,6 +1,8 @@
 use adw::subclass::prelude::*;
 use gtk::{
     CompositeTemplate,
+    CssProvider,
+    gdk,
     gio,
     glib,
     prelude::*,
@@ -10,6 +12,11 @@ use crate::ui::models::SETTINGS;
 
 pub const THEME_LIGHT: i32 = 2;
 pub const THEME_DARK: i32 = 3;
+const DARK_STYLE_RESOURCE: &str = "/moe/tsuna/tsukimi/style-dark.css";
+
+thread_local! {
+    static DARK_STYLE_PROVIDER: std::cell::OnceCell<CssProvider> = const { std::cell::OnceCell::new() };
+}
 
 pub fn normalized_theme(theme: i32) -> i32 {
     if theme == THEME_LIGHT {
@@ -20,10 +27,31 @@ pub fn normalized_theme(theme: i32) -> i32 {
 }
 
 pub fn apply_theme(theme: i32) {
-    adw::StyleManager::default().set_color_scheme(if normalized_theme(theme) == THEME_LIGHT {
+    let is_light = normalized_theme(theme) == THEME_LIGHT;
+    adw::StyleManager::default().set_color_scheme(if is_light {
         adw::ColorScheme::ForceLight
     } else {
         adw::ColorScheme::ForceDark
+    });
+
+    let Some(display) = gdk::Display::default() else {
+        return;
+    };
+    DARK_STYLE_PROVIDER.with(|provider_cell| {
+        let provider = provider_cell.get_or_init(|| {
+            let provider = CssProvider::new();
+            provider.load_from_resource(DARK_STYLE_RESOURCE);
+            provider
+        });
+        if is_light {
+            gtk::style_context_remove_provider_for_display(&display, provider);
+        } else {
+            gtk::style_context_add_provider_for_display(
+                &display,
+                provider,
+                gtk::STYLE_PROVIDER_PRIORITY_APPLICATION + 1,
+            );
+        }
     });
 }
 

@@ -1,10 +1,13 @@
-.scroll-spinner {
-	background-color: rgba(0, 0, 0, 0.5);
-}
-
+.scroll-spinner,
 .played-mark {
 	background-color: rgba(0, 0, 0, 0.5);
 }
+
+@define-color window_fg_color #f5f6f7;
+@define-color theme_fg_color #f5f6f7;
+@define-color theme_text_color #f5f6f7;
+@define-color theme_bg_color #111111;
+@define-color theme_base_color #181818;
 
 .media-info-section {
 	padding: 4px 10px 22px;
@@ -292,6 +295,20 @@ window.app-window.windows-native-frame .window-frame {
 	border-radius: 32px;
 	box-shadow: none;
 	opacity: 1;
+}
+
+.app-window .source-panel {
+	margin-top: 12px;
+	margin-bottom: 12px;
+	margin-left: 12px;
+	margin-right: 6px;
+}
+
+.app-window .main-surface {
+	margin-top: 12px;
+	margin-bottom: 12px;
+	margin-left: 6px;
+	margin-right: 12px;
 }
 
 /* Header/content surfaces share the exact panel color. */
@@ -1164,13 +1181,13 @@ window.app-window.compact-1080 .source-panel {
 	margin-top: 8px;
 	margin-bottom: 8px;
 	margin-left: 8px;
-	margin-right: 6px;
+	margin-right: 4px;
 }
 
 window.app-window.compact-1080 .main-surface {
 	margin-top: 8px;
 	margin-bottom: 8px;
-	margin-left: 3px;
+	margin-left: 4px;
 	margin-right: 8px;
 }
 
