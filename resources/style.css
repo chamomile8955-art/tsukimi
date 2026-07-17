@@ -744,17 +744,6 @@ window.app-window > contents,
   box-shadow: none;
 }
 
-window.app-window > contents,
-.app-window .window-frame,
-.app-window .window-root-overlay,
-.app-window .window-toast-overlay,
-.app-window .window-stack {
-  margin: 0;
-  padding: 0;
-  border: none;
-  outline: none;
-}
-
 .app-window.maximized .window-frame,
 .app-window.fullscreen .window-frame,
 .app-window.tiled .window-frame {
@@ -763,11 +752,11 @@ window.app-window > contents,
   box-shadow: none;
 }
 
+/* Windows owns the outer frame geometry. Keeping the application-drawn
+ * 34px clip here creates a second outline inside the native DWM frame. */
 window.app-window.windows-native-frame .window-frame {
   border: none;
-  border-radius: 32px;
-  background-color: @tsukimi_panel_bg_light;
-  background-clip: padding-box;
+  border-radius: 0;
   box-shadow: none;
 }
 
@@ -775,9 +764,9 @@ window.app-window.windows-native-frame .window-frame {
 .app-window .main-surface {
   background-color: @tsukimi_panel_bg_light;
   background-image: none;
-  background-clip: border-box;
-  border: none;
-  border-radius: 0;
+  background-clip: padding-box;
+  border: 1px solid @tsukimi_panel_border;
+  border-radius: 32px;
   box-shadow: none;
   opacity: 1;
 }
@@ -845,14 +834,14 @@ window.app-window.windows-native-frame .window-frame {
 }
 
 .app-window .main-toolbar {
-  border-radius: 0;
+  border-radius: 32px 32px 0 0;
 }
 
 .app-window .main-content-pane,
 .app-window .main-navigation,
 .app-window .main-page,
 .app-window .content-stack {
-  border-radius: 0;
+  border-radius: 0 0 32px 32px;
 }
 
 .media-library-scroll,
@@ -1508,6 +1497,7 @@ popover.floating-menu arrow {
 
 /* Settings is a native floating window. */
 .account-settings,
+.app-window .settings-dialog,
 window.floating-dialog,
 window.settings-dialog {
   background-color: #f7f7f7;
@@ -1867,23 +1857,22 @@ button.media-card-play-button {
 }
 
 window.app-window.compact-1080 .source-panel {
-  margin-top: 0;
-  margin-bottom: 0;
-  margin-left: 0;
-  margin-right: 0;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  margin-left: 8px;
+  margin-right: 6px;
 }
 
 window.app-window.compact-1080 .main-surface {
-  margin-top: 0;
-  margin-bottom: 0;
-  margin-left: 0;
-  margin-right: 0;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  margin-left: 3px;
+  margin-right: 8px;
 }
 
 window.app-window.compact-1080 .source-panel,
 window.app-window.compact-1080 .main-surface {
-  border: none;
-  border-radius: 0;
+  border-radius: 24px;
 }
 
 window.app-window.compact-1080 .window-frame {
@@ -1898,14 +1887,14 @@ window.app-window.compact-1080 .window-titlebar {
 }
 
 window.app-window.compact-1080 .main-toolbar {
-  border-radius: 0;
+  border-radius: 24px 24px 0 0;
 }
 
 window.app-window.compact-1080 .main-content-pane,
 window.app-window.compact-1080 .main-navigation,
 window.app-window.compact-1080 .main-page,
 window.app-window.compact-1080 .content-stack {
-  border-radius: 0;
+  border-radius: 0 0 24px 24px;
 }
 
 window.app-window.compact-1080 .top-navigation {
