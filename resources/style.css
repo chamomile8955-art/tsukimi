@@ -802,14 +802,6 @@ window.app-window.fullscreen .app-shell {
   background-image: none;
 }
 
-window.app-window.maximized .source-panel,
-window.app-window.maximized .main-surface,
-window.app-window.fullscreen .source-panel,
-window.app-window.fullscreen .main-surface {
-  border: none;
-  border-radius: 0;
-}
-
 .app-window .source-panel,
 .app-window .main-surface {
   background-color: @tsukimi_panel_bg_light;

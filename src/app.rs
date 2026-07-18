@@ -251,8 +251,11 @@ mod imp {
 
                 status.set_text("正在连接服务器...");
                 window.set_opacity(0.0);
-                window.set_transient_for(Some(&splash));
-                window.set_modal(true);
+                #[cfg(not(target_os = "windows"))]
+                {
+                    window.set_transient_for(Some(&splash));
+                    window.set_modal(true);
+                }
                 window.add_tick_callback(glib::clone!(
                     #[weak]
                     splash,
@@ -288,8 +291,11 @@ mod imp {
 
                     if progress >= 1.0 {
                         window.set_opacity(1.0);
-                        window.set_modal(false);
-                        window.set_transient_for(gtk::Window::NONE);
+                        #[cfg(not(target_os = "windows"))]
+                        {
+                            window.set_modal(false);
+                            window.set_transient_for(gtk::Window::NONE);
+                        }
                         splash.close();
                         glib::ControlFlow::Break
                     } else {

@@ -419,6 +419,21 @@ impl Window {
             fn gdk_win32_surface_get_handle(surface: *mut c_void) -> *mut c_void;
         }
 
+        #[link(name = "user32")]
+        unsafe extern "system" {
+            fn GetWindowLongPtrW(hwnd: *mut c_void, index: i32) -> isize;
+            fn SetWindowLongPtrW(hwnd: *mut c_void, index: i32, value: isize) -> isize;
+            fn SetWindowPos(
+                hwnd: *mut c_void,
+                hwnd_insert_after: *mut c_void,
+                x: i32,
+                y: i32,
+                cx: i32,
+                cy: i32,
+                flags: u32,
+            ) -> i32;
+        }
+
         const DWMWA_WINDOW_CORNER_PREFERENCE: u32 = 33;
         const DWMWA_BORDER_COLOR: u32 = 34;
         const DWMWA_SYSTEMBACKDROP_TYPE: u32 = 38;
@@ -426,6 +441,13 @@ impl Window {
         const DWMWCP_DONOTROUND: i32 = 1;
         const DWMWCP_ROUND: i32 = 2;
         const DWMSBT_NONE: i32 = 1;
+        const GWL_EXSTYLE: i32 = -20;
+        const WS_EX_TOOLWINDOW: isize = 0x0000_0080;
+        const WS_EX_APPWINDOW: isize = 0x0004_0000;
+        const SWP_NOMOVE: u32 = 0x0002;
+        const SWP_NOSIZE: u32 = 0x0001;
+        const SWP_NOZORDER: u32 = 0x0004;
+        const SWP_FRAMECHANGED: u32 = 0x0020;
 
         let Some(surface) = self.surface() else {
             return;
@@ -435,6 +457,23 @@ impl Window {
         if hwnd.is_null() {
             tracing::warn!("Unable to get the Win32 window handle for native rounded corners");
             return;
+        }
+
+        let ex_style = unsafe { GetWindowLongPtrW(hwnd, GWL_EXSTYLE) };
+        let taskbar_ex_style = (ex_style & !WS_EX_TOOLWINDOW) | WS_EX_APPWINDOW;
+        if taskbar_ex_style != ex_style {
+            unsafe {
+                SetWindowLongPtrW(hwnd, GWL_EXSTYLE, taskbar_ex_style);
+                SetWindowPos(
+                    hwnd,
+                    std::ptr::null_mut(),
+                    0,
+                    0,
+                    0,
+                    0,
+                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED,
+                );
+            }
         }
 
         let preference = if self.is_maximized() || self.is_fullscreen() {
@@ -493,7 +532,6 @@ impl Window {
     fn sync_window_state_classes(&self) {
         let is_maximized = self.is_maximized();
         let is_fullscreen = self.is_fullscreen();
-        let is_edge_to_edge = is_maximized || is_fullscreen;
 
         if is_maximized {
             self.add_css_class("maximized");
@@ -507,23 +545,17 @@ impl Window {
             self.remove_css_class("fullscreen");
         }
 
-        self.sync_shell_spacing(is_edge_to_edge);
+        self.sync_shell_spacing();
 
         #[cfg(target_os = "windows")]
         self.configure_windows_native_frame();
     }
 
-    fn sync_shell_spacing(&self, is_edge_to_edge: bool) {
+    fn sync_shell_spacing(&self) {
         let imp = self.imp();
 
-        if is_edge_to_edge {
-            set_widget_margins(&imp.source_navipage.get(), 0, 0, 0, 0);
-            set_widget_margins(&imp.navipage.get(), 0, 0, 0, 0);
-            return;
-        }
-
-        set_widget_margins(&imp.source_navipage.get(), 8, 8, 8, 4);
-        set_widget_margins(&imp.navipage.get(), 8, 8, 4, 8);
+        set_widget_margins(&imp.source_navipage.get(), 16, 16, 16, 8);
+        set_widget_margins(&imp.navipage.get(), 16, 16, 8, 16);
     }
 
     fn log_shell_state(&self, stage: &str, saved_server_count: usize) {
