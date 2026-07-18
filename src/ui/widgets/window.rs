@@ -60,6 +60,8 @@ mod imp {
         #[template_child]
         pub navipage: TemplateChild<adw::NavigationPage>,
         #[template_child]
+        pub source_navipage: TemplateChild<adw::NavigationPage>,
+        #[template_child]
         pub toast: TemplateChild<adw::ToastOverlay>,
         #[template_child]
         pub player_toolbar_box: TemplateChild<PlayerToolbarBox>,
@@ -337,6 +339,15 @@ glib::wrapper! {
                     gtk::ConstraintTarget, gtk::Native, gtk::Root, gtk::ShortcutManager;
 }
 
+fn set_widget_margins<W: glib::object::IsA<gtk::Widget>>(
+    widget: &W, top: i32, bottom: i32, start: i32, end: i32,
+) {
+    widget.set_margin_top(top);
+    widget.set_margin_bottom(bottom);
+    widget.set_margin_start(start);
+    widget.set_margin_end(end);
+}
+
 pub const PROGRESSBAR_FADE_ANIMATION_DURATION: u32 = 500;
 static STARTUP_SERVER_RESTORE_RECORDED: std::sync::atomic::AtomicBool =
     std::sync::atomic::AtomicBool::new(false);
@@ -412,6 +423,7 @@ impl Window {
         const DWMWA_BORDER_COLOR: u32 = 34;
         const DWMWA_SYSTEMBACKDROP_TYPE: u32 = 38;
         const DWMWA_COLOR_NONE: u32 = 0xFFFF_FFFE;
+        const DWMWCP_DONOTROUND: i32 = 1;
         const DWMWCP_ROUND: i32 = 2;
         const DWMSBT_NONE: i32 = 1;
 
@@ -425,7 +437,11 @@ impl Window {
             return;
         }
 
-        let preference = DWMWCP_ROUND;
+        let preference = if self.is_maximized() || self.is_fullscreen() {
+            DWMWCP_DONOTROUND
+        } else {
+            DWMWCP_ROUND
+        };
         let result = unsafe {
             DwmSetWindowAttribute(
                 hwnd,
@@ -475,17 +491,39 @@ impl Window {
     }
 
     fn sync_window_state_classes(&self) {
-        if self.is_maximized() {
+        let is_maximized = self.is_maximized();
+        let is_fullscreen = self.is_fullscreen();
+        let is_edge_to_edge = is_maximized || is_fullscreen;
+
+        if is_maximized {
             self.add_css_class("maximized");
         } else {
             self.remove_css_class("maximized");
         }
 
-        if self.is_fullscreen() {
+        if is_fullscreen {
             self.add_css_class("fullscreen");
         } else {
             self.remove_css_class("fullscreen");
         }
+
+        self.sync_shell_spacing(is_edge_to_edge);
+
+        #[cfg(target_os = "windows")]
+        self.configure_windows_native_frame();
+    }
+
+    fn sync_shell_spacing(&self, is_edge_to_edge: bool) {
+        let imp = self.imp();
+
+        if is_edge_to_edge {
+            set_widget_margins(&imp.source_navipage.get(), 0, 0, 0, 0);
+            set_widget_margins(&imp.navipage.get(), 0, 0, 0, 0);
+            return;
+        }
+
+        set_widget_margins(&imp.source_navipage.get(), 8, 8, 8, 4);
+        set_widget_margins(&imp.navipage.get(), 8, 8, 4, 8);
     }
 
     fn log_shell_state(&self, stage: &str, saved_server_count: usize) {

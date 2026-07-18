@@ -8,6 +8,10 @@
 @define-color theme_text_color #f5f6f7;
 @define-color theme_bg_color #111111;
 @define-color theme_base_color #181818;
+@define-color tsukimi_dark_root #141416;
+@define-color tsukimi_dark_panel #242428;
+@define-color tsukimi_dark_panel_raised #2d2d33;
+@define-color tsukimi_dark_border rgba(255, 255, 255, 0.18);
 
 .media-info-section {
 	padding: 4px 10px 22px;
@@ -242,7 +246,7 @@ window.app-window > contents,
 .app-window .app-shell > widget.background,
 .app-window overlay-split-view > widget.background,
 .app-window .window-stack > box {
-	background-color: #181818;
+	background-color: @tsukimi_dark_root;
 	background-image: none;
 }
 
@@ -308,12 +312,40 @@ window.app-window.windows-native-frame .window-stack > box {
 	background-image: none;
 }
 
+window.app-window.maximized,
+window.app-window.maximized.background,
+window.app-window.maximized > contents,
+window.app-window.maximized .window-frame,
+window.app-window.maximized .window-root-overlay,
+window.app-window.maximized .window-toast-overlay,
+window.app-window.maximized .window-stack,
+window.app-window.maximized .app-shell,
+window.app-window.fullscreen,
+window.app-window.fullscreen.background,
+window.app-window.fullscreen > contents,
+window.app-window.fullscreen .window-frame,
+window.app-window.fullscreen .window-root-overlay,
+window.app-window.fullscreen .window-toast-overlay,
+window.app-window.fullscreen .window-stack,
+window.app-window.fullscreen .app-shell {
+	background-color: #000000;
+	background-image: none;
+}
+
+window.app-window.maximized .source-panel,
+window.app-window.maximized .main-surface,
+window.app-window.fullscreen .source-panel,
+window.app-window.fullscreen .main-surface {
+	border: none;
+	border-radius: 0;
+}
+
 .app-window .source-panel,
 .app-window .main-surface {
-	background-color: #181818;
+	background-color: @tsukimi_dark_panel;
 	background-image: none;
 	background-clip: padding-box;
-	border: 1px solid alpha(@window_fg_color, 0.10);
+	border: 1px solid @tsukimi_dark_border;
 	border-radius: 32px;
 	box-shadow: none;
 	opacity: 1;
@@ -335,7 +367,7 @@ window.app-window > contents,
 	padding-bottom: 12px;
 	padding-left: 16px;
 	padding-right: 16px;
-	background-color: #181818;
+	background-color: @tsukimi_dark_panel;
 	background-image: none;
 	border: none;
 	border-bottom: none;
@@ -381,7 +413,7 @@ window.app-window > contents,
 .app-window toolbarview,
 .app-window toolbarview > box,
 .app-window toolbarview > box > box {
-	background-color: #181818;
+	background-color: @tsukimi_dark_panel;
 	background-image: none;
 	border: none;
 	border-bottom: none;
@@ -414,9 +446,9 @@ window.app-window > contents,
 .app-window menubutton > button {
 	min-height: 40px;
 	padding: 0 12px;
-	border: 1px solid alpha(@window_fg_color, 0.10);
+	border: 1px solid @tsukimi_dark_border;
 	border-radius: 999px;
-	background-color: #202020;
+	background-color: @tsukimi_dark_panel_raised;
 	background-image: none;
 	background-clip: padding-box;
 	box-shadow: none;
@@ -439,9 +471,9 @@ window.app-window > contents,
 .app-window dropdown > button {
 	min-height: 40px;
 	padding: 0 14px;
-	border: 1px solid alpha(@window_fg_color, 0.10);
+	border: 1px solid @tsukimi_dark_border;
 	border-radius: 999px;
-	background-color: #202020;
+	background-color: @tsukimi_dark_panel_raised;
 	background-image: none;
 	box-shadow: none;
 }
@@ -461,8 +493,8 @@ window.app-window > contents,
 .app-window button.accent,
 .app-window togglebutton.suggested-action,
 .app-window togglebutton.accent {
-	background-color: #282828;
-	border-color: alpha(@window_fg_color, 0.14);
+	background-color: #383840;
+	border-color: rgba(255, 255, 255, 0.22);
 	color: @window_fg_color;
 	border-radius: 999px;
 }
@@ -470,9 +502,9 @@ window.app-window > contents,
 .app-window row.suggested-action,
 .account-settings row.suggested-action,
 .glass-dialog row.suggested-action {
-	border: 1px solid alpha(@window_fg_color, 0.14);
+	border: 1px solid rgba(255, 255, 255, 0.22);
 	border-radius: 999px;
-	background-color: #282828;
+	background-color: #383840;
 	background-image: none;
 	box-shadow: none;
 	color: @window_fg_color;
@@ -481,13 +513,13 @@ window.app-window > contents,
 .app-window row.suggested-action:hover,
 .account-settings row.suggested-action:hover,
 .glass-dialog row.suggested-action:hover {
-	background-color: #303030;
+	background-color: #42424b;
 }
 
 .app-window row.suggested-action:active,
 .account-settings row.suggested-action:active,
 .glass-dialog row.suggested-action:active {
-	background-color: #363636;
+	background-color: #4b4b55;
 }
 
 .app-window button.destructive-action {
@@ -515,10 +547,10 @@ window.app-window > contents,
 	margin-bottom: 0;
 	padding: 0;
 	border-radius: 999px;
-	background-color: #202020;
+	background-color: @tsukimi_dark_panel_raised;
 	background-image: none;
 	background-clip: padding-box;
-	border: 1px solid alpha(@window_fg_color, 0.10);
+	border: 1px solid @tsukimi_dark_border;
 	box-shadow: none;
 	outline: none;
 	text-shadow: none;
@@ -611,7 +643,7 @@ menubutton.glass-button > button:hover,
 .app-window button.circular-icon-button:hover,
 .app-window togglebutton.circular-icon-button:hover,
 .app-window menubutton.circular-icon-button > button:hover {
-	background-color: #282828;
+	background-color: #383840;
 	background-image: none;
 	box-shadow: none;
 }
@@ -626,7 +658,7 @@ menubutton.glass-button > button:active,
 .app-window togglebutton.circular-icon-button:active,
 .app-window togglebutton.circular-icon-button:checked,
 .app-window menubutton.circular-icon-button > button:active {
-	background-color: #303030;
+	background-color: #42424b;
 	background-image: none;
 	box-shadow: none;
 }
@@ -1138,9 +1170,9 @@ dialog.add-server-dialog sheet {
 
 .account-settings .boxed-list,
 .glass-dialog .boxed-list {
-	border: 1px solid alpha(@window_fg_color, 0.10);
+	border: 1px solid @tsukimi_dark_border;
 	border-radius: 14px;
-	background-color: #202020;
+	background-color: @tsukimi_dark_panel_raised;
 	box-shadow: none;
 }
 
@@ -1149,9 +1181,9 @@ dialog.add-server-dialog sheet {
 	min-width: 40px;
 	min-height: 40px;
 	padding: 0 12px;
-	border: 1px solid alpha(@window_fg_color, 0.10);
+	border: 1px solid @tsukimi_dark_border;
 	border-radius: 999px;
-	background-color: #202020;
+	background-color: @tsukimi_dark_panel_raised;
 }
 
 .account-settings button,
@@ -1165,19 +1197,19 @@ dialog.floating-dialog button {
 
 .account-settings button.flat:hover,
 .glass-dialog button.flat:hover {
-	background-color: #282828;
+	background-color: #383840;
 }
 
 .account-settings button.flat:active,
 .glass-dialog button.flat:active {
-	background-color: #303030;
+	background-color: #42424b;
 }
 
 .account-settings button.suggested-action,
 .glass-dialog button.suggested-action {
-	border: 1px solid alpha(@window_fg_color, 0.14);
+	border: 1px solid rgba(255, 255, 255, 0.22);
 	border-radius: 999px;
-	background-color: #282828;
+	background-color: #383840;
 	color: @window_fg_color;
 	box-shadow: none;
 }

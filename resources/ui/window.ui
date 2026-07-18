@@ -65,7 +65,7 @@
                               <class name="app-shell"/>
                             </style>
                             <property name="sidebar">
-                              <object class="AdwNavigationPage">
+                              <object class="AdwNavigationPage" id="source_navipage">
                                 <property name="title">Tsukimi</property>
                                 <property name="margin-top">8</property>
                                 <property name="margin-bottom">8</property>

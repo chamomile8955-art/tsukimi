@@ -782,6 +782,34 @@ window.app-window.windows-native-frame .window-stack > box {
   background-image: none;
 }
 
+window.app-window.maximized,
+window.app-window.maximized.background,
+window.app-window.maximized > contents,
+window.app-window.maximized .window-frame,
+window.app-window.maximized .window-root-overlay,
+window.app-window.maximized .window-toast-overlay,
+window.app-window.maximized .window-stack,
+window.app-window.maximized .app-shell,
+window.app-window.fullscreen,
+window.app-window.fullscreen.background,
+window.app-window.fullscreen > contents,
+window.app-window.fullscreen .window-frame,
+window.app-window.fullscreen .window-root-overlay,
+window.app-window.fullscreen .window-toast-overlay,
+window.app-window.fullscreen .window-stack,
+window.app-window.fullscreen .app-shell {
+  background-color: #000000;
+  background-image: none;
+}
+
+window.app-window.maximized .source-panel,
+window.app-window.maximized .main-surface,
+window.app-window.fullscreen .source-panel,
+window.app-window.fullscreen .main-surface {
+  border: none;
+  border-radius: 0;
+}
+
 .app-window .source-panel,
 .app-window .main-surface {
   background-color: @tsukimi_panel_bg_light;
