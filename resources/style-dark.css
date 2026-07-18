@@ -267,7 +267,8 @@ window.app-window > contents,
 .app-window .window-frame {
 	border: none;
 	border-radius: 32px;
-	background-color: #181818;
+	background-color: transparent;
+	background-image: none;
 	background-clip: padding-box;
 	box-shadow: none;
 }
@@ -296,6 +297,7 @@ window.app-window.windows-native-frame .window-toast-overlay,
 window.app-window.windows-native-frame .window-stack,
 window.app-window.windows-native-frame .app-shell,
 window.app-window.windows-native-frame .window-frame > box,
+window.app-window.windows-native-frame .window-frame > overlay,
 window.app-window.windows-native-frame .app-shell > box,
 window.app-window.windows-native-frame .app-shell > overlay,
 window.app-window.windows-native-frame .app-shell > stack,

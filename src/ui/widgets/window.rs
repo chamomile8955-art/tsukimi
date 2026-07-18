@@ -224,6 +224,7 @@ mod imp {
             });
             #[cfg(target_os = "windows")]
             {
+                obj.set_decorated(false);
                 obj.add_css_class("windows-native-frame");
                 obj.connect_realize(|window| {
                     window.configure_windows_native_frame();
