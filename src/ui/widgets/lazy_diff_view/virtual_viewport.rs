@@ -1,15 +1,8 @@
-use std::cell::{
-    Cell,
-    RefCell,
-};
+use std::cell::{Cell, RefCell};
 
 use gtk::{
-    Adjustment,
-    ScrollablePolicy,
-    glib::{
-        self,
-        signal::SignalHandlerId,
-    },
+    Adjustment, ScrollablePolicy,
+    glib::{self, signal::SignalHandlerId},
     prelude::*,
     subclass::prelude::*,
 };

@@ -1,9 +1,6 @@
 use strsim::jaro_winkler;
 
-use crate::ui::{
-    models::SETTINGS,
-    provider::descriptor::DescriptorType,
-};
+use crate::ui::{models::SETTINGS, provider::descriptor::DescriptorType};
 
 pub fn make_video_version_choice_from_filter(dl_list: Vec<String>) -> Option<usize> {
     let descriptors = crate::ui::models::SETTINGS.preferred_version_descriptors();

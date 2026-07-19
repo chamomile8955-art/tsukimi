@@ -1,42 +1,22 @@
 use gst::ClockTime;
-use gtk::{
-    glib,
-    prelude::*,
-    subclass::prelude::*,
-    template_callbacks,
-};
+use gtk::{glib, prelude::*, subclass::prelude::*, template_callbacks};
 
-use super::{
-    smooth_scale::SmoothScale,
-    song_widget::format_duration,
-};
+use super::{smooth_scale::SmoothScale, song_widget::format_duration};
 use crate::{
     gstl::player::imp::ListRepeatMode,
-    ui::{
-        models::SETTINGS,
-        provider::core_song::CoreSong,
-    },
-    utils::{
-        get_image_with_cache,
-        spawn,
-    },
+    ui::{models::SETTINGS, provider::core_song::CoreSong},
+    utils::{get_image_with_cache, spawn},
 };
 
 mod imp {
 
     use adw::subclass::bin::BinImpl;
     use glib::closure_local;
-    use gtk::{
-        CompositeTemplate,
-        glib::subclass::InitializingObject,
-    };
+    use gtk::{CompositeTemplate, glib::subclass::InitializingObject};
 
     use super::*;
     use crate::{
-        gstl::player::{
-            MusicPlayer,
-            imp::ListRepeatMode,
-        },
+        gstl::player::{MusicPlayer, imp::ListRepeatMode},
         ui::widgets::smooth_scale::SmoothScale,
     };
 

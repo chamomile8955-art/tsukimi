@@ -1,26 +1,10 @@
-use adw::{
-    prelude::*,
-    subclass::prelude::*,
-};
-use gtk::{
-    CompositeTemplate,
-    glib,
-    template_callbacks,
-};
+use adw::{prelude::*, subclass::prelude::*};
+use gtk::{CompositeTemplate, glib, template_callbacks};
 
-use super::{
-    account_add::imp::ActionType,
-    window::Window,
-};
+use super::{account_add::imp::ActionType, window::Window};
 use crate::{
-    client::{
-        Account,
-        account::ServerType,
-    },
-    ui::{
-        models::SETTINGS,
-        provider::account_item::AccountItem,
-    },
+    client::{Account, account::ServerType},
+    ui::{models::SETTINGS, provider::account_item::AccountItem},
 };
 
 mod imp {
@@ -31,11 +15,7 @@ mod imp {
     use super::*;
     use crate::{
         client::jellyfin_client::JELLYFIN_CLIENT,
-        ui::{
-            models::SETTINGS,
-            provider::account_item::AccountItem,
-            widgets::window::Window,
-        },
+        ui::{models::SETTINGS, provider::account_item::AccountItem, widgets::window::Window},
         utils::spawn,
     };
 

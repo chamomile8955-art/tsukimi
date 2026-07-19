@@ -1,7 +1,4 @@
-use gtk::{
-    gio,
-    prelude::*,
-};
+use gtk::{gio, prelude::*};
 use mpris_server::zbus::fdo;
 
 pub async fn raise_window() -> fdo::Result<()> {

@@ -1,31 +1,17 @@
 use std::sync::{
     Arc,
-    atomic::{
-        AtomicBool,
-        Ordering,
-    },
+    atomic::{AtomicBool, Ordering},
 };
 
-use adw::{
-    prelude::*,
-    subclass::prelude::*,
-};
+use adw::{prelude::*, subclass::prelude::*};
 use gtk::{
-    CompositeTemplate,
-    SignalListItemFactory,
-    gio,
-    glib::{
-        self,
-        clone,
-    },
+    CompositeTemplate, SignalListItemFactory, gio,
+    glib::{self, clone},
     template_callbacks,
 };
 
 use super::{
-    hortu_scrolled::{
-        UnifySize,
-        resolve_prefer_size,
-    },
+    hortu_scrolled::{UnifySize, resolve_prefer_size},
     single_grid::imp::ViewType,
     tu_list_item::imp::PosterType,
     tu_overview_item::imp::ViewGroup,
@@ -34,26 +20,16 @@ use super::{
 use crate::{
     client::structs::SimpleListItem,
     ui::provider::{
-        tu_item::{
-            PreferPoster,
-            PreferSize,
-            TuItem,
-        },
+        tu_item::{PreferPoster, PreferSize, TuItem},
         tu_object::TuObject,
     },
 };
 
 pub(crate) mod imp {
 
-    use std::sync::{
-        Arc,
-        atomic::AtomicBool,
-    };
+    use std::sync::{Arc, atomic::AtomicBool};
 
-    use std::cell::{
-        Cell,
-        RefCell,
-    };
+    use std::cell::{Cell, RefCell};
 
     use glib::subclass::InitializingObject;
     use gtk::glib::Properties;

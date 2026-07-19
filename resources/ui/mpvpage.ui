@@ -228,28 +228,9 @@
                               </object>
                             </child>
                             <child>
-                              <object class="GtkButton">
-                                <property name="action_name">mpv.backward</property>
-                                <property name="valign">center</property>
-                                <child>
-                                  <object class="GtkImage">
-                                    <property name="icon_name">seek-backward-large-symbolic</property>
-                                    <property name="pixel-size">24</property>
-                                    <property name="halign">center</property>
-                                    <property name="valign">center</property>
-                                  </object>
-                                </child>
-                                <style>
-                                  <class name="circular" />
-                                  <class name="flat" />
-                                  <class name="mpv-control-button" />
-                                </style>
-                              </object>
-                            </child>
-                            <child>
                               <object class="GtkButton" id="_play_button">
-                                <property name="height-request">48</property>
-                                <property name="width-request">48</property>
+                                <property name="height-request">68</property>
+                                <property name="width-request">68</property>
                                 <property name="focusable">True</property>
                                 <property name="receives_default">True</property>
                                 <property name="valign">center</property>
@@ -257,7 +238,7 @@
                                 <child>
                                   <object class="GtkImage" id="play_pause_image">
                                     <property name="icon_name">media-playback-pause-symbolic</property>
-                                    <property name="pixel-size">32</property>
+                                    <property name="pixel-size">36</property>
                                     <property name="halign">center</property>
                                     <property name="valign">center</property>
                                   </object>
@@ -266,25 +247,6 @@
                                   <class name="flat" />
                                   <class name="mpv-play-button" />
                                   <class name="circular" />
-                                  <class name="mpv-control-button" />
-                                </style>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="GtkButton">
-                                <property name="action_name">mpv.forward</property>
-                                <property name="valign">center</property>
-                                <child>
-                                  <object class="GtkImage">
-                                    <property name="icon_name">seek-forward-large-symbolic</property>
-                                    <property name="pixel-size">24</property>
-                                    <property name="halign">center</property>
-                                    <property name="valign">center</property>
-                                  </object>
-                                </child>
-                                <style>
-                                  <class name="circular" />
-                                  <class name="flat" />
                                   <class name="mpv-control-button" />
                                 </style>
                               </object>
@@ -301,6 +263,9 @@
                                 </style>
                               </object>
                             </child>
+                            <style>
+                              <class name="mpv-transport-controls" />
+                            </style>
                           </object>
                         </child>
                         <child type="end">

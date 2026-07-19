@@ -1,15 +1,7 @@
-use std::{
-    env,
-    fs::File,
-    io,
-    sync::Mutex,
-};
+use std::{env, fs::File, io, sync::Mutex};
 
 use clap::Parser;
-use tracing::{
-    info,
-    level_filters::LevelFilter,
-};
+use tracing::{info, level_filters::LevelFilter};
 use tracing_subscriber::fmt::time::ChronoLocal;
 
 use crate::dyn_event;
@@ -78,11 +70,7 @@ impl Args {
             } else if cfg!(debug_assertions) || cfg!(feature = "console") {
                 None
             } else {
-                Some(
-                    crate::windows_portable_paths()
-                        .logs
-                        .join("tsukimi.log"),
-                )
+                Some(crate::windows_portable_paths().logs.join("tsukimi.log"))
             }
         };
         #[cfg(not(target_os = "windows"))]
@@ -112,11 +100,7 @@ impl Args {
                 let tracing_writer = match File::create(&path) {
                     Ok(f) => f,
                     Err(e) => {
-                        eprintln!(
-                            "Failed to create tracing file {}: {}",
-                            path.display(),
-                            e
-                        );
+                        eprintln!("Failed to create tracing file {}: {}", path.display(), e);
                         return;
                     }
                 };

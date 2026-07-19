@@ -44,10 +44,7 @@ macro_rules! insert_editm_dialog {
 macro_rules! bing_song_model {
     ($widget:expr, $active_model:expr, $active_core_song:expr) => {{
         use adw::prelude::*;
-        use gtk::{
-            glib,
-            prelude::WidgetExt,
-        };
+        use gtk::{glib, prelude::WidgetExt};
         use $crate::utils::spawn;
 
         let root = $widget.root();

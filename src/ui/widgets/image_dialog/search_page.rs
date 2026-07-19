@@ -1,31 +1,17 @@
 use adw::subclass::prelude::*;
 use gettextrs::gettext;
-use gtk::{
-    CompositeTemplate,
-    StringObject,
-    gio,
-    glib,
-};
+use gtk::{CompositeTemplate, StringObject, gio, glib};
 
 use adw::prelude::*;
 use gtk::template_callbacks;
 
 use crate::{
-    client::{
-        error::UserFacingError,
-        jellyfin_client::JELLYFIN_CLIENT,
-    },
+    client::{error::UserFacingError, jellyfin_client::JELLYFIN_CLIENT},
     ui::{
         GlobalToast,
-        widgets::eu_item::{
-            self,
-            EuObject,
-        },
+        widgets::eu_item::{self, EuObject},
     },
-    utils::{
-        spawn,
-        spawn_tokio,
-    },
+    utils::{spawn, spawn_tokio},
 };
 
 use super::ImageDialogNavigtion;
@@ -34,10 +20,7 @@ mod imp {
     use std::cell::OnceCell;
 
     use eu_item::EuListItemExt;
-    use glib::{
-        Properties,
-        subclass::InitializingObject,
-    };
+    use glib::{Properties, subclass::InitializingObject};
     use gtk::gio;
 
     use crate::ui::widgets::eu_item::EuObject;

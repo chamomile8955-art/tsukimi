@@ -1,20 +1,11 @@
-use gtk::{
-    SignalListItemFactory,
-    prelude::*,
-};
+use gtk::{SignalListItemFactory, prelude::*};
 
 use super::{
     filter_panel::FilterPanelDialog,
     identify::IdentifyDialog,
     image_dialog::ImageDialog,
-    tu_list_item::{
-        TuListItem,
-        imp::PosterType,
-    },
-    tu_overview_item::{
-        TuOverviewItem,
-        imp::ViewGroup,
-    },
+    tu_list_item::{TuListItem, imp::PosterType},
+    tu_overview_item::{TuOverviewItem, imp::ViewGroup},
 };
 
 use crate::ui::provider::tu_object::TuObject;

@@ -1,21 +1,13 @@
 use crate::{
     alert_dialog,
-    client::{
-        error::UserFacingError,
-        jellyfin_client::JELLYFIN_CLIENT,
-    },
+    client::{error::UserFacingError, jellyfin_client::JELLYFIN_CLIENT},
     ui::{
         provider::IS_ADMIN,
         widgets::{
-            menu_info::MenuInfo,
-            missing_episodes_dialog::MissingEpisodesDialog,
-            window::Window,
+            menu_info::MenuInfo, missing_episodes_dialog::MissingEpisodesDialog, window::Window,
         },
     },
-    utils::{
-        spawn,
-        spawn_tokio,
-    },
+    utils::{spawn, spawn_tokio},
 };
 
 use crate::ui::GlobalToast;
@@ -24,13 +16,9 @@ use super::prelude::TuItemMenuPrelude;
 use adw::prelude::AlertDialogExt;
 use gettextrs::gettext;
 use gtk::{
-    Builder,
-    PopoverMenu,
+    Builder, PopoverMenu,
     gdk::Rectangle,
-    gio::{
-        self,
-        MenuModel,
-    },
+    gio::{self, MenuModel},
     glib,
     prelude::*,
 };

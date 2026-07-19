@@ -1,20 +1,10 @@
 use adw::subclass::prelude::ObjectSubclassIsExt;
 use gtk::glib;
-use mpris_server::{
-    LocalTrackListInterface,
-    Metadata,
-    TrackId,
-    TrackListSignal,
-    Uri,
-    zbus::fdo,
-};
+use mpris_server::{LocalTrackListInterface, Metadata, TrackId, TrackListSignal, Uri, zbus::fdo};
 use tracing::warn;
 
 use crate::{
-    ui::{
-        mpv::page::MPVPage,
-        provider::tu_item::TuItem,
-    },
+    ui::{mpv::page::MPVPage, provider::tu_item::TuItem},
     utils::spawn,
 };
 

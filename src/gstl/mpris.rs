@@ -1,46 +1,20 @@
 use anyhow::Result;
 
-use adw::subclass::prelude::{
-    ObjectSubclassExt,
-    ObjectSubclassIsExt,
-};
-use gtk::{
-    self,
-    glib,
-};
+use adw::subclass::prelude::{ObjectSubclassExt, ObjectSubclassIsExt};
+use gtk::{self, glib};
 use mpris_server::{
-    LocalPlayerInterface,
-    LocalRootInterface,
-    LocalServer,
-    LoopStatus,
-    Metadata,
-    PlaybackRate,
-    PlaybackStatus,
-    Property,
-    Signal,
-    Time,
-    TrackId,
-    Volume,
-    zbus::{
-        self,
-        fdo,
-    },
+    LocalPlayerInterface, LocalRootInterface, LocalServer, LoopStatus, Metadata, PlaybackRate,
+    PlaybackStatus, Property, Signal, Time, TrackId, Volume,
+    zbus::{self, fdo},
 };
 
 use super::player::MusicPlayer;
 use crate::{
-    APP_ID,
-    CLIENT_ID,
+    APP_ID, CLIENT_ID,
     gstl::player::imp::ListRepeatMode,
-    utils::{
-        get_image_with_cache,
-        spawn,
-    },
+    utils::{get_image_with_cache, spawn},
 };
-use tracing::{
-    info,
-    warn,
-};
+use tracing::{info, warn};
 
 impl MusicPlayer {
     pub async fn initialize_mpris(&self) -> Result<()> {

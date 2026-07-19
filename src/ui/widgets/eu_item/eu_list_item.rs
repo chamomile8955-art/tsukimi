@@ -1,8 +1,5 @@
 use adw::subclass::prelude::*;
-use gtk::{
-    CompositeTemplate,
-    glib,
-};
+use gtk::{CompositeTemplate, glib};
 
 use gtk::template_callbacks;
 
@@ -11,10 +8,7 @@ use super::EuItem;
 mod imp {
     use std::cell::RefCell;
 
-    use glib::{
-        Properties,
-        subclass::InitializingObject,
-    };
+    use glib::{Properties, subclass::InitializingObject};
     use gtk::prelude::*;
 
     use crate::ui::widgets::picture_loader::PictureLoader;

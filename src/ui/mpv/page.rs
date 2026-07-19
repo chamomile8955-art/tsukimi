@@ -4,26 +4,13 @@
 use adw::prelude::*;
 use gettextrs::gettext;
 use glib::Object;
-use gtk::{
-    Builder,
-    PopoverMenu,
-    gdk::Rectangle,
-    gio,
-    glib,
-    subclass::prelude::*,
-};
+use gtk::{Builder, PopoverMenu, gdk::Rectangle, gio, glib, subclass::prelude::*};
 use itertools::Itertools;
 
 use super::{
     mpvglarea::MPVGLArea,
     tsukimi_mpv::{
-        ChapterList,
-        ListenEvent,
-        MPV_EVENT_CHANNEL,
-        MpvTrack,
-        MpvTracks,
-        PAUSED,
-        TrackSelection,
+        ChapterList, ListenEvent, MPV_EVENT_CHANNEL, MpvTrack, MpvTracks, PAUSED, TrackSelection,
         TsukimiMPV,
     },
     video_scale::VideoScale,
@@ -31,16 +18,8 @@ use super::{
 use crate::{
     client::{
         error::UserFacingError,
-        jellyfin_client::{
-            BackType,
-            JELLYFIN_CLIENT,
-        },
-        structs::{
-            Back,
-            MediaSegmentType,
-            MediaSource,
-            MediaStream,
-        },
+        jellyfin_client::{BackType, JELLYFIN_CLIENT},
+        structs::{Back, MediaSegmentType, MediaSource, MediaStream},
     },
     close_on_error,
     ui::{
@@ -50,19 +29,12 @@ use crate::{
         widgets::{
             check_row::CheckRow,
             item::SelectedVideoSubInfo,
-            item_utils::{
-                make_subtitle_version_choice,
-                make_video_version_choice_from_matcher,
-            },
+            item_utils::{make_subtitle_version_choice, make_video_version_choice_from_matcher},
             song_widget::format_duration,
             window::Window,
         },
     },
-    utils::{
-        spawn,
-        spawn_g_timeout,
-        spawn_tokio,
-    },
+    utils::{spawn, spawn_g_timeout, spawn_tokio},
 };
 
 const MIN_MOTION_TIME: i64 = 100000;
@@ -128,35 +100,20 @@ impl MpvTrackKind {
 
 mod imp {
 
-    use std::cell::{
-        Cell,
-        RefCell,
-    };
+    use std::cell::{Cell, RefCell};
 
     use adw::prelude::*;
     use glib::subclass::InitializingObject;
-    use gtk::{
-        CompositeTemplate,
-        PopoverMenu,
-        glib,
-        subclass::prelude::*,
-    };
+    use gtk::{CompositeTemplate, PopoverMenu, glib, subclass::prelude::*};
     #[cfg(target_os = "linux")]
     use mpris_server::LocalServer;
-    
 
     use crate::{
-        client::structs::{
-            Back,
-            MediaSegment,
-        },
+        client::structs::{Back, MediaSegment},
         ui::{
             models::SETTINGS,
             mpv::{
-                VolumeBar,
-                menu_actions::MenuActions,
-                mpvglarea::MPVGLArea,
-                video_scale::VideoScale,
+                VolumeBar, menu_actions::MenuActions, mpvglarea::MPVGLArea, video_scale::VideoScale,
             },
             provider::tu_item::TuItem,
         },
@@ -356,9 +313,7 @@ mod imp {
                 self.mpv_window_controls.upcast_ref::<gtk::Widget>(),
             );
             self.mpv_window_controls.connect_map(|controls| {
-                super::normalize_window_control_buttons(
-                    controls.upcast_ref::<gtk::Widget>(),
-                );
+                super::normalize_window_control_buttons(controls.upcast_ref::<gtk::Widget>());
             });
             obj.set_popover();
 
@@ -580,6 +535,9 @@ impl MPVPage {
 
         self.set_current_video(Some(item));
         self.imp().current_episode_list.replace(episode_list);
+        if let Some(window) = self.root().and_downcast_ref::<Window>() {
+            window.reset_mpv_media_info();
+        }
 
         #[cfg(target_os = "linux")]
         {
@@ -1045,6 +1003,12 @@ impl MPVPage {
                             obj.on_file_loaded();
                         }
                         ListenEvent::TrackList(value) => {
+                            if let Some(window) = obj.root().and_downcast_ref::<Window>() {
+                                window.update_mpv_media_info_tracks(MpvTracks {
+                                    audio_tracks: value.audio_tracks.clone(),
+                                    sub_tracks: value.sub_tracks.clone(),
+                                });
+                            }
                             obj.set_audio_and_video_tracks_dropdown(value);
                         }
                         ListenEvent::Volume(value) => {
@@ -1239,10 +1203,7 @@ impl MPVPage {
 
     fn on_cache_speed_update(&self, value: i64) {
         let label = &self.imp().network_speed_label;
-        label.set_text(&format!(
-            "{:.2} MB/s",
-            value as f64 / (1024.0 * 1024.0)
-        ));
+        label.set_text(&format!("{:.2} MB/s", value as f64 / (1024.0 * 1024.0)));
     }
 
     #[template_callback]

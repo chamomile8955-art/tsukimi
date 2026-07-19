@@ -2,20 +2,14 @@ use std::ops::Deref;
 
 use gtk::{
     gio,
-    glib::{
-        self,
-        thread_guard::ThreadGuard,
-    },
+    glib::{self, thread_guard::ThreadGuard},
     prelude::*,
 };
 
 use crate::{
     APP_ID,
     client::Account,
-    ui::provider::descriptor::{
-        Descriptor,
-        VecSerialize,
-    },
+    ui::provider::descriptor::{Descriptor, VecSerialize},
 };
 
 pub struct Settings(ThreadGuard<gio::Settings>);
@@ -161,9 +155,7 @@ impl Settings {
             }
         }
 
-        if changed
-            && let Err(error) = self.set_string(Self::ACCOUNTS, &accounts.to_string())
-        {
+        if changed && let Err(error) = self.set_string(Self::ACCOUNTS, &accounts.to_string()) {
             tracing::warn!(%error, "Failed to persist server route migration");
         }
 

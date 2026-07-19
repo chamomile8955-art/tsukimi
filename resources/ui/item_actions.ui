@@ -7,6 +7,7 @@
     <property name="valign">center</property>
     <style>
       <class name="control-group"/>
+      <class name="hero-action-group"/>
     </style>
     <child>
       <object class="StarToggle" id="favourite_button">
@@ -19,6 +20,7 @@
           <class name="circular" />
           <class name="suggested-action" />
           <class name="glass-button" />
+          <class name="hero-favorite-button" />
         </style>
       </object>
     </child>
@@ -36,6 +38,7 @@
           <class name="circular" />
           <class name="flat" />
           <class name="glass-button" />
+          <class name="hero-more-button" />
         </style>
       </object>
     </child>

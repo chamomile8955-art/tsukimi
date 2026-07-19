@@ -1,10 +1,5 @@
 use adw::subclass::prelude::*;
-use gtk::{
-    CompositeTemplate,
-    glib,
-    prelude::*,
-    template_callbacks,
-};
+use gtk::{CompositeTemplate, glib, prelude::*, template_callbacks};
 
 use crate::client::structs::FilterItem;
 

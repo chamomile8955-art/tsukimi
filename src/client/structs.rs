@@ -1,16 +1,7 @@
-use chrono::{
-    DateTime,
-    Utc,
-};
+use chrono::{DateTime, Utc};
 use derive_builder::Builder;
-use serde::{
-    Deserialize,
-    Serialize,
-};
-use std::{
-    collections::HashMap,
-    fmt,
-};
+use serde::{Deserialize, Serialize};
+use std::{collections::HashMap, fmt};
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct AuthenticateResponse {
@@ -653,11 +644,7 @@ use adw::prelude::*;
 use gtk::glib;
 
 use super::jellyfin_client::JELLYFIN_CLIENT;
-use crate::ui::widgets::{
-    hortu_scrolled::UnifySize,
-    single_grid::SingleGrid,
-    window::Window,
-};
+use crate::ui::widgets::{hortu_scrolled::UnifySize, single_grid::SingleGrid, window::Window};
 
 impl SGTitem {
     pub fn activate<T>(&self, widget: &T, list_type: String)

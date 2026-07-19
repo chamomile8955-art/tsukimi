@@ -3,10 +3,7 @@ use std::cell::RefCell;
 use adw::subclass::prelude::*;
 use gtk::{
     CompositeTemplate,
-    glib::{
-        self,
-        Properties,
-    },
+    glib::{self, Properties},
 };
 
 mod imp {

@@ -1,27 +1,13 @@
 use adw::subclass::prelude::*;
-use gst::prelude::{
-    CastNone,
-    StaticType,
-};
-use gtk::{
-    CompositeTemplate,
-    glib,
-    prelude::*,
-    template_callbacks,
-};
+use gst::prelude::{CastNone, StaticType};
+use gtk::{CompositeTemplate, glib, prelude::*, template_callbacks};
 
 use crate::client::structs::FilterItem;
 
-use super::{
-    FilterDialogSearchPage,
-    FilterPanelDialog,
-};
+use super::{FilterDialogSearchPage, FilterPanelDialog};
 
 mod imp {
-    use std::cell::{
-        OnceCell,
-        RefCell,
-    };
+    use std::cell::{OnceCell, RefCell};
 
     use glib::subclass::InitializingObject;
 

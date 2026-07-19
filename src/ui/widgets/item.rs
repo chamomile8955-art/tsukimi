@@ -1,98 +1,49 @@
 use super::{
     episode_switcher::EpisodeButton,
     fix::ScrolledWindowFixExt,
-    hortu_scrolled::{
-        SHOW_BUTTON_ANIMATION_DURATION,
-        UnifySize,
-    },
+    hortu_scrolled::{SHOW_BUTTON_ANIMATION_DURATION, UnifySize},
     item_utils::*,
     song_widget::format_duration,
-    utils::{
-        GlobalToast,
-        run_time_ticks_to_label,
-    },
+    utils::{GlobalToast, run_time_ticks_to_label},
     window::Window,
 };
 use crate::{
-    client::{
-        error::UserFacingError,
-        jellyfin_client::JELLYFIN_CLIENT,
-        structs::*,
-    },
+    client::{error::UserFacingError, jellyfin_client::JELLYFIN_CLIENT, structs::*},
     ui::{
-        mpv::page::{
-            PlaybackDirectMode,
-            media_source_stream_url,
-        },
+        mpv::page::{PlaybackDirectMode, media_source_stream_url},
         provider::{
-            dropdown_factory::{
-                DropdownList,
-                DropdownListBuilder,
-            },
+            dropdown_factory::{DropdownList, DropdownListBuilder},
             tu_item::TuItem,
             tu_object::TuObject,
         },
     },
     utils::{
-        CacheEvent,
-        CachePolicy,
-        fetch_with_cache,
-        get_image_with_cache,
-        spawn,
-        spawn_g_timeout,
+        CacheEvent, CachePolicy, fetch_with_cache, get_image_with_cache, spawn, spawn_g_timeout,
         spawn_tokio,
     },
 };
-use adw::{
-    prelude::*,
-    subclass::prelude::*,
-};
-use chrono::{
-    DateTime,
-    Utc,
-};
+use adw::{prelude::*, subclass::prelude::*};
+use chrono::{DateTime, Utc};
 use gettextrs::gettext;
 use glib::Object;
-use gtk::{
-    ListScrollFlags,
-    ListView,
-    gio,
-    glib,
-    template_callbacks,
-};
+use gtk::{ListScrollFlags, ListView, gio, glib, template_callbacks};
 
 pub(crate) mod imp {
-    use std::cell::{
-        OnceCell,
-        RefCell,
-    };
+    use std::cell::{OnceCell, RefCell};
 
     use adw::subclass::prelude::*;
     use glib::subclass::InitializingObject;
-    use gtk::{
-        CompositeTemplate,
-        glib,
-        prelude::*,
-    };
+    use gtk::{CompositeTemplate, glib, prelude::*};
 
     use super::SimpleListItem;
     use crate::{
         ui::{
-            provider::{
-                dropdown_factory::factory,
-                tu_item::TuItem,
-                tu_object::TuObject,
-            },
+            provider::{dropdown_factory::factory, tu_item::TuItem, tu_object::TuObject},
             widgets::{
-                EpisodeSwitcher,
-                fix::ScrolledWindowFixExt,
-                horbu_scrolled::HorbuScrolled,
-                hortu_scrolled::HortuScrolled,
-                item_actionbox::ItemActionsBox,
-                item_carousel::ItemCarousel,
-                star_toggle::StarToggle,
-                tu_overview_item::imp::ViewGroup,
-                utils::TuItemBuildExt,
+                EpisodeSwitcher, fix::ScrolledWindowFixExt, horbu_scrolled::HorbuScrolled,
+                hortu_scrolled::HortuScrolled, item_actionbox::ItemActionsBox,
+                item_carousel::ItemCarousel, star_toggle::StarToggle,
+                tu_overview_item::imp::ViewGroup, utils::TuItemBuildExt,
             },
         },
         utils::spawn,
@@ -677,17 +628,16 @@ impl ItemPage {
     async fn set_first_episode(&self, id: &str) -> Option<TuItem> {
         let id = id.to_string();
         let seasons_id = id.clone();
-        let mut seasons = match spawn_tokio(async move {
-            JELLYFIN_CLIENT.get_season_list(&seasons_id).await
-        })
-        .await
-        {
-            Ok(seasons) => seasons.items,
-            Err(error) => {
-                self.toast(error.to_user_facing());
-                return None;
-            }
-        };
+        let mut seasons =
+            match spawn_tokio(async move { JELLYFIN_CLIENT.get_season_list(&seasons_id).await })
+                .await
+            {
+                Ok(seasons) => seasons.items,
+                Err(error) => {
+                    self.toast(error.to_user_facing());
+                    return None;
+                }
+            };
         // Prefer the first numbered season. Specials (season 0) are only used
         // when the series has no regular season.
         seasons.sort_by_key(|season| {
@@ -1263,9 +1213,7 @@ impl ItemPage {
         card
     }
 
-    fn append_media_info_row(
-        grid: &gtk::Grid, row: &mut i32, key: &str, value: Option<&str>,
-    ) {
+    fn append_media_info_row(grid: &gtk::Grid, row: &mut i32, key: &str, value: Option<&str>) {
         let Some(value) = value.filter(|value| !value.is_empty()) else {
             return;
         };

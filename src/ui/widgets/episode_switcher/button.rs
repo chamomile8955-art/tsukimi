@@ -1,8 +1,4 @@
-use gtk::{
-    glib,
-    prelude::*,
-    subclass::prelude::*,
-};
+use gtk::{glib, prelude::*, subclass::prelude::*};
 
 pub(crate) mod imp {
     use std::cell::OnceCell;

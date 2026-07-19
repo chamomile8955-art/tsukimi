@@ -1,33 +1,16 @@
 use glib::Object;
-use gtk::{
-    gio,
-    glib,
-    subclass::prelude::*,
-};
+use gtk::{gio, glib, subclass::prelude::*};
 use libmpv2::SetData;
 use tracing::info;
 
-use super::tsukimi_mpv::{
-    ACTIVE,
-    TrackSelection,
-};
-use crate::{
-    client::jellyfin_client::JELLYFIN_CLIENT,
-    ui::models::SETTINGS,
-    utils::spawn,
-};
+use super::tsukimi_mpv::{ACTIVE, TrackSelection};
+use crate::{client::jellyfin_client::JELLYFIN_CLIENT, ui::models::SETTINGS, utils::spawn};
 
 mod imp {
-    use std::{
-        cell::OnceCell as LocalOnceCell,
-        ffi::c_void,
-    };
+    use std::{cell::OnceCell as LocalOnceCell, ffi::c_void};
 
     #[cfg(target_os = "linux")]
-    use gdk_wayland::{
-        WaylandDisplay,
-        wayland_client::Proxy,
-    };
+    use gdk_wayland::{WaylandDisplay, wayland_client::Proxy};
 
     #[cfg(target_os = "linux")]
     use gdk_x11::X11Display;
@@ -35,28 +18,17 @@ mod imp {
     use gettextrs::gettext;
     use glow::HasContext;
     use gtk::{
-        gdk::{
-            Display,
-            GLContext,
-        },
+        gdk::{Display, GLContext},
         glib,
         prelude::*,
         subclass::prelude::*,
     };
-    use libmpv2::render::{
-        OpenGLInitParams,
-        RenderContext,
-        RenderParam,
-        RenderParamApiType,
-    };
+    use libmpv2::render::{OpenGLInitParams, RenderContext, RenderParam, RenderParamApiType};
     use once_cell::sync::OnceCell;
 
     use crate::{
         close_on_error,
-        ui::mpv::tsukimi_mpv::{
-            RENDER_UPDATE,
-            TsukimiMPV,
-        },
+        ui::mpv::tsukimi_mpv::{RENDER_UPDATE, TsukimiMPV},
     };
 
     #[derive(Default)]

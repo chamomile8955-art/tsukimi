@@ -1,26 +1,12 @@
-use adw::{
-    prelude::*,
-    subclass::prelude::*,
-};
+use adw::{prelude::*, subclass::prelude::*};
 use gettextrs::gettext;
-use gtk::{
-    CompositeTemplate,
-    gio,
-    glib,
-    template_callbacks,
-};
+use gtk::{CompositeTemplate, gio, glib, template_callbacks};
 use libmpv2::SetData;
 
 use super::options_matcher::{
-    match_audio_channels,
-    match_hwdec_interop,
-    match_sub_border_style,
-    match_video_upscale,
+    match_audio_channels, match_hwdec_interop, match_sub_border_style, match_video_upscale,
 };
-use crate::ui::{
-    GlobalToast,
-    models::SETTINGS,
-};
+use crate::ui::{GlobalToast, models::SETTINGS};
 
 mod imp {
     use glib::subclass::InitializingObject;

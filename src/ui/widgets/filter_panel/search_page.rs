@@ -1,42 +1,23 @@
-use adw::{
-    prelude::*,
-    subclass::prelude::*,
-};
-use gtk::{
-    CompositeTemplate,
-    glib,
-};
+use adw::{prelude::*, subclass::prelude::*};
+use gtk::{CompositeTemplate, glib};
 
 use gtk::template_callbacks;
 
 use crate::{
-    client::{
-        error::UserFacingError,
-        jellyfin_client::JELLYFIN_CLIENT,
-        structs::FilterItem,
-    },
+    client::{error::UserFacingError, jellyfin_client::JELLYFIN_CLIENT, structs::FilterItem},
     ui::GlobalToast,
-    utils::{
-        spawn,
-        spawn_tokio,
-    },
+    utils::{spawn, spawn_tokio},
 };
 
 mod imp {
     use std::{
         cell::RefCell,
-        sync::{
-            LazyLock,
-            Mutex,
-        },
+        sync::{LazyLock, Mutex},
     };
 
     use glib::{
         WeakRef,
-        subclass::{
-            InitializingObject,
-            Signal,
-        },
+        subclass::{InitializingObject, Signal},
     };
 
     use super::*;
@@ -111,11 +92,7 @@ glib::wrapper! {
         @extends gtk::Widget, adw::NavigationPage, @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget;
 }
 
-use super::{
-    FilterPanelDialog,
-    FilterRow,
-    FiltersRow,
-};
+use super::{FilterPanelDialog, FilterRow, FiltersRow};
 
 impl Default for FilterDialogSearchPage {
     fn default() -> Self {

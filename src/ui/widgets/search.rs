@@ -1,52 +1,28 @@
 use glib::Object;
-use gtk::{
-    gio,
-    glib,
-    prelude::*,
-    subclass::prelude::*,
-    template_callbacks,
-};
+use gtk::{gio, glib, prelude::*, subclass::prelude::*, template_callbacks};
 
 use adw::prelude::*;
 
 use crate::{
-    client::{
-        error::UserFacingError,
-        jellyfin_client::JELLYFIN_CLIENT,
-        structs::*,
-    },
+    client::{error::UserFacingError, jellyfin_client::JELLYFIN_CLIENT, structs::*},
     ui::provider::tu_item::TuItem,
-    utils::{
-        spawn,
-        spawn_tokio,
-    },
+    utils::{spawn, spawn_tokio},
 };
 
-use super::{
-    filter_panel::FilterPanelDialog,
-    utils::GlobalToast,
-};
+use super::{filter_panel::FilterPanelDialog, utils::GlobalToast};
 
 mod imp {
 
-    use std::{
-        cell::OnceCell,
-        sync::atomic::Ordering,
-    };
+    use std::{cell::OnceCell, sync::atomic::Ordering};
 
     use glib::subclass::InitializingObject;
-    use gtk::{
-        CompositeTemplate,
-        glib,
-        subclass::prelude::*,
-    };
+    use gtk::{CompositeTemplate, glib, subclass::prelude::*};
 
     use gtk::prelude::*;
 
     use crate::{
         ui::widgets::{
-            filter_panel::FilterPanelDialog,
-            hortu_scrolled::UnifySize,
+            filter_panel::FilterPanelDialog, hortu_scrolled::UnifySize,
             tuview_scrolled::TuViewScrolled,
         },
         utils::spawn,

@@ -1,18 +1,8 @@
-use adw::{
-    prelude::*,
-    subclass::prelude::*,
-};
-use gtk::{
-    CompositeTemplate,
-    gio,
-    glib,
-};
+use adw::{prelude::*, subclass::prelude::*};
+use gtk::{CompositeTemplate, gio, glib};
 
 use crate::{
-    client::structs::{
-        SGTitem,
-        Urls,
-    },
+    client::structs::{SGTitem, Urls},
     utils::spawn,
 };
 

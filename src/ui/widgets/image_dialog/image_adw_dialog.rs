@@ -1,15 +1,8 @@
 use adw::subclass::prelude::*;
-use gtk::{
-    glib,
-    prelude::*,
-    template_callbacks,
-};
+use gtk::{glib, prelude::*, template_callbacks};
 
 use crate::{
-    client::{
-        error::UserFacingError,
-        jellyfin_client::JELLYFIN_CLIENT,
-    },
+    client::{error::UserFacingError, jellyfin_client::JELLYFIN_CLIENT},
     ui::GlobalToast,
     utils::spawn_tokio,
 };
@@ -19,18 +12,12 @@ mod imp {
 
     use adw::prelude::*;
     use glib::subclass::InitializingObject;
-    use gtk::{
-        CompositeTemplate,
-        glib,
-    };
+    use gtk::{CompositeTemplate, glib};
 
     use super::*;
     use crate::{
         client::structs::ImageItem,
-        ui::{
-            provider::IS_ADMIN,
-            widgets::image_dialog::ImageInfoCard,
-        },
+        ui::{provider::IS_ADMIN, widgets::image_dialog::ImageInfoCard},
         utils::spawn,
     };
 

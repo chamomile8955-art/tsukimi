@@ -1,46 +1,23 @@
-use adw::{
-    prelude::*,
-    subclass::prelude::*,
-};
+use adw::{prelude::*, subclass::prelude::*};
 use gettextrs::gettext;
-use gtk::{
-    SpinButton,
-    glib,
-    template_callbacks,
-};
+use gtk::{SpinButton, glib, template_callbacks};
 
 use super::utils::GlobalToast;
 use crate::{
-    client::{
-        error::UserFacingError,
-        jellyfin_client::JELLYFIN_CLIENT,
-        structs::SimpleListItem,
-    },
-    utils::{
-        spawn,
-        spawn_tokio,
-    },
+    client::{error::UserFacingError, jellyfin_client::JELLYFIN_CLIENT, structs::SimpleListItem},
+    utils::{spawn, spawn_tokio},
 };
 mod imp {
-    use std::cell::{
-        OnceCell,
-        RefCell,
-    };
+    use std::cell::{OnceCell, RefCell};
 
     use glib::subclass::InitializingObject;
-    use gtk::{
-        CompositeTemplate,
-        glib,
-    };
+    use gtk::{CompositeTemplate, glib};
     use serde_json::Value;
 
     use super::*;
     use crate::{
         client::structs::SimpleListItem,
-        ui::{
-            provider::IS_ADMIN,
-            widgets::item::dt,
-        },
+        ui::{provider::IS_ADMIN, widgets::item::dt},
         utils::spawn,
     };
 

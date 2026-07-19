@@ -1,16 +1,8 @@
-use gtk::{
-    glib,
-    prelude::*,
-    subclass::prelude::*,
-};
+use gtk::{glib, prelude::*, subclass::prelude::*};
 mod imp {
     use std::cell::RefCell;
 
-    use gtk::{
-        glib,
-        prelude::*,
-        subclass::prelude::*,
-    };
+    use gtk::{glib, prelude::*, subclass::prelude::*};
 
     use crate::gstl::player::MusicPlayer;
 

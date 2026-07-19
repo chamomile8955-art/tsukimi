@@ -1,35 +1,22 @@
 use gst::prelude::*;
 use gtk::glib;
 
-use crate::{
-    client::jellyfin_client::JELLYFIN_CLIENT,
-    ui::provider::core_song::CoreSong,
-};
+use crate::{client::jellyfin_client::JELLYFIN_CLIENT, ui::provider::core_song::CoreSong};
 
 pub mod imp {
     use std::{
-        cell::{
-            Cell,
-            RefCell,
-        },
+        cell::{Cell, RefCell},
         sync::OnceLock,
     };
 
     use anyhow::Result;
-    use flume::{
-        Receiver,
-        Sender,
-        unbounded,
-    };
+    use flume::{Receiver, Sender, unbounded};
     use glib::subclass::Signal;
     use gst::ClockTime;
     use gtk::{
         glib,
         glib::Properties,
-        prelude::{
-            ObjectExt,
-            *,
-        },
+        prelude::{ObjectExt, *},
         subclass::prelude::*,
     };
     #[cfg(target_os = "linux")]

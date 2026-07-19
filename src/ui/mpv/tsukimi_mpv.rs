@@ -1,32 +1,21 @@
 use std::{
     cell::RefCell,
     collections::HashMap,
-    sync::{
-        Arc,
-        atomic::AtomicU32,
-    },
+    sync::{Arc, atomic::AtomicU32},
     thread::JoinHandle,
 };
 
 use libmpv2::{
-    GetData,
-    Mpv,
-    SetData,
-    events::{
-        EventContext,
-        PropertyData,
-    },
+    GetData, Mpv, SetData,
+    events::{EventContext, PropertyData},
     mpv_node::MpvNode,
     render::RenderContext,
 };
-use tracing::{
-    debug,
-    warn,
-};
+use tracing::{debug, warn};
 
 const MAX_VOLUME: i64 = 100;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct MpvTrack {
     pub id: i64,
     pub title: String,
@@ -69,10 +58,7 @@ pub const SHUTDOWN: u32 = 2;
 impl Default for TsukimiMPV {
     fn default() -> Self {
         unsafe {
-            use libc::{
-                LC_NUMERIC,
-                setlocale,
-            };
+            use libc::{LC_NUMERIC, setlocale};
             setlocale(LC_NUMERIC, c"C".as_ptr() as *const _);
         }
 
@@ -81,8 +67,7 @@ impl Default for TsukimiMPV {
         #[cfg(all(unix, not(target_os = "macos")))]
         let library = unsafe { libloading::os::unix::Library::new("libepoxy.so.0") }.unwrap();
         #[cfg(target_os = "windows")]
-        let library =
-            unsafe { libloading::os::windows::Library::new("libepoxy-0.dll") }.unwrap();
+        let library = unsafe { libloading::os::windows::Library::new("libepoxy-0.dll") }.unwrap();
 
         epoxy::load_with(|name| {
             unsafe { library.get::<_>(name.as_bytes()) }
@@ -164,11 +149,7 @@ impl Default for TsukimiMPV {
     }
 }
 
-use flume::{
-    Receiver,
-    Sender,
-    unbounded,
-};
+use flume::{Receiver, Sender, unbounded};
 use libmpv2::events::Event;
 use once_cell::sync::Lazy;
 
@@ -516,6 +497,7 @@ impl TsukimiMPV {
 unsafe impl Send for TsukimiMPV {}
 unsafe impl Sync for TsukimiMPV {}
 
+#[derive(Clone, Debug)]
 pub struct MpvTracks {
     pub audio_tracks: Vec<MpvTrack>,
     pub sub_tracks: Vec<MpvTrack>,
@@ -643,17 +625,11 @@ use url::Url;
 
 #[cfg(not(target_os = "windows"))]
 use super::options_matcher::match_hwdec_interop;
-use super::options_matcher::{
-    match_audio_channels,
-    match_video_upscale,
-};
+use super::options_matcher::{match_audio_channels, match_video_upscale};
 use crate::{
     client::error::UserFacingError,
     ui::models::SETTINGS,
-    utils::{
-        spawn_tokio_blocking_without_await,
-        spawn_tokio_without_await,
-    },
+    utils::{spawn_tokio_blocking_without_await, spawn_tokio_without_await},
 };
 
 const KEYSTRING_MAP: &[(&str, &str)] = &[

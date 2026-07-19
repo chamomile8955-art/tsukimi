@@ -1,12 +1,5 @@
 use adw::subclass::prelude::*;
-use gtk::{
-    CompositeTemplate,
-    CssProvider,
-    gdk,
-    gio,
-    glib,
-    prelude::*,
-};
+use gtk::{CompositeTemplate, CssProvider, gdk, gio, glib, prelude::*};
 
 use crate::ui::models::SETTINGS;
 

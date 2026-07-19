@@ -2,65 +2,28 @@ use std::cell::RefCell;
 
 use adw::prelude::*;
 use glib::Object;
-use gtk::{
-    gio,
-    glib,
-    glib::subclass::types::ObjectSubclassIsExt,
-    template_callbacks,
-};
+use gtk::{gio, glib, glib::subclass::types::ObjectSubclassIsExt, template_callbacks};
 use imp::PosterType;
 
 use super::tu_item::{
-    PROGRESSBAR_ANIMATION_DURATION,
-    TuItemBasic,
-    TuItemMenuPrelude,
-    TuItemOverlay,
+    PROGRESSBAR_ANIMATION_DURATION, TuItemBasic, TuItemMenuPrelude, TuItemOverlay,
     TuItemOverlayPrelude,
 };
 use crate::ui::{
-    provider::tu_item::{
-        ACTOR,
-        DIRECTOR,
-        GUEST_STAR,
-        PERSON,
-        PRODUCER,
-        TuItem,
-        WRITER,
-    },
-    widgets::utils::{
-        TU_ITEM_BANNER_SIZE,
-        TU_ITEM_VIDEO_SIZE,
-        compact_size,
-    },
+    provider::tu_item::{ACTOR, DIRECTOR, GUEST_STAR, PERSON, PRODUCER, TuItem, WRITER},
+    widgets::utils::{TU_ITEM_BANNER_SIZE, TU_ITEM_VIDEO_SIZE, compact_size},
 };
 
 pub mod imp {
-    use std::cell::{
-        Cell,
-        RefCell,
-    };
+    use std::cell::{Cell, RefCell};
 
-    use adw::{
-        prelude::*,
-        subclass::prelude::*,
-    };
+    use adw::{prelude::*, subclass::prelude::*};
     use glib::subclass::InitializingObject;
-    use gtk::{
-        CompositeTemplate,
-        PopoverMenu,
-        gdk,
-        glib,
-        graphene,
-        gsk,
-    };
+    use gtk::{CompositeTemplate, PopoverMenu, gdk, glib, graphene, gsk};
 
     use crate::ui::{
         provider::tu_item::TuItem,
-        widgets::{
-            hover_scale::HoverScale,
-            picture_loader::PictureLoader,
-            tu_item::TuItemAction,
-        },
+        widgets::{hover_scale::HoverScale, picture_loader::PictureLoader, tu_item::TuItemAction},
     };
 
     #[derive(Default, Hash, Eq, PartialEq, Clone, Copy, glib::Enum, Debug)]
@@ -102,6 +65,8 @@ pub mod imp {
         pub rating_label: TemplateChild<gtk::Label>,
         #[template_child]
         pub playback_label: TemplateChild<gtk::Label>,
+        #[template_child]
+        pub count_badge: TemplateChild<gtk::Label>,
         #[template_child]
         pub progress_bar: TemplateChild<gtk::ProgressBar>,
         #[property(get, set = Self::set_progress)]
@@ -311,12 +276,7 @@ pub mod imp {
             let fill_rect =
                 graphene::Rect::new(HORIZONTAL_INSET, progress_y, fill_w, PROGRESS_HEIGHT);
             let fill_clip = gsk::RoundedRect::new(
-                graphene::Rect::new(
-                    HORIZONTAL_INSET,
-                    progress_y,
-                    track_w,
-                    PROGRESS_HEIGHT,
-                ),
+                graphene::Rect::new(HORIZONTAL_INSET, progress_y, track_w, PROGRESS_HEIGHT),
                 graphene::Size::new(CORNER_RADIUS, CORNER_RADIUS),
                 graphene::Size::new(CORNER_RADIUS, CORNER_RADIUS),
                 graphene::Size::new(CORNER_RADIUS, CORNER_RADIUS),
@@ -456,6 +416,13 @@ impl TuListItem {
         imp.played_mark.set_visible(item.has_played_mark());
 
         imp.folder_mark.set_visible(item.has_folder_mark());
+
+        if let Some(count_badge) = item.fmt_count_badge() {
+            imp.count_badge.set_text(&count_badge);
+            imp.count_badge.set_visible(true);
+        } else {
+            imp.count_badge.set_visible(false);
+        }
 
         // Poster cards keep the lower-left corner visually empty. Playback
         // remains available through activation/context actions.

@@ -1,16 +1,8 @@
 use adw::subclass::prelude::*;
-use gtk::{
-    CompositeTemplate,
-    glib,
-    prelude::WidgetExt,
-    template_callbacks,
-};
+use gtk::{CompositeTemplate, glib, prelude::WidgetExt, template_callbacks};
 
 mod imp {
-    use glib::{
-        WeakRef,
-        subclass::InitializingObject,
-    };
+    use glib::{WeakRef, subclass::InitializingObject};
     use gtk::prelude::*;
 
     use super::*;

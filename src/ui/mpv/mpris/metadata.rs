@@ -1,20 +1,10 @@
 use adw::subclass::prelude::ObjectSubclassIsExt;
 use gtk::glib;
-use mpris_server::{
-    Metadata,
-    Property,
-    Time,
-};
+use mpris_server::{Metadata, Property, Time};
 
 use crate::{
-    ui::{
-        mpv::page::MPVPage,
-        provider::tu_item::TuItem,
-    },
-    utils::{
-        get_image_with_cache,
-        spawn,
-    },
+    ui::{mpv::page::MPVPage, provider::tu_item::TuItem},
+    utils::{get_image_with_cache, spawn},
 };
 
 impl MPVPage {

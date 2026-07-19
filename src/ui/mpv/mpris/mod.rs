@@ -1,39 +1,15 @@
 use anyhow::Result;
 
-use adw::subclass::prelude::{
-    ObjectSubclassExt,
-    ObjectSubclassIsExt,
-};
-use gtk::{
-    self,
-    glib,
-    prelude::*,
-};
+use adw::subclass::prelude::{ObjectSubclassExt, ObjectSubclassIsExt};
+use gtk::{self, glib, prelude::*};
 use mpris_server::{
-    LocalPlayerInterface,
-    LocalRootInterface,
-    LocalServer,
-    LoopStatus,
-    Metadata,
-    PlaybackRate,
-    PlaybackStatus,
-    Property,
-    Signal,
-    Time,
-    TrackId,
-    Volume,
-    zbus::{
-        self,
-        fdo,
-    },
+    LocalPlayerInterface, LocalRootInterface, LocalServer, LoopStatus, Metadata, PlaybackRate,
+    PlaybackStatus, Property, Signal, Time, TrackId, Volume,
+    zbus::{self, fdo},
 };
 
 use crate::{
-    APP_ID,
-    CLIENT_ID,
-    gstl::player::imp::ListRepeatMode,
-    ui::mpv::page::MPVPage,
-    utils::spawn,
+    APP_ID, CLIENT_ID, gstl::player::imp::ListRepeatMode, ui::mpv::page::MPVPage, utils::spawn,
 };
 use tracing::warn;
 

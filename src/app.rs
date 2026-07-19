@@ -1,26 +1,14 @@
-use adw::{
-    prelude::*,
-    subclass::prelude::*,
-};
+use adw::{prelude::*, subclass::prelude::*};
 use gtk::glib;
 
 mod imp {
-    use std::cell::{
-        Cell,
-        OnceCell,
-    };
+    use std::cell::{Cell, OnceCell};
 
-    use gtk::{
-        CssProvider,
-        gdk::Display,
-    };
+    use gtk::{CssProvider, gdk::Display};
 
     use crate::ui::{
         SETTINGS,
-        widgets::theme_switcher::{
-            apply_theme,
-            normalized_theme,
-        },
+        widgets::theme_switcher::{apply_theme, normalized_theme},
     };
 
     use super::*;
@@ -198,11 +186,7 @@ mod imp {
             content.append(&status);
 
             let (width, height) = restored_window_size();
-            tracing::info!(
-                width,
-                height,
-                "Startup splash using restored window size"
-            );
+            tracing::info!(width, height, "Startup splash using restored window size");
             let splash = adw::ApplicationWindow::builder()
                 .application(&*self.obj())
                 .content(&content)
@@ -224,9 +208,7 @@ mod imp {
             (splash, status)
         }
 
-        fn create_main_window(
-            &self, splash: adw::ApplicationWindow, status: gtk::Label,
-        ) {
+        fn create_main_window(&self, splash: adw::ApplicationWindow, status: gtk::Label) {
             let app = self.obj().clone();
             glib::MainContext::default().spawn_local(async move {
                 // Yield after each status change so the splash is painted
@@ -274,9 +256,7 @@ mod imp {
             });
         }
 
-        fn reveal_main_window(
-            window: &crate::Window, splash: &adw::ApplicationWindow,
-        ) {
+        fn reveal_main_window(window: &crate::Window, splash: &adw::ApplicationWindow) {
             let started = std::time::Instant::now();
             window.add_tick_callback(glib::clone!(
                 #[weak]
@@ -284,8 +264,7 @@ mod imp {
                 #[upgrade_or]
                 glib::ControlFlow::Break,
                 move |window, _| {
-                    let progress =
-                        (started.elapsed().as_secs_f64() / 0.22).clamp(0.0, 1.0);
+                    let progress = (started.elapsed().as_secs_f64() / 0.22).clamp(0.0, 1.0);
                     let eased = 1.0 - (1.0 - progress).powi(3);
                     window.set_opacity(eased);
 
@@ -322,10 +301,7 @@ mod imp {
 
     #[cfg(target_os = "macos")]
     fn center_window(window: &gtk::Window) {
-        use std::ffi::{
-            c_char,
-            c_void,
-        };
+        use std::ffi::{c_char, c_void};
 
         use glib::translate::ToGlibPtr;
 
@@ -348,8 +324,7 @@ mod imp {
         let Some(surface) = window.surface() else {
             return;
         };
-        let native_view =
-            unsafe { gdk_macos_surface_get_native_window(surface.to_glib_none().0) };
+        let native_view = unsafe { gdk_macos_surface_get_native_window(surface.to_glib_none().0) };
         if native_view.is_null() {
             return;
         }
@@ -390,8 +365,7 @@ mod imp {
         let Some(surface) = window.surface() else {
             return;
         };
-        let hwnd =
-            unsafe { gdk_win32_surface_get_handle(surface.as_ptr().cast::<c_void>()) };
+        let hwnd = unsafe { gdk_win32_surface_get_handle(surface.as_ptr().cast::<c_void>()) };
         if hwnd.is_null() {
             return;
         }

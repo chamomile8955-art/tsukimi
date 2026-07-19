@@ -1,25 +1,12 @@
-use gtk::{
-    glib,
-    prelude::*,
-    subclass::prelude::ObjectSubclassIsExt,
-};
+use gtk::{glib, prelude::*, subclass::prelude::ObjectSubclassIsExt};
 
 use crate::{
-    client::{
-        error::UserFacingError,
-        jellyfin_client::JELLYFIN_CLIENT,
-    },
+    client::{error::UserFacingError, jellyfin_client::JELLYFIN_CLIENT},
     ui::{
         GlobalToast,
-        widgets::{
-            song_widget::SongWidget,
-            star_toggle::StarToggle,
-        },
+        widgets::{song_widget::SongWidget, star_toggle::StarToggle},
     },
-    utils::{
-        spawn,
-        spawn_tokio,
-    },
+    utils::{spawn, spawn_tokio},
 };
 
 pub trait HasLikeAction {

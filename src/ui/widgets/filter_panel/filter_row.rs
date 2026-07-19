@@ -1,9 +1,5 @@
 use adw::subclass::prelude::*;
-use gtk::{
-    CompositeTemplate,
-    glib,
-    prelude::*,
-};
+use gtk::{CompositeTemplate, glib, prelude::*};
 
 use crate::client::structs::FilterItem;
 
@@ -12,10 +8,7 @@ use super::FilterDialogSearchPage;
 mod imp {
     use std::cell::RefCell;
 
-    use glib::{
-        Properties,
-        subclass::InitializingObject,
-    };
+    use glib::{Properties, subclass::InitializingObject};
 
     use super::*;
 

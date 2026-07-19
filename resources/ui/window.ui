@@ -82,7 +82,7 @@
                                       <class name="source-toolbar"/>
                                     </style>
                                     <child type="top">
-                                      <object class="AdwHeaderBar">
+                                      <object class="AdwHeaderBar" id="main_header">
                                         <property name="show-start-title-buttons">false</property>
                                         <property name="show-end-title-buttons">false</property>
                                         <style>
@@ -501,14 +501,18 @@
                             <property name="show-sidebar">False</property>
                             <property name="pin-sidebar">False</property>
                             <property name="sidebar-position">end</property>
-                            <property name="min-sidebar-width">360</property>
-                            <property name="max-sidebar-width">420</property>
+                            <property name="min-sidebar-width">420</property>
+                            <property name="max-sidebar-width">520</property>
                             <style>
                               <class name="mpv-overlay-menu"/>
                             </style>
                             <property name="sidebar">
                               <object class="AdwNavigationPage">
                                 <property name="overflow">hidden</property>
+                                <property name="margin-top">16</property>
+                                <property name="margin-end">16</property>
+                                <property name="margin-bottom">18</property>
+                                <property name="margin-start">8</property>
                                 <style>
                                   <class name="osd" />
                                   <class name="mpv-sidebar-panel"/>
@@ -557,11 +561,59 @@
                                               <object class="AdwHeaderBar">
                                                 <property name="show-end-title-buttons">false</property>
                                                 <property name="title-widget">
-                                                  <object class="AdwViewSwitcher">
-                                                    <property name="stack">mpv_view_stack</property>
+                                                  <object class="GtkBox">
+                                                    <property name="orientation">horizontal</property>
+                                                    <property name="spacing">6</property>
+                                                    <property name="halign">center</property>
+                                                    <property name="valign">center</property>
                                                     <style>
                                                       <class name="mpv-sidebar-switcher"/>
                                                     </style>
+                                                    <child>
+                                                      <object class="GtkButton" id="mpv_settings_tab">
+                                                        <property name="action-name">win.mpv-settings</property>
+                                                        <property name="child">
+                                                          <object class="AdwButtonContent">
+                                                            <property name="icon-name">settings-symbolic</property>
+                                                            <property name="label" translatable="yes">设置</property>
+                                                          </object>
+                                                        </property>
+                                                        <style>
+                                                          <class name="flat"/>
+                                                          <class name="mpv-sidebar-tab"/>
+                                                        </style>
+                                                      </object>
+                                                    </child>
+                                                    <child>
+                                                      <object class="GtkButton" id="mpv_shortcuts_tab">
+                                                        <property name="action-name">win.mpv-shortcuts</property>
+                                                        <property name="child">
+                                                          <object class="AdwButtonContent">
+                                                            <property name="icon-name">keyboard-shortcuts-symbolic</property>
+                                                            <property name="label" translatable="yes">快捷键</property>
+                                                          </object>
+                                                        </property>
+                                                        <style>
+                                                          <class name="flat"/>
+                                                          <class name="mpv-sidebar-tab"/>
+                                                        </style>
+                                                      </object>
+                                                    </child>
+                                                    <child>
+                                                      <object class="GtkButton" id="mpv_media_info_tab">
+                                                        <property name="action-name">win.mpv-media-info</property>
+                                                        <property name="child">
+                                                          <object class="AdwButtonContent">
+                                                            <property name="icon-name">info-symbolic</property>
+                                                            <property name="label" translatable="yes">媒体信息</property>
+                                                          </object>
+                                                        </property>
+                                                        <style>
+                                                          <class name="flat"/>
+                                                          <class name="mpv-sidebar-tab"/>
+                                                        </style>
+                                                      </object>
+                                                    </child>
                                                   </object>
                                                 </property>
                                                 <style>
@@ -575,7 +627,7 @@
                                                   <object class="AdwViewStackPage">
                                                     <property name="name">control-bar</property>
                                                     <property name="icon-name">settings-symbolic</property>
-                                                    <property name="title" translatable="yes">Settings</property>
+                                                    <property name="title" translatable="yes">设置</property>
                                                     <property name="child">
                                                       <object class="MPVControlSidebar" id="mpv_control_sidebar"/>
                                                     </property>
@@ -610,12 +662,12 @@
                                                   <object class="AdwViewStackPage">
                                                     <property name="name">media-info</property>
                                                     <property name="icon-name">info-symbolic</property>
-                                                    <property name="title" translatable="yes">Media info</property>
+                                                    <property name="title" translatable="yes">媒体信息</property>
                                                     <property name="child">
                                                       <object class="GtkScrolledWindow">
                                                         <property name="hscrollbar-policy">never</property>
                                                         <child>
-                                                          <object class="GtkBox">
+                                                          <object class="GtkBox" id="mpv_media_info_box">
                                                             <property name="orientation">vertical</property>
                                                             <property name="spacing">16</property>
                                                             <property name="margin-start">20</property>
@@ -625,35 +677,6 @@
                                                             <style>
                                                               <class name="mpv-info-panel"/>
                                                             </style>
-                                                            <child>
-                                                              <object class="AdwPreferencesGroup">
-                                                                <property name="title" translatable="yes">Media info</property>
-                                                                <style>
-                                                                  <class name="mpv-settings-group"/>
-                                                                </style>
-                                                                <child>
-                                                                  <object class="AdwActionRow">
-                                                                    <property name="title" translatable="yes">Playback statistics</property>
-                                                                    <property name="subtitle" translatable="yes">Show or hide the video information overlay</property>
-                                                                    <child type="prefix">
-                                                                      <object class="GtkImage">
-                                                                        <property name="icon-name">info-symbolic</property>
-                                                                      </object>
-                                                                    </child>
-                                                                    <child type="suffix">
-                                                                      <object class="GtkButton">
-                                                                        <property name="icon-name">view-more-symbolic</property>
-                                                                        <property name="valign">center</property>
-                                                                        <property name="action-name">win.mpv-info</property>
-                                                                        <style>
-                                                                          <class name="flat"/>
-                                                                        </style>
-                                                                      </object>
-                                                                    </child>
-                                                                  </object>
-                                                                </child>
-                                                              </object>
-                                                            </child>
                                                           </object>
                                                         </child>
                                                       </object>

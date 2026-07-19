@@ -18,7 +18,7 @@
 }
 
 .item-hero {
-	min-height: 560px;
+	min-height: 740px;
 }
 
 .media-info-source {
@@ -133,6 +133,22 @@
 .app-window button.played-mark image {
 	color: #ffffff;
 	-gtk-icon-shadow: none;
+}
+
+.app-window label.media-count-badge {
+	min-width: 28px;
+	min-height: 28px;
+	padding: 0 7px;
+	border-radius: 999px;
+	border: 1px solid rgba(255, 255, 255, 0.34);
+	background-color: #6c5cff;
+	background-image: none;
+	color: #ffffff;
+	font-size: 0.9em;
+	font-weight: 800;
+	line-height: 1;
+	text-shadow: none;
+	box-shadow: 0 3px 12px rgba(0, 0, 0, 0.34);
 }
 
 .people-section {
@@ -308,7 +324,7 @@ window.app-window.windows-native-frame .app-shell > stack,
 window.app-window.windows-native-frame .app-shell > widget.background,
 window.app-window.windows-native-frame overlay-split-view > widget.background,
 window.app-window.windows-native-frame .window-stack > box {
-	background-color: transparent;
+	background-color: @tsukimi_dark_root;
 	background-image: none;
 }
 
@@ -320,6 +336,13 @@ window.app-window.maximized .window-root-overlay,
 window.app-window.maximized .window-toast-overlay,
 window.app-window.maximized .window-stack,
 window.app-window.maximized .app-shell,
+window.app-window.maximized .window-frame > overlay,
+window.app-window.maximized .window-frame > box,
+window.app-window.maximized .app-shell > overlay,
+window.app-window.maximized .app-shell > box,
+window.app-window.maximized .app-shell > stack,
+window.app-window.maximized overlay-split-view > widget.background,
+window.app-window.maximized .window-stack > box,
 window.app-window.fullscreen,
 window.app-window.fullscreen.background,
 window.app-window.fullscreen > contents,
@@ -327,7 +350,14 @@ window.app-window.fullscreen .window-frame,
 window.app-window.fullscreen .window-root-overlay,
 window.app-window.fullscreen .window-toast-overlay,
 window.app-window.fullscreen .window-stack,
-window.app-window.fullscreen .app-shell {
+window.app-window.fullscreen .app-shell,
+window.app-window.fullscreen .window-frame > overlay,
+window.app-window.fullscreen .window-frame > box,
+window.app-window.fullscreen .app-shell > overlay,
+window.app-window.fullscreen .app-shell > box,
+window.app-window.fullscreen .app-shell > stack,
+window.app-window.fullscreen overlay-split-view > widget.background,
+window.app-window.fullscreen .window-stack > box {
 	background-color: #000000;
 	background-image: none;
 }
@@ -559,6 +589,23 @@ window.app-window > contents,
 	border-radius: 999px;
 }
 
+.app-window button.glass-button,
+.app-window togglebutton.glass-button,
+.app-window menubutton.glass-button > button,
+.app-window button.circular-icon-button,
+.app-window togglebutton.circular-icon-button,
+.app-window menubutton.circular-icon-button > button,
+.app-window .segmented-control > button,
+.app-window stackswitcher.segmented-control > button,
+.app-window .control-group > button,
+.app-window .control-group > togglebutton,
+.app-window .control-group > menubutton > button,
+.app-window box.linked > button,
+.app-window box.linked > togglebutton,
+.app-window box.linked > menubutton > button {
+	transition: background-color 120ms ease-out, border-color 120ms ease-out, color 120ms ease-out;
+}
+
 .app-window button.circular-icon-button,
 .app-window togglebutton.circular-icon-button,
 .app-window menubutton.circular-icon-button > button {
@@ -742,6 +789,84 @@ menubutton.glass-button > button:focus-visible {
 	background-color: rgba(255, 255, 255, 0.13);
 }
 
+.app-window .media-toolbar-actions {
+	min-height: 46px;
+}
+
+.app-window .media-toolbar-actions .media-view-switch,
+.app-window .media-toolbar-actions .media-sort-order {
+	min-height: 44px;
+	padding: 4px;
+	border-color: rgba(255, 255, 255, 0.18);
+	background-color: rgba(45, 45, 51, 0.92);
+}
+
+.app-window .media-toolbar-actions .media-view-switch > button,
+.app-window .media-toolbar-actions .media-sort-order > button {
+	min-width: 38px;
+	min-height: 36px;
+	padding: 0;
+	-gtk-icon-size: 18px;
+}
+
+.app-window dropdown.media-sort-dropdown,
+.app-window dropdown.media-sort-dropdown > button {
+	min-height: 44px;
+	padding: 0 12px;
+	border: 1px solid rgba(255, 255, 255, 0.18);
+	border-radius: 999px;
+	background-color: rgba(45, 45, 51, 0.92);
+	background-image: none;
+	box-shadow: none;
+}
+
+.app-window dropdown.media-sort-dropdown > button:hover {
+	background-color: #383840;
+}
+
+.app-window dropdown.media-sort-dropdown > button:active {
+	background-color: #42424b;
+}
+
+.app-window .media-toolbar-summary {
+	min-height: 46px;
+}
+
+.app-window .media-toolbar-summary label {
+	margin: 0;
+	padding: 0;
+}
+
+.app-window menubutton.media-poster-menu > button,
+.app-window button.media-filter-button {
+	min-height: 44px;
+	border: 1px solid rgba(255, 255, 255, 0.18);
+	border-radius: 999px;
+	background-color: rgba(45, 45, 51, 0.92);
+	background-image: none;
+	box-shadow: none;
+}
+
+.app-window menubutton.media-poster-menu > button {
+	padding: 0 14px;
+}
+
+.app-window button.media-filter-button {
+	min-width: 44px;
+	padding: 0;
+	-gtk-icon-size: 18px;
+}
+
+.app-window menubutton.media-poster-menu > button:hover,
+.app-window button.media-filter-button:hover {
+	background-color: #383840;
+}
+
+.app-window menubutton.media-poster-menu > button:active,
+.app-window button.media-filter-button:active {
+	background-color: #42424b;
+}
+
 .app-window .control-group > button,
 .app-window .control-group > menubutton,
 .app-window box.linked > button,
@@ -882,6 +1007,133 @@ menubutton.glass-button > button:focus-visible {
 	border-color: rgba(255, 255, 255, 0.22);
 	background-color: rgba(0, 0, 0, 0.72);
 	background-image: none;
+}
+
+.app-window .poster-info-overlay button.hero-play-button {
+	min-height: 52px;
+	padding-left: 28px;
+	padding-right: 28px;
+	border: 1px solid rgba(255, 255, 255, 0.42);
+	border-radius: 999px;
+	background-color: rgba(255, 255, 255, 0.94);
+	background-image: none;
+	box-shadow: 0 8px 22px rgba(0, 0, 0, 0.22);
+	color: #17161c;
+	transition: background-color 120ms ease-out, border-color 120ms ease-out, box-shadow 120ms ease-out;
+}
+
+.app-window .poster-info-overlay button.hero-play-button:hover {
+	background-color: #ffffff;
+	border-color: rgba(255, 255, 255, 0.62);
+}
+
+.app-window .poster-info-overlay button.hero-play-button:active {
+	background-color: rgba(224, 222, 232, 0.96);
+	border-color: rgba(255, 255, 255, 0.36);
+	box-shadow: 0 3px 10px rgba(0, 0, 0, 0.22);
+}
+
+.app-window .poster-info-overlay button.hero-play-button label,
+.app-window .poster-info-overlay button.hero-play-button image {
+	color: #17161c;
+	text-shadow: none;
+}
+
+.app-window .poster-info-overlay .hero-action-group.control-group {
+	min-height: 52px;
+	padding: 4px;
+	border: 1px solid rgba(255, 255, 255, 0.36);
+	border-radius: 999px;
+	background-color: rgba(255, 255, 255, 0.88);
+	background-image: none;
+	box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
+}
+
+.app-window .poster-info-overlay .hero-action-group > togglebutton.hero-favorite-button,
+.app-window .poster-info-overlay .hero-action-group > menubutton.hero-more-button > button {
+	min-width: 44px;
+	min-height: 44px;
+	padding: 0;
+	border: none;
+	border-radius: 999px;
+	background-color: transparent;
+	background-image: none;
+	color: #23212b;
+	box-shadow: none;
+}
+
+.app-window .poster-info-overlay .hero-action-group > togglebutton.hero-favorite-button:hover,
+.app-window .poster-info-overlay .hero-action-group > menubutton.hero-more-button > button:hover {
+	background-color: rgba(0, 0, 0, 0.08);
+}
+
+.app-window .poster-info-overlay .hero-action-group > togglebutton.hero-favorite-button:active,
+.app-window .poster-info-overlay .hero-action-group > menubutton.hero-more-button > button:active,
+.app-window .poster-info-overlay .hero-action-group > menubutton.hero-more-button > button:checked {
+	background-color: rgba(0, 0, 0, 0.16);
+}
+
+.app-window .poster-info-overlay .hero-action-group > togglebutton.hero-favorite-button:checked {
+	background-color: #6c5cff;
+	color: #ffffff;
+}
+
+.app-window .poster-info-overlay .hero-action-group > togglebutton.hero-favorite-button image,
+.app-window .poster-info-overlay .hero-action-group > menubutton.hero-more-button > button image {
+	color: inherit;
+	text-shadow: none;
+	-gtk-icon-shadow: none;
+}
+
+.app-window .poster-info-overlay .media-choice-row {
+	min-height: 44px;
+}
+
+.app-window .poster-info-overlay .media-choice-label {
+	min-height: 44px;
+	margin-right: 2px;
+	padding-top: 0;
+	padding-bottom: 0;
+	color: #ffffff;
+	font-size: 1.02em;
+	font-weight: 750;
+	line-height: 1.2;
+	text-shadow: 0 2px 6px rgba(0, 0, 0, 0.72);
+}
+
+.app-window .poster-info-overlay dropdown.media-choice-dropdown > button {
+	min-height: 44px;
+	padding-left: 18px;
+	padding-right: 16px;
+	border: 1px solid rgba(255, 255, 255, 0.22);
+	border-radius: 999px;
+	background-color: rgba(0, 0, 0, 0.78);
+	background-image: none;
+	box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+	color: #ffffff;
+	transition: background-color 120ms ease-out, border-color 120ms ease-out, box-shadow 120ms ease-out;
+}
+
+.app-window .poster-info-overlay dropdown.media-choice-dropdown > button:hover {
+	background-color: rgba(0, 0, 0, 0.86);
+	border-color: rgba(255, 255, 255, 0.32);
+}
+
+.app-window .poster-info-overlay dropdown.media-choice-dropdown > button:active {
+	background-color: rgba(0, 0, 0, 0.94);
+	box-shadow: 0 3px 10px rgba(0, 0, 0, 0.24);
+}
+
+.app-window .poster-info-overlay dropdown.media-choice-dropdown label,
+.app-window .poster-info-overlay dropdown.media-choice-dropdown image,
+.app-window .poster-info-overlay dropdown.media-choice-dropdown > button label,
+.app-window .poster-info-overlay dropdown.media-choice-dropdown > button image {
+	color: #ffffff;
+	font-size: 0.96em;
+	font-weight: 700;
+	line-height: 1.2;
+	text-shadow: none;
+	-gtk-icon-shadow: none;
 }
 
 /* Source footer / settings placement support */
@@ -1043,7 +1295,7 @@ popover.floating-menu contents > * {
 	background-clip: padding-box;
 	border: 1px solid alpha(@window_fg_color, 0.10);
 	border-radius: 18px;
-	box-shadow: 0 18px 42px rgba(0, 0, 0, 0.24);
+	box-shadow: 0 10px 26px rgba(0, 0, 0, 0.18);
 	color: @window_fg_color;
 }
 
@@ -1057,7 +1309,7 @@ popover.menu.floating-dialog contents > * {
 	background-clip: padding-box;
 	border: 1px solid alpha(@window_fg_color, 0.10);
 	border-radius: 22px;
-	box-shadow: 0 18px 42px rgba(0, 0, 0, 0.24);
+	box-shadow: 0 10px 26px rgba(0, 0, 0, 0.18);
 	color: @window_fg_color;
 }
 
@@ -1084,7 +1336,7 @@ window.settings-dialog {
 	background-image: none;
 	border: 1px solid alpha(@window_fg_color, 0.10);
 	border-radius: 22px;
-	box-shadow: 0 24px 64px rgba(0, 0, 0, 0.28);
+	box-shadow: 0 12px 30px rgba(0, 0, 0, 0.20);
 	color: @window_fg_color;
 }
 
@@ -1110,7 +1362,7 @@ dialog.add-server-dialog sheet {
 	background-clip: padding-box;
 	border: 1px solid alpha(@window_fg_color, 0.12);
 	border-radius: 22px;
-	box-shadow: 0 24px 64px rgba(0, 0, 0, 0.28);
+	box-shadow: 0 12px 30px rgba(0, 0, 0, 0.20);
 	color: @window_fg_color;
 }
 
@@ -1141,23 +1393,27 @@ dialog.add-server-dialog sheet {
 	color: @window_fg_color;
 }
 
-/* Keep the server-type selector visually inside its entry row instead of
- * drawing a second, mismatched button surface around “Emby/Jellyfin”. */
+/* Standalone server-type selector in the add-server form. */
 .add-server-dialog dropdown.server-type-selector,
 .add-server-dialog dropdown.server-type-selector > button {
-	background-color: transparent;
+	min-width: 132px;
+	min-height: 38px;
+	padding: 0 10px;
+	border-radius: 999px;
+	background-color: @tsukimi_dark_panel_raised;
 	background-image: none;
-	border: none;
+	border: 1px solid @tsukimi_dark_border;
 	box-shadow: none;
+	transition: background-color 120ms ease-out, border-color 120ms ease-out;
 }
 
 .add-server-dialog dropdown.server-type-selector > button:hover {
-	background-color: @glass_hover;
+	background-color: #383840;
 }
 
 .add-server-dialog dropdown.server-type-selector > button:active,
 .add-server-dialog dropdown.server-type-selector > button:checked {
-	background-color: @glass_pressed;
+	background-color: #42424b;
 }
 
 .account-settings .boxed-list,
@@ -1245,6 +1501,11 @@ window.app-window.compact-1080 .content-stack {
 
 window.app-window.compact-1080 .top-navigation {
 	min-height: 44px;
+}
+
+window.app-window.compact-1080 .item-hero,
+window.app-window.compact-1080.detail-hero-mode .item-hero {
+	min-height: 650px;
 }
 
 window.app-window.compact-1080 .media-library-content {

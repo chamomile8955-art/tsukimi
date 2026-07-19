@@ -1,59 +1,29 @@
 use std::{
-    cell::{
-        Cell,
-        RefCell,
-    },
-    collections::{
-        HashMap,
-        VecDeque,
-    },
+    cell::{Cell, RefCell},
+    collections::{HashMap, VecDeque},
     path::PathBuf,
     sync::{
-        LazyLock,
-        Mutex,
-        atomic::{
-            AtomicBool,
-            AtomicUsize,
-            Ordering,
-        },
+        LazyLock, Mutex,
+        atomic::{AtomicBool, AtomicUsize, Ordering},
     },
 };
 
-use adw::{
-    prelude::*,
-    subclass::prelude::*,
-};
+use adw::{prelude::*, subclass::prelude::*};
 use gtk::{
-    CompositeTemplate,
-    gio,
-    glib::{
-        self,
-        clone,
-    },
+    CompositeTemplate, gio,
+    glib::{self, clone},
 };
-use tracing::{
-    debug,
-    warn,
-};
+use tracing::{debug, warn};
 use xxhash_rust::xxh3::xxh3_64;
 
 use super::{
-    image_paintable::{
-        DecodedPaintable,
-        ImagePaintable,
-    },
-    utils::{
-        TU_ITEM_POST_SIZE,
-        TU_ITEM_VIDEO_SIZE,
-    },
+    image_paintable::{DecodedPaintable, ImagePaintable},
+    utils::{TU_ITEM_POST_SIZE, TU_ITEM_VIDEO_SIZE},
 };
 use crate::{
     client::jellyfin_client::JELLYFIN_CLIENT,
     ui::models::jellyfin_cache_path,
-    utils::{
-        spawn,
-        spawn_tokio,
-    },
+    utils::{spawn, spawn_tokio},
 };
 
 const IMAGE_LOAD_DELAY: std::time::Duration = std::time::Duration::from_millis(16);
@@ -69,12 +39,7 @@ static MAX_IMAGE_DECODE_TASKS: LazyLock<usize> = LazyLock::new(rayon::current_nu
 static IMAGE_DECODE_TASKS: AtomicUsize = AtomicUsize::new(0);
 static FIRST_POSTER_RENDERED: AtomicBool = AtomicBool::new(false);
 static IN_FLIGHT_DOWNLOADS: LazyLock<
-    Mutex<
-        HashMap<
-            String,
-            Vec<tokio::sync::oneshot::Sender<Result<(), String>>>,
-        >,
-    >,
+    Mutex<HashMap<String, Vec<tokio::sync::oneshot::Sender<Result<(), String>>>>>,
 > = LazyLock::new(|| Mutex::new(HashMap::new()));
 
 enum LoadedImage {
@@ -194,10 +159,7 @@ fn try_acquire_decode_permit() -> Option<DecodePermit> {
 }
 
 pub(crate) mod imp {
-    use std::cell::{
-        Cell,
-        RefCell,
-    };
+    use std::cell::{Cell, RefCell};
 
     use glib::subclass::InitializingObject;
 
@@ -490,13 +452,7 @@ impl PictureLoader {
             requested_format = profile.label(),
             "Poster cache lookup"
         );
-        self.reveal_picture(
-            cache_file_path,
-            cancellable,
-            generation,
-            true,
-            profile,
-        );
+        self.reveal_picture(cache_file_path, cancellable, generation, true, profile);
     }
 
     fn reveal_picture(
@@ -504,11 +460,7 @@ impl PictureLoader {
         fetch_on_error: bool, profile: ImageRequestProfile,
     ) {
         let file = gio::File::for_path(&cache_file_path);
-        let cache_key = format!(
-            "file:{}:{}",
-            self.animated(),
-            cache_file_path.display()
-        );
+        let cache_key = format!("file:{}:{}", self.animated(), cache_file_path.display());
         self.load_file_bytes(
             file,
             cache_key,
@@ -521,8 +473,8 @@ impl PictureLoader {
     }
 
     fn apply_paintable(
-        &self, paintable: &gtk::gdk::Paintable, cache_key: &str,
-        cancellable: gio::Cancellable, generation: u64,
+        &self, paintable: &gtk::gdk::Paintable, cache_key: &str, cancellable: gio::Cancellable,
+        generation: u64,
     ) {
         if !self.is_current(&cancellable, generation) {
             return;
@@ -548,8 +500,7 @@ impl PictureLoader {
 
         debug!(
             poster = cache_key,
-            generation,
-            "Poster UI update triggered on GLib main context"
+            generation, "Poster UI update triggered on GLib main context"
         );
 
         if !FIRST_POSTER_RENDERED.swap(true, Ordering::Relaxed) {
@@ -782,7 +733,8 @@ impl PictureLoader {
                             debug!(
                                 media_item_id = obj.id(),
                                 image_type = obj.imagetype(),
-                                fallback_reason = "all supported decoders and Windows format fallbacks failed",
+                                fallback_reason =
+                                    "all supported decoders and Windows format fallbacks failed",
                                 "Showing no-cover poster fallback"
                             );
                             obj.set_broken(waiter.cancellable, waiter.generation);
@@ -868,8 +820,8 @@ impl PictureLoader {
 
     #[cfg(target_os = "windows")]
     fn start_windows_format_fallback(
-        &self, cancellable: gio::Cancellable, generation: u64,
-        profile: ImageRequestProfile, reason: &'static str,
+        &self, cancellable: gio::Cancellable, generation: u64, profile: ImageRequestProfile,
+        reason: &'static str,
     ) {
         spawn(clone!(
             #[weak(rename_to = obj)]
@@ -943,26 +895,14 @@ impl PictureLoader {
             match result {
                 Ok(()) => {
                     debug!("Setting image: {}", &pathbuf.display());
-                    obj.reveal_picture(
-                        pathbuf,
-                        cancellable,
-                        generation,
-                        false,
-                        profile,
-                    );
+                    obj.reveal_picture(pathbuf, cancellable, generation, false, profile);
                 }
                 Err(error) => {
                     warn!("{error}");
                     if attempt == 0 {
                         glib::timeout_future(IMAGE_NETWORK_RETRY_DELAY).await;
                         if obj.is_current(&cancellable, generation) {
-                            obj.get_file_attempt(
-                                pathbuf,
-                                cancellable,
-                                generation,
-                                1,
-                                profile,
-                            );
+                            obj.get_file_attempt(pathbuf, cancellable, generation, 1, profile);
                         }
                     } else {
                         #[cfg(target_os = "windows")]

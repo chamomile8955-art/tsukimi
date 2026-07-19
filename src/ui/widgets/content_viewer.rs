@@ -1,13 +1,5 @@
-use adw::{
-    prelude::*,
-    subclass::prelude::*,
-};
-use gtk::{
-    gdk,
-    gio,
-    glib,
-    glib::clone,
-};
+use adw::{prelude::*, subclass::prelude::*};
+use gtk::{gdk, gio, glib, glib::clone};
 use tracing::warn;
 
 use super::image_paintable::ImagePaintable;
@@ -17,10 +9,7 @@ mod imp {
     use std::cell::Cell;
 
     use glib::subclass::InitializingObject;
-    use gtk::{
-        CompositeTemplate,
-        glib,
-    };
+    use gtk::{CompositeTemplate, glib};
 
     use super::*;
 

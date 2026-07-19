@@ -2,10 +2,7 @@ use std::cell::RefCell;
 
 use gtk::{
     glib,
-    glib::{
-        prelude::*,
-        subclass::prelude::*,
-    },
+    glib::{prelude::*, subclass::prelude::*},
 };
 
 use crate::ui::widgets::song_widget::State;

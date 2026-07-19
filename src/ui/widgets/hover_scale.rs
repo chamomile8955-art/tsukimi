@@ -1,21 +1,11 @@
-use adw::{
-    prelude::*,
-    subclass::prelude::*,
-};
-use gtk::{
-    glib,
-    graphene,
-    gsk,
-};
+use adw::{prelude::*, subclass::prelude::*};
+use gtk::{glib, graphene, gsk};
 
 pub const MAX_SCALE: f32 = 1.035;
 const ANIMATION_DURATION: u32 = 120;
 
 mod imp {
-    use std::cell::{
-        OnceCell,
-        RefCell,
-    };
+    use std::cell::{OnceCell, RefCell};
 
     use adw::TimedAnimation;
     use glib::clone;

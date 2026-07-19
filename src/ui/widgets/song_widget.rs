@@ -1,21 +1,11 @@
-use adw::{
-    prelude::*,
-    subclass::prelude::*,
-};
+use adw::{prelude::*, subclass::prelude::*};
 use chrono::Duration;
-use gtk::{
-    CompositeTemplate,
-    glib,
-};
+use gtk::{CompositeTemplate, glib};
 
 use crate::{
     client::structs::SongWidgetView,
     ui::{
-        provider::{
-            actions::HasLikeAction,
-            core_song::CoreSong,
-            tu_item::TuItem,
-        },
+        provider::{actions::HasLikeAction, core_song::CoreSong, tu_item::TuItem},
         widgets::picture_loader::PictureLoader,
     },
     utils::spawn,
@@ -32,10 +22,7 @@ pub enum State {
 }
 
 pub(crate) mod imp {
-    use std::cell::{
-        Cell,
-        OnceCell,
-    };
+    use std::cell::{Cell, OnceCell};
 
     use glib::subclass::InitializingObject;
 
@@ -43,14 +30,9 @@ pub(crate) mod imp {
     use crate::{
         insert_editm_dialog,
         ui::{
-            provider::{
-                core_song::CoreSong,
-                tu_item::TuItem,
-            },
+            provider::{core_song::CoreSong, tu_item::TuItem},
             widgets::{
-                image_dialog::ImageDialog,
-                metadata_dialog::MetadataDialog,
-                star_toggle::StarToggle,
+                image_dialog::ImageDialog, metadata_dialog::MetadataDialog, star_toggle::StarToggle,
             },
         },
     };

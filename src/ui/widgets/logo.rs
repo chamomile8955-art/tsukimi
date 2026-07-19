@@ -1,9 +1,6 @@
 use gtk::{
     Revealer,
-    glib::{
-        self,
-        clone,
-    },
+    glib::{self, clone},
     prelude::*,
 };
 use tracing::debug;
@@ -11,10 +8,7 @@ use tracing::debug;
 use crate::{
     client::jellyfin_client::JELLYFIN_CLIENT,
     ui::models::jellyfin_cache_path,
-    utils::{
-        spawn,
-        spawn_tokio,
-    },
+    utils::{spawn, spawn_tokio},
 };
 
 pub async fn set_logo(id: String, image_type: &str, tag: Option<u8>) -> Revealer {

@@ -1,13 +1,6 @@
-use std::cell::{
-    Cell,
-    RefCell,
-};
+use std::cell::{Cell, RefCell};
 
-use gtk::{
-    glib,
-    prelude::*,
-    subclass::prelude::*,
-};
+use gtk::{glib, prelude::*, subclass::prelude::*};
 
 mod imp {
     use super::*;

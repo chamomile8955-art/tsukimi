@@ -1,41 +1,23 @@
 use gettextrs::gettext;
 use glib::Object;
-use gtk::{
-    gio,
-    glib,
-    subclass::prelude::*,
-};
+use gtk::{gio, glib, subclass::prelude::*};
 
 use super::{
     hortu_scrolled::UnifySize,
-    single_grid::{
-        SingleGrid,
-        imp::ListType,
-    },
+    single_grid::{SingleGrid, imp::ListType},
 };
 use crate::{
     client::jellyfin_client::JELLYFIN_CLIENT,
-    ui::provider::tu_item::{
-        PreferPoster,
-        TuItem,
-    },
+    ui::provider::tu_item::{PreferPoster, TuItem},
 };
 mod imp {
 
     use std::cell::OnceCell;
 
     use glib::subclass::InitializingObject;
-    use gtk::{
-        CompositeTemplate,
-        glib,
-        prelude::*,
-        subclass::prelude::*,
-    };
+    use gtk::{CompositeTemplate, glib, prelude::*, subclass::prelude::*};
 
-    use crate::{
-        ui::provider::tu_item::TuItem,
-        utils::spawn_g_timeout,
-    };
+    use crate::{ui::provider::tu_item::TuItem, utils::spawn_g_timeout};
 
     // Object holding the state
     #[derive(CompositeTemplate, Default, glib::Properties)]

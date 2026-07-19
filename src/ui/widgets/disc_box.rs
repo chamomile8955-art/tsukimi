@@ -1,28 +1,14 @@
 use adw::subclass::prelude::*;
 use gettextrs::gettext;
-use gtk::{
-    CompositeTemplate,
-    glib,
-    prelude::*,
-    template_callbacks,
-};
+use gtk::{CompositeTemplate, glib, prelude::*, template_callbacks};
 
 use super::song_widget::SongWidget;
-use crate::{
-    client::structs::SongWidgetView,
-    ui::provider::tu_item::TuItem,
-};
+use crate::{client::structs::SongWidgetView, ui::provider::tu_item::TuItem};
 
 mod imp {
-    use std::{
-        cell::OnceCell,
-        sync::OnceLock,
-    };
+    use std::{cell::OnceCell, sync::OnceLock};
 
-    use glib::subclass::{
-        InitializingObject,
-        Signal,
-    };
+    use glib::subclass::{InitializingObject, Signal};
 
     use super::*;
 

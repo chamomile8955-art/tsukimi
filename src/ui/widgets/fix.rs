@@ -1,7 +1,4 @@
-use gtk::{
-    ScrolledWindow,
-    prelude::*,
-};
+use gtk::{ScrolledWindow, prelude::*};
 
 pub trait ScrolledWindowFixExt {
     fn fix(&self) -> &Self;

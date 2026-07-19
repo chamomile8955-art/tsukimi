@@ -1,21 +1,11 @@
-use std::cell::{
-    Cell,
-    RefCell,
-};
+use std::cell::{Cell, RefCell};
 
 use gtk::{
     glib,
-    glib::{
-        prelude::*,
-        subclass::prelude::*,
-    },
+    glib::{prelude::*, subclass::prelude::*},
 };
 
-use crate::client::{
-    Account,
-    ServerRoute,
-    account::ServerType,
-};
+use crate::client::{Account, ServerRoute, account::ServerType};
 
 pub mod imp {
     use gtk::glib::Properties;

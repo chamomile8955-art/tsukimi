@@ -1,21 +1,12 @@
 use glib::Object;
-use gtk::{
-    gio,
-    glib,
-};
+use gtk::{gio, glib};
 
 pub mod imp {
     use std::cell::Cell;
 
     use adw::subclass::prelude::*;
     use glib::subclass::InitializingObject;
-    use gtk::{
-        CompositeTemplate,
-        gdk,
-        glib,
-        graphene,
-        prelude::*,
-    };
+    use gtk::{CompositeTemplate, gdk, glib, graphene, prelude::*};
 
     use super::CUBIC_POINTS;
 

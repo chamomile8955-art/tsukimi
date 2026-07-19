@@ -3,20 +3,13 @@ use std::collections::HashSet;
 use adw::prelude::*;
 use gettextrs::gettext;
 use glib::Object;
-use gtk::{
-    glib,
-    subclass::prelude::*,
-    template_callbacks,
-};
+use gtk::{glib, subclass::prelude::*, template_callbacks};
 use imp::ActionType;
 
 use super::utils::GlobalToast;
 use crate::{
     client::{
-        Account,
-        ServerRoute,
-        account::ServerType,
-        error::UserFacingError,
+        Account, ServerRoute, account::ServerType, error::UserFacingError,
         jellyfin_client::JELLYFIN_CLIENT,
     },
     ui::models::SETTINGS,
@@ -32,19 +25,11 @@ pub(crate) struct RouteEditor {
 }
 
 pub mod imp {
-    use std::cell::{
-        Cell,
-        RefCell,
-    };
+    use std::cell::{Cell, RefCell};
 
     use adw::subclass::dialog::AdwDialogImpl;
     use glib::subclass::InitializingObject;
-    use gtk::{
-        CompositeTemplate,
-        glib,
-        prelude::*,
-        subclass::prelude::*,
-    };
+    use gtk::{CompositeTemplate, glib, prelude::*, subclass::prelude::*};
 
     use crate::client::Account;
 
@@ -176,7 +161,7 @@ impl AccountWindow {
             ""
         };
         let name = adw::EntryRow::builder()
-            .title(gettext("Route Name"))
+            .title(gettext("线路名称"))
             .text(
                 route
                     .map(|route| route.name.as_str())
@@ -184,7 +169,7 @@ impl AccountWindow {
             )
             .build();
         let url = adw::EntryRow::builder()
-            .title(gettext("Route URL"))
+            .title(gettext("线路地址"))
             .text(route.map(|route| route.url.as_str()).unwrap_or(""))
             .build();
         let default_button = gtk::CheckButton::builder()
@@ -196,14 +181,14 @@ impl AccountWindow {
         default_button.set_active(is_default || imp.route_editors.borrow().is_empty());
 
         let default_row = adw::ActionRow::builder()
-            .title(gettext("Set as Default Route"))
+            .title(gettext("设为默认线路"))
             .activatable_widget(&default_button)
             .build();
         default_row.add_prefix(&default_button);
 
         let remove_button = gtk::Button::builder()
             .icon_name("user-trash-symbolic")
-            .tooltip_text(gettext("Delete Route"))
+            .tooltip_text(gettext("删除线路"))
             .valign(gtk::Align::Center)
             .css_classes(["flat", "circular", "glass-button"])
             .build();
@@ -263,7 +248,7 @@ impl AccountWindow {
     fn remove_route_editor(&self, row: &adw::ExpanderRow) {
         let imp = self.imp();
         if imp.route_editors.borrow().len() == 1 {
-            imp.stack.toast(gettext("At least one route is required"));
+            imp.stack.toast(gettext("至少需要一条线路"));
             return;
         }
 
@@ -274,9 +259,7 @@ impl AccountWindow {
         let removed = editors.remove(index);
         let removed_default = removed.default_button.is_active();
         imp.routes_group.remove(&removed.row);
-        if removed_default
-            && let Some(first) = editors.first()
-        {
+        if removed_default && let Some(first) = editors.first() {
             first.default_button.set_active(true);
         }
     }
@@ -298,7 +281,7 @@ impl AccountWindow {
                         %error,
                         "Failed server route validation"
                     );
-                    return Err(format!("{}: {error}", gettext("Invalid route")));
+                    return Err(format!("{}: {error}", gettext("线路无效")));
                 }
             };
             if !route_names.insert(route.name.clone()) {
@@ -306,7 +289,7 @@ impl AccountWindow {
                     route_name = %route.name,
                     "Failed server route validation: duplicate route name"
                 );
-                return Err(gettext("Route names must be unique"));
+                return Err(gettext("线路名称不能重复"));
             }
             if editor.default_button.is_active() {
                 default_route = Some(route.name.clone());
@@ -316,7 +299,7 @@ impl AccountWindow {
 
         let default_route = default_route
             .or_else(|| routes.first().map(|route| route.name.clone()))
-            .ok_or_else(|| gettext("At least one route is required"))?;
+            .ok_or_else(|| gettext("至少需要一条线路"))?;
         Ok((routes, default_route))
     }
 
@@ -326,7 +309,7 @@ impl AccountWindow {
         let username = imp.username_entry.text().trim().to_string();
         let password = imp.password_entry.text().to_string();
         if username.is_empty() {
-            imp.stack.toast(gettext("Fields must be filled in"));
+            imp.stack.toast(gettext("请填写所有必填项"));
             return;
         }
         let (routes, default_route) = match self.collect_routes() {
@@ -380,7 +363,7 @@ impl AccountWindow {
                         %error,
                         "Failed route validation while updating credentials"
                     );
-                    imp.stack.toast(format!("{}: {error}", gettext("Invalid route")));
+                    imp.stack.toast(format!("{}: {error}", gettext("线路无效")));
                     return;
                 }
                 let _ = JELLYFIN_CLIENT.header_change_token("");
@@ -421,17 +404,15 @@ impl AccountWindow {
                     .expect("Failed to update preferred server name");
             }
 
-            if editing_active
-                && let Err(error) = JELLYFIN_CLIENT.init(&account).await {
-                    tracing::warn!(
-                        server = %account.servername,
-                        %error,
-                        "Failed to apply edited active server route"
-                    );
-                    imp.stack.toast(error.to_string());
-                }
-            self.close_dialog(&gettext("Server edited successfully"))
-                .await;
+            if editing_active && let Err(error) = JELLYFIN_CLIENT.init(&account).await {
+                tracing::warn!(
+                    server = %account.servername,
+                    %error,
+                    "Failed to apply edited active server route"
+                );
+                imp.stack.toast(error.to_string());
+            }
+            self.close_dialog(&gettext("服务器已更新")).await;
             return;
         }
 
@@ -443,7 +424,7 @@ impl AccountWindow {
             .expect("Default route missing");
         if let Err(error) = JELLYFIN_CLIENT.header_change_route(&route_url) {
             tracing::warn!(route_url = %route_url, %error, "Failed server route validation");
-            imp.stack.toast(format!("{}: {error}", gettext("Invalid route")));
+            imp.stack.toast(format!("{}: {error}", gettext("线路无效")));
             return;
         }
         let _ = JELLYFIN_CLIENT.header_change_token("");
@@ -494,8 +475,7 @@ impl AccountWindow {
         };
         account.normalize_routes();
         SETTINGS.add_account(account).expect("Failed to add server");
-        self.close_dialog(&gettext("Server added successfully"))
-            .await;
+        self.close_dialog(&gettext("服务器已添加")).await;
     }
 
     async fn close_dialog(&self, msg: &str) {

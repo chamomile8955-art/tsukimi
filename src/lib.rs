@@ -1,15 +1,8 @@
 use std::{
     env,
     path::Path,
-    sync::{
-        LazyLock,
-        OnceLock,
-    },
-    time::{
-        Duration,
-        Instant,
-        UNIX_EPOCH,
-    },
+    sync::{LazyLock, OnceLock},
+    time::{Duration, Instant, UNIX_EPOCH},
 };
 
 mod app;
@@ -26,11 +19,7 @@ pub mod client;
 
 pub use arg::Args;
 pub use config::GETTEXT_PACKAGE;
-use config::{
-    LOCALEDIR,
-    PKGDATADIR,
-    version,
-};
+use config::{LOCALEDIR, PKGDATADIR, version};
 use once_cell::sync::OnceCell;
 
 use clap::Parser;
@@ -183,10 +172,7 @@ fn configure_windows_runtime() {
     );
     set_path_if_unset("XDG_DATA_DIRS", directory.join("share"));
     set_path_if_unset("GIO_EXTRA_MODULES", directory.join("lib/gio/modules"));
-    set_path_if_unset(
-        "GST_PLUGIN_PATH",
-        directory.join("lib/gstreamer-1.0"),
-    );
+    set_path_if_unset("GST_PLUGIN_PATH", directory.join("lib/gstreamer-1.0"));
     set_path_if_unset(
         "GST_PLUGIN_SCANNER",
         directory.join("libexec/gstreamer-1.0/gst-plugin-scanner.exe"),
@@ -201,10 +187,7 @@ fn configure_windows_runtime() {
             .find(|path| path.is_file())
     {
         if let Some(version_directory) = cache.parent() {
-            set_path_if_unset(
-                "GDK_PIXBUF_MODULEDIR",
-                version_directory.join("loaders"),
-            );
+            set_path_if_unset("GDK_PIXBUF_MODULEDIR", version_directory.join("loaders"));
         }
         set_path_if_unset("GDK_PIXBUF_MODULE_FILE", cache);
     }
@@ -294,8 +277,7 @@ fn register_gio_resources() {
         "Runtime resource path diagnostics"
     );
 
-    let resources =
-        gtk::gio::Resource::load(&path).expect("Failed to load resources.");
+    let resources = gtk::gio::Resource::load(&path).expect("Failed to load resources.");
     log_resource_entry(&resources, WINDOW_UI_RESOURCE, BUILD_WINDOW_UI);
     log_resource_entry(&resources, STYLE_CSS_RESOURCE, BUILD_STYLE_CSS);
     gtk::gio::resources_register(&resources);
@@ -334,9 +316,7 @@ fn log_runtime_file(kind: &str, path: &Path) -> Option<std::time::SystemTime> {
     }
 }
 
-fn log_resource_entry(
-    resources: &gtk::gio::Resource, resource_path: &str, build_source: &[u8],
-) {
+fn log_resource_entry(resources: &gtk::gio::Resource, resource_path: &str, build_source: &[u8]) {
     match resources.lookup_data(resource_path, gtk::gio::ResourceLookupFlags::NONE) {
         Ok(data) => {
             let runtime_data = data.as_ref();

@@ -37,7 +37,7 @@
                         <child>
                           <object class="GtkStackPage">
                             <property name="name">entry</property>
-                            <property name="title">Entry</property>
+                            <property name="title">填写信息</property>
                             <property name="child">
                               <object class="GtkScrolledWindow">
                                 <property name="hscrollbar-policy">never</property>
@@ -54,10 +54,10 @@
                                         <property name="spacing">18</property>
                                         <child>
                                           <object class="AdwPreferencesGroup">
-                                            <property name="description" translatable="yes">Enter the server details below.</property>
+                                            <property name="description" translatable="yes">请在下方填写服务器信息。</property>
                                             <child>
-                                              <object class="AdwEntryRow" id="servername_entry">
-                                                <property name="title" translatable="yes">Name</property>
+                                              <object class="AdwActionRow">
+                                                <property name="title" translatable="yes">服务器类型</property>
                                                 <child type="suffix">
                                                   <object class="GtkDropDown" id="server_type">
                                                     <property name="valign">center</property>
@@ -77,13 +77,18 @@
                                               </object>
                                             </child>
                                             <child>
+                                              <object class="AdwEntryRow" id="servername_entry">
+                                                <property name="title" translatable="yes">名称</property>
+                                              </object>
+                                            </child>
+                                            <child>
                                               <object class="AdwEntryRow" id="username_entry">
-                                                <property name="title" translatable="yes">Username</property>
+                                                <property name="title" translatable="yes">用户名</property>
                                               </object>
                                             </child>
                                             <child>
                                               <object class="AdwPasswordEntryRow" id="password_entry">
-                                                <property name="title" translatable="yes">Password</property>
+                                                <property name="title" translatable="yes">密码</property>
                                                 <property name="activates-default">true</property>
                                                 <signal name="entry-activated" handler="on_password_entry_activated" swapped="yes"/>
                                               </object>
@@ -92,12 +97,12 @@
                                         </child>
                                         <child>
                                           <object class="AdwPreferencesGroup" id="routes_group">
-                                            <property name="title" translatable="yes">Server Routes</property>
-                                            <property name="description" translatable="yes">Add LAN, public, reverse-proxy, or VPN addresses for this server.</property>
+                                            <property name="title" translatable="yes">服务器线路</property>
+                                            <property name="description" translatable="yes">为此服务器添加局域网、公网、反向代理或 VPN 地址。</property>
                                             <property name="header-suffix">
                                               <object class="GtkButton">
                                                 <property name="icon-name">list-add-symbolic</property>
-                                                <property name="tooltip-text" translatable="yes">Add Route</property>
+                                                <property name="tooltip-text" translatable="yes">添加线路</property>
                                                 <signal name="clicked" handler="on_add_route_clicked" swapped="yes"/>
                                                 <style>
                                                   <class name="flat"/>
@@ -112,7 +117,7 @@
                                           <object class="AdwPreferencesGroup">
                                             <child>
                                               <object class="AdwButtonRow">
-                                                <property name="title" translatable="yes">Add</property>
+                                                <property name="title" translatable="yes">添加</property>
                                                 <property name="start-icon-name">list-add-symbolic</property>
                                                 <property name="action-name">account.add</property>
                                                 <style>
@@ -133,7 +138,7 @@
                         <child>
                           <object class="GtkStackPage">
                             <property name="name">loading</property>
-                            <property name="title">Loading</property>
+                            <property name="title">加载中</property>
                             <property name="child">
                               <object class="AdwSpinner">
                                 <property name="visible">True</property>

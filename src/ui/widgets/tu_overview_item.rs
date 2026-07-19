@@ -3,47 +3,25 @@ use std::cell::RefCell;
 use adw::prelude::*;
 use gettextrs::gettext;
 use glib::Object;
-use gtk::{
-    gio,
-    glib,
-    glib::subclass::types::ObjectSubclassIsExt,
-    template_callbacks,
-};
+use gtk::{gio, glib, glib::subclass::types::ObjectSubclassIsExt, template_callbacks};
 use imp::ViewGroup;
 
 use super::{
     tu_item::{
-        TuItemBasic,
-        TuItemMenuPrelude,
-        TuItemOverlay,
-        TuItemOverlayPrelude,
-        TuItemProgressbarAnimation,
-        TuItemProgressbarAnimationPrelude,
+        TuItemBasic, TuItemMenuPrelude, TuItemOverlay, TuItemOverlayPrelude,
+        TuItemProgressbarAnimation, TuItemProgressbarAnimationPrelude,
     },
     tu_list_item::imp::PosterType,
-    utils::{
-        TU_ITEM_POST_SIZE,
-        TU_ITEM_VIDEO_SIZE,
-        compact_size,
-        run_time_ticks_to_label,
-    },
+    utils::{TU_ITEM_POST_SIZE, TU_ITEM_VIDEO_SIZE, compact_size, run_time_ticks_to_label},
 };
 use crate::ui::provider::tu_item::TuItem;
 
 pub mod imp {
-    use std::cell::{
-        Cell,
-        RefCell,
-    };
+    use std::cell::{Cell, RefCell};
 
     use adw::subclass::prelude::*;
     use glib::subclass::InitializingObject;
-    use gtk::{
-        CompositeTemplate,
-        PopoverMenu,
-        glib,
-        prelude::*,
-    };
+    use gtk::{CompositeTemplate, PopoverMenu, glib, prelude::*};
 
     #[derive(Default, Hash, Eq, PartialEq, Clone, Copy, glib::Enum, Debug)]
     #[repr(u32)]
@@ -56,10 +34,7 @@ pub mod imp {
 
     use crate::ui::{
         provider::tu_item::TuItem,
-        widgets::{
-            picture_loader::PictureLoader,
-            tu_item::TuItemAction,
-        },
+        widgets::{picture_loader::PictureLoader, tu_item::TuItemAction},
     };
 
     // Object holding the state

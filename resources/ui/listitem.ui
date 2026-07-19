@@ -52,6 +52,18 @@
                   </object>
                 </child>
                 <child type="overlay">
+                  <object class="GtkLabel" id="count_badge">
+                    <property name="halign">end</property>
+                    <property name="valign">start</property>
+                    <property name="margin-end">8</property>
+                    <property name="margin-top">8</property>
+                    <property name="visible">false</property>
+                    <style>
+                      <class name="media-count-badge"/>
+                    </style>
+                  </object>
+                </child>
+                <child type="overlay">
                   <object class="GtkButton" id="direct_play_button">
                     <property name="halign">start</property>
                     <property name="valign">end</property>

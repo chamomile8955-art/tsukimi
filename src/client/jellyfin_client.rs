@@ -1,80 +1,27 @@
-use std::{
-    cmp::Reverse,
-    collections::HashMap,
-    future,
-    hash::Hasher,
-    path::Path,
-    time::Duration,
-};
+use std::{cmp::Reverse, collections::HashMap, future, hash::Hasher, path::Path, time::Duration};
 
-use crate::{
-    client::account::ServerType,
-    ui::PlaybackDirectMode,
-};
-use anyhow::{
-    Context,
-    Result,
-    anyhow,
-    bail,
-};
+use crate::{client::account::ServerType, ui::PlaybackDirectMode};
+use anyhow::{Context, Result, anyhow, bail};
 use arc_swap::ArcSwap;
-use chrono::{
-    DateTime,
-    Utc,
-};
-use futures_util::{
-    StreamExt,
-    stream::FuturesUnordered,
-};
+use chrono::{DateTime, Utc};
+use futures_util::{StreamExt, stream::FuturesUnordered};
 use moka::future::Cache;
 use once_cell::sync::Lazy;
-use reqwest::{
-    Client,
-    Method,
-    RequestBuilder,
-    Response,
-    header::HeaderValue,
-};
-use serde::{
-    Deserialize,
-    Serialize,
-    de::DeserializeOwned,
-};
-use serde_json::{
-    Value,
-    json,
-};
+use reqwest::{Client, Method, RequestBuilder, Response, header::HeaderValue};
+use serde::{Deserialize, Serialize, de::DeserializeOwned};
+use serde_json::{Value, json};
 use std::sync::Arc;
-use tracing::{
-    debug,
-    warn,
-};
+use tracing::{debug, warn};
 use url::Url;
 use uuid::Uuid;
 
 use super::{
-    Account,
-    ReqClient,
-    ServerRoute,
+    Account, ReqClient, ServerRoute,
     error::UserFacingError,
     structs::{
-        ActivityLogs,
-        AuthenticateResponse,
-        Back,
-        DeleteInfo,
-        ExternalIdInfo,
-        FilterList,
-        ImageItem,
-        ImageSearchResult,
-        List,
-        LoginResponse,
-        Media,
-        MediaSegmentList,
-        MissingEpisodesList,
-        PublicServerInfo,
-        RemoteSearchInfo,
-        ScheduledTask,
-        ServerInfo,
+        ActivityLogs, AuthenticateResponse, Back, DeleteInfo, ExternalIdInfo, FilterList,
+        ImageItem, ImageSearchResult, List, LoginResponse, Media, MediaSegmentList,
+        MissingEpisodesList, PublicServerInfo, RemoteSearchInfo, ScheduledTask, ServerInfo,
         SimpleListItem,
     },
 };
@@ -82,12 +29,8 @@ use crate::{
     CLIENT_ID,
     config::version,
     ui::{
-        SETTINGS,
-        jellyfin_cache_path,
-        widgets::{
-            filter_panel::FiltersList,
-            single_grid::imp::ListType,
-        },
+        SETTINGS, jellyfin_cache_path,
+        widgets::{filter_panel::FiltersList, single_grid::imp::ListType},
     },
     utils::spawn_tokio_without_await,
 };
@@ -220,7 +163,8 @@ impl JellyfinClient {
         let route = account
             .active_route()
             .ok_or_else(|| anyhow!("No valid server route is configured"))?;
-        let route = ServerRoute::validated(&route.name, &route.url).map_err(|error| anyhow!(error))?;
+        let route =
+            ServerRoute::validated(&route.name, &route.url).map_err(|error| anyhow!(error))?;
         let route_name = route.name;
         let route_url = route.url;
         let url = Self::api_url_from_route(&route_url)?;
@@ -288,8 +232,7 @@ impl JellyfinClient {
     }
 
     fn api_url_from_route(route_url: &str) -> Result<Url> {
-        let route =
-            ServerRoute::validated("active", route_url).map_err(|error| anyhow!(error))?;
+        let route = ServerRoute::validated("active", route_url).map_err(|error| anyhow!(error))?;
         let mut url = Url::parse(&route.url)?;
         if !url.path().ends_with('/') {
             let path = format!("{}/", url.path());
@@ -1704,10 +1647,7 @@ impl JellyfinClient {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::client::{
-        account::ServerType,
-        error::UserFacingError,
-    };
+    use crate::client::{account::ServerType, error::UserFacingError};
 
     #[tokio::test]
     async fn search() {
@@ -1785,10 +1725,7 @@ mod tests {
         }
 
         let image = std::fs::read("/home/inaha/Works/tsukimi/target/debug/test.jpg").unwrap();
-        use base64::{
-            Engine as _,
-            engine::general_purpose::STANDARD,
-        };
+        use base64::{Engine as _, engine::general_purpose::STANDARD};
         let image = STANDARD.encode(&image);
         match JELLYFIN_CLIENT
             .post_image("293", "Thumb", image, "image/jpeg")

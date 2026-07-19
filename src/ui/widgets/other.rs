@@ -1,64 +1,29 @@
 use super::{
-    horbu_scrolled::HorbuScrolled,
-    item::dt,
-    picture_loader::PictureLoader,
-    utils::GlobalToast,
+    horbu_scrolled::HorbuScrolled, item::dt, picture_loader::PictureLoader, utils::GlobalToast,
 };
 use crate::{
-    client::{
-        error::UserFacingError,
-        jellyfin_client::JELLYFIN_CLIENT,
-        structs::*,
-    },
-    fraction,
-    fraction_reset,
-    ui::provider::{
-        tu_item::TuItem,
-        tu_object::TuObject,
-    },
-    utils::{
-        CacheEvent,
-        CachePolicy,
-        fetch_with_cache,
-    },
+    client::{error::UserFacingError, jellyfin_client::JELLYFIN_CLIENT, structs::*},
+    fraction, fraction_reset,
+    ui::provider::{tu_item::TuItem, tu_object::TuObject},
+    utils::{CacheEvent, CachePolicy, fetch_with_cache},
 };
-use chrono::{
-    DateTime,
-    Utc,
-};
+use chrono::{DateTime, Utc};
 use glib::Object;
-use gtk::{
-    gio,
-    glib,
-    prelude::*,
-    subclass::prelude::*,
-    template_callbacks,
-};
+use gtk::{gio, glib, prelude::*, subclass::prelude::*, template_callbacks};
 
 pub(crate) mod imp {
     use std::cell::OnceCell;
 
     use adw::subclass::prelude::*;
     use glib::subclass::InitializingObject;
-    use gtk::{
-        CompositeTemplate,
-        SignalListItemFactory,
-        gio,
-        glib,
-        prelude::*,
-    };
+    use gtk::{CompositeTemplate, SignalListItemFactory, gio, glib, prelude::*};
 
     use crate::{
         ui::{
-            provider::{
-                tu_item::TuItem,
-                tu_object::TuObject,
-            },
+            provider::{tu_item::TuItem, tu_object::TuObject},
             widgets::{
-                horbu_scrolled::HorbuScrolled,
-                hortu_scrolled::HortuScrolled,
-                item_actionbox::ItemActionsBox,
-                tu_overview_item::imp::ViewGroup,
+                horbu_scrolled::HorbuScrolled, hortu_scrolled::HortuScrolled,
+                item_actionbox::ItemActionsBox, tu_overview_item::imp::ViewGroup,
                 utils::TuItemBuildExt,
             },
         },

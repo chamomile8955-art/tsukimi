@@ -1,20 +1,11 @@
-use std::{
-    future::Future,
-    path::PathBuf,
-};
+use std::{future::Future, path::PathBuf};
 
 use anyhow::Result;
-use serde::{
-    Deserialize,
-    Serialize,
-};
+use serde::{Deserialize, Serialize};
 use xxhash_rust::xxh3::xxh3_64;
 
 use crate::{
-    client::{
-        jellyfin_client::JELLYFIN_CLIENT,
-        runtime::runtime,
-    },
+    client::{jellyfin_client::JELLYFIN_CLIENT, runtime::runtime},
     ui::jellyfin_cache_path,
 };
 

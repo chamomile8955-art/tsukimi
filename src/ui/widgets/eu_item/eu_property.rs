@@ -1,10 +1,7 @@
 use std::cell::RefCell;
 
 use adw::prelude::*;
-use gtk::glib::{
-    self,
-    subclass::prelude::*,
-};
+use gtk::glib::{self, subclass::prelude::*};
 
 pub mod imp {
 

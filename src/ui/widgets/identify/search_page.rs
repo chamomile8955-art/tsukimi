@@ -1,35 +1,19 @@
-use adw::{
-    prelude::*,
-    subclass::prelude::*,
-};
+use adw::{prelude::*, subclass::prelude::*};
 use gettextrs::gettext;
-use gtk::{
-    CompositeTemplate,
-    gio,
-    glib,
-};
+use gtk::{CompositeTemplate, gio, glib};
 
 use gtk::template_callbacks;
 use serde_json::Value;
 
 use crate::{
     client::{
-        error::UserFacingError,
-        jellyfin_client::JELLYFIN_CLIENT,
-        structs::RemoteSearchResult,
+        error::UserFacingError, jellyfin_client::JELLYFIN_CLIENT, structs::RemoteSearchResult,
     },
     ui::{
         GlobalToast,
-        widgets::eu_item::{
-            self,
-            EuItem,
-            EuObject,
-        },
+        widgets::eu_item::{self, EuItem, EuObject},
     },
-    utils::{
-        spawn,
-        spawn_tokio,
-    },
+    utils::{spawn, spawn_tokio},
 };
 
 mod imp {

@@ -2,49 +2,22 @@ use std::collections::HashSet;
 
 use gettextrs::gettext;
 use glib::Object;
-use gtk::{
-    gio,
-    glib,
-    prelude::*,
-    subclass::prelude::*,
-    template_callbacks,
-};
+use gtk::{gio, glib, prelude::*, subclass::prelude::*, template_callbacks};
 
 use super::{
-    hortu_scrolled::{
-        HortuScrolled,
-        UnifySize,
-    },
-    single_grid::{
-        SingleGrid,
-        imp::ListType,
-    },
+    hortu_scrolled::{HortuScrolled, UnifySize},
+    single_grid::{SingleGrid, imp::ListType},
     utils::GlobalToast,
     window::Window,
 };
 use crate::{
-    client::{
-        error::UserFacingError,
-        jellyfin_client::JELLYFIN_CLIENT,
-        structs::*,
-    },
-    fraction,
-    fraction_reset,
+    client::{error::UserFacingError, jellyfin_client::JELLYFIN_CLIENT, structs::*},
+    fraction, fraction_reset,
     ui::{
         SETTINGS,
-        provider::tu_item::{
-            PreferPoster,
-            TuItem,
-        },
+        provider::tu_item::{PreferPoster, TuItem},
     },
-    utils::{
-        CacheEvent,
-        CachePolicy,
-        CacheSource,
-        fetch_with_cache,
-        spawn,
-        spawn_g_timeout,
-    },
+    utils::{CacheEvent, CachePolicy, CacheSource, fetch_with_cache, spawn, spawn_g_timeout},
 };
 
 static STARTUP_API_TIMING_LOGGED: std::sync::atomic::AtomicBool =
@@ -53,20 +26,14 @@ static STARTUP_API_TIMING_LOGGED: std::sync::atomic::AtomicBool =
 mod imp {
 
     use std::{
-        cell::{
-            Cell,
-            RefCell,
-        },
+        cell::{Cell, RefCell},
         collections::HashMap,
     };
 
     use glib::subclass::InitializingObject;
     use gtk::{
         CompositeTemplate,
-        glib::{
-            self,
-            WeakRef,
-        },
+        glib::{self, WeakRef},
         prelude::StaticTypeExt,
         subclass::prelude::*,
     };

@@ -1,11 +1,5 @@
-use adw::{
-    prelude::*,
-    subclass::prelude::*,
-};
-use gtk::{
-    CompositeTemplate,
-    glib,
-};
+use adw::{prelude::*, subclass::prelude::*};
+use gtk::{CompositeTemplate, glib};
 
 mod imp {
     use glib::subclass::InitializingObject;

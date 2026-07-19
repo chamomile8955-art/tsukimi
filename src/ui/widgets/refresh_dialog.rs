@@ -1,18 +1,9 @@
-use adw::{
-    prelude::*,
-    subclass::prelude::*,
-};
+use adw::{prelude::*, subclass::prelude::*};
 use gettextrs::gettext;
-use gtk::{
-    glib,
-    template_callbacks,
-};
+use gtk::{glib, template_callbacks};
 
 use crate::{
-    client::{
-        error::UserFacingError,
-        jellyfin_client::JELLYFIN_CLIENT,
-    },
+    client::{error::UserFacingError, jellyfin_client::JELLYFIN_CLIENT},
     utils::spawn_tokio,
 };
 
@@ -22,10 +13,7 @@ mod imp {
     use std::cell::OnceCell;
 
     use glib::subclass::InitializingObject;
-    use gtk::{
-        CompositeTemplate,
-        glib,
-    };
+    use gtk::{CompositeTemplate, glib};
 
     use super::*;
 

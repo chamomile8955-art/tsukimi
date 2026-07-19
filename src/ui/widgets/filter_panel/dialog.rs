@@ -1,23 +1,11 @@
-use super::{
-    FiltersList,
-    FiltersRow,
-};
-use adw::{
-    prelude::*,
-    subclass::prelude::*,
-};
-use gtk::{
-    glib,
-    template_callbacks,
-};
+use super::{FiltersList, FiltersRow};
+use adw::{prelude::*, subclass::prelude::*};
+use gtk::{glib, template_callbacks};
 
 mod imp {
 
     use glib::subclass::InitializingObject;
-    use gtk::{
-        CompositeTemplate,
-        glib,
-    };
+    use gtk::{CompositeTemplate, glib};
 
     use super::*;
 

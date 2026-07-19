@@ -1,36 +1,16 @@
 use gettextrs::gettext;
 use glib::Object;
-use gtk::{
-    gio,
-    glib,
-    prelude::*,
-    subclass::prelude::*,
-};
+use gtk::{gio, glib, prelude::*, subclass::prelude::*};
 
-use super::{
-    hortu_scrolled::UnifySize,
-    utils::GlobalToast,
-};
+use super::{hortu_scrolled::UnifySize, utils::GlobalToast};
 use crate::{
-    client::{
-        error::UserFacingError,
-        jellyfin_client::JELLYFIN_CLIENT,
-        structs::*,
-    },
-    fraction,
-    fraction_reset,
-    utils::{
-        spawn,
-        spawn_tokio,
-    },
+    client::{error::UserFacingError, jellyfin_client::JELLYFIN_CLIENT, structs::*},
+    fraction, fraction_reset,
+    utils::{spawn, spawn_tokio},
 };
 mod imp {
     use glib::subclass::InitializingObject;
-    use gtk::{
-        CompositeTemplate,
-        glib,
-        subclass::prelude::*,
-    };
+    use gtk::{CompositeTemplate, glib, subclass::prelude::*};
 
     use crate::ui::widgets::hortu_scrolled::HortuScrolled;
 

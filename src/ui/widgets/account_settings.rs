@@ -4,47 +4,21 @@ use super::utils::GlobalToast;
 use crate::{
     client::jellyfin_client::JELLYFIN_CLIENT,
     ui::{
-        models::{
-            SETTINGS,
-            jellyfin_cache_path,
-        },
-        provider::descriptor::{
-            Descriptor,
-            DescriptorType,
-        },
+        models::{SETTINGS, jellyfin_cache_path},
+        provider::descriptor::{Descriptor, DescriptorType},
     },
-    utils::{
-        spawn,
-        spawn_tokio,
-        spawn_tokio_blocking,
-    },
+    utils::{spawn, spawn_tokio, spawn_tokio_blocking},
 };
-use adw::{
-    prelude::*,
-    subclass::prelude::*,
-};
+use adw::{prelude::*, subclass::prelude::*};
 use gettextrs::gettext;
-use gtk::{
-    CompositeTemplate,
-    gdk::DragAction,
-    gio,
-    glib,
-    template_callbacks,
-};
+use gtk::{CompositeTemplate, gdk::DragAction, gio, glib, template_callbacks};
 
 mod imp {
-    use std::cell::{
-        Cell,
-        OnceCell,
-        RefCell,
-    };
+    use std::cell::{Cell, OnceCell, RefCell};
 
     use glib::subclass::InitializingObject;
 
-    use crate::{
-        Window,
-        ui::widgets::action_row::AActionRow,
-    };
+    use crate::{Window, ui::widgets::action_row::AActionRow};
 
     use super::*;
 
@@ -231,23 +205,13 @@ impl AccountSettings {
 
     #[template_callback]
     fn on_manage_servers(&self) {
-        gtk::prelude::WidgetExt::activate_action(
-            &self.window(),
-            "win.show-sidebar",
-            None,
-        )
-        .unwrap();
+        gtk::prelude::WidgetExt::activate_action(&self.window(), "win.show-sidebar", None).unwrap();
         self.close();
     }
 
     #[template_callback]
     fn on_open_server_panel(&self) {
-        gtk::prelude::WidgetExt::activate_action(
-            &self.window(),
-            "win.server-panel",
-            None,
-        )
-        .unwrap();
+        gtk::prelude::WidgetExt::activate_action(&self.window(), "win.server-panel", None).unwrap();
         self.close();
     }
 

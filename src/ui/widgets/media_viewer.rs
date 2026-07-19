@@ -1,37 +1,21 @@
 use super::utils::GlobalToast;
-use adw::{
-    prelude::*,
-    subclass::prelude::*,
-};
+use adw::{prelude::*, subclass::prelude::*};
 use gettextrs::gettext;
-use gtk::{
-    CompositeTemplate,
-    gdk,
-    glib,
-    glib::clone,
-    graphene,
-};
+use gtk::{CompositeTemplate, gdk, glib, glib::clone, graphene};
 
 const ANIMATION_DURATION: u32 = 250;
 const CANCEL_SWIPE_ANIMATION_DURATION: u32 = 400;
 
 mod imp {
     use std::{
-        cell::{
-            Cell,
-            OnceCell,
-            RefCell,
-        },
+        cell::{Cell, OnceCell, RefCell},
         collections::HashMap,
     };
 
     use glib::subclass::InitializingObject;
 
     use super::*;
-    use crate::ui::widgets::{
-        content_viewer::MediaContentViewer,
-        scale_revealer::ScaleRevealer,
-    };
+    use crate::ui::widgets::{content_viewer::MediaContentViewer, scale_revealer::ScaleRevealer};
 
     #[derive(Debug, Default, CompositeTemplate, glib::Properties)]
     #[template(resource = "/moe/tsuna/tsukimi/ui/media_viewer.ui")]

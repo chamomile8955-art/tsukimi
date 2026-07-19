@@ -2,23 +2,16 @@ use adw::prelude::BinExt;
 use gtk::prelude::*;
 
 use crate::ui::{
-    provider::tu_item::{
-        PreferPoster,
-        TuItem,
-    },
+    provider::tu_item::{PreferPoster, TuItem},
     widgets::{
-        hover_scale::HoverScale,
-        picture_loader::PictureLoader,
-        tu_list_item::imp::PosterType,
+        hover_scale::HoverScale, picture_loader::PictureLoader, tu_list_item::imp::PosterType,
     },
 };
 
 use super::TuItemBasic;
 
 pub trait TuItemOverlayPrelude {
-    fn get_image_request(
-        &self, item: &TuItem,
-    ) -> (&str, Option<String>, Option<String>, String) {
+    fn get_image_request(&self, item: &TuItem) -> (&str, Option<String>, Option<String>, String) {
         if self.poster_type_ext() != PosterType::Poster
             && let Some(imag_tags) = item.image_tags()
         {
@@ -29,22 +22,12 @@ pub trait TuItemOverlayPrelude {
                     } else if let Some(image_tag) = imag_tags.thumb() {
                         return ("Thumb", None, Some(image_tag), item.id());
                     } else if let Some(image_tag) = imag_tags.backdrop() {
-                        return (
-                            "Backdrop",
-                            Some(0.to_string()),
-                            Some(image_tag),
-                            item.id(),
-                        );
+                        return ("Backdrop", Some(0.to_string()), Some(image_tag), item.id());
                     }
                 }
                 PosterType::Backdrop => {
                     if let Some(image_tag) = imag_tags.backdrop() {
-                        return (
-                            "Backdrop",
-                            Some(0.to_string()),
-                            Some(image_tag),
-                            item.id(),
-                        );
+                        return ("Backdrop", Some(0.to_string()), Some(image_tag), item.id());
                     } else if let Some(image_tag) = imag_tags.thumb() {
                         return ("Thumb", None, Some(image_tag), item.id());
                     }
@@ -135,8 +118,7 @@ where
             return;
         }
 
-        let picture_loader =
-            PictureLoader::new_with_image_tag(&id, image_type, index, image_tag);
+        let picture_loader = PictureLoader::new_with_image_tag(&id, image_type, index, image_tag);
         picture_loader.set_fallback_title(item.name());
         picture_loader.add_css_class("inbox");
         overlay.set_child(Some(&picture_loader));
@@ -155,8 +137,7 @@ where
             return;
         }
 
-        let picture_loader =
-            PictureLoader::new_with_image_tag(&id, image_type, index, image_tag);
+        let picture_loader = PictureLoader::new_with_image_tag(&id, image_type, index, image_tag);
         picture_loader.set_fallback_title(item.name());
         let hover_scale = HoverScale::new();
         hover_scale.set_child(Some(&picture_loader));
@@ -174,9 +155,8 @@ where
             return;
         }
 
-        let picture_loader = PictureLoader::new_animated_with_image_tag(
-            &id, image_type, index, image_tag,
-        );
+        let picture_loader =
+            PictureLoader::new_animated_with_image_tag(&id, image_type, index, image_tag);
         picture_loader.set_fallback_title(item.name());
         picture_loader.add_css_class("inbox");
         overlay.set_child(Some(&picture_loader));

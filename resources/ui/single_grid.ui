@@ -13,7 +13,11 @@
               <object class="GtkBox">
                 <property name="orientation">horizontal</property>
                 <property name="margin-start">45</property>
-                <property name="spacing">6</property>
+                <property name="spacing">8</property>
+                <property name="valign">center</property>
+                <style>
+                  <class name="media-toolbar-summary"/>
+                </style>
                 <child>
                   <object class="GtkLabel" id="count">
                     <property name="label" translatable="yes"></property>
@@ -42,6 +46,7 @@
                     <style>
                       <class name="flat"/>
                       <class name="glass-button"/>
+                      <class name="media-poster-menu"/>
                     </style>
                   </object>
                 </child>
@@ -55,6 +60,7 @@
                       <class name="flat"/>
                       <class name="circular"/>
                       <class name="glass-button"/>
+                      <class name="media-filter-button"/>
                     </style>
                   </object>
                 </child>
@@ -63,25 +69,30 @@
             <child type="end">
               <object class="GtkBox">
                 <property name="orientation">horizontal</property>
-                <property name="spacing">6</property>
+                <property name="spacing">8</property>
                 <property name="margin-end">55</property>
+                <property name="valign">center</property>
+                <style>
+                  <class name="media-toolbar-actions"/>
+                </style>
                 <child>
                   <object class="AdwToggleGroup" id="glgroup">
                     <property name="active-name">grid</property>
                     <style>
                       <class name="segmented-control"/>
+                      <class name="media-view-switch"/>
                     </style>
                     <child>
                       <object class="AdwToggle">
                         <property name="icon-name">view-grid-symbolic</property>
-                        <property name="tooltip" translatable="yes">Grid View</property>
+                        <property name="tooltip" translatable="yes">网格视图</property>
                         <property name="name">grid</property>
                       </object>
                     </child>
                     <child>
                       <object class="AdwToggle">
                         <property name="icon-name">view-list-symbolic</property>
-                        <property name="tooltip" translatable="yes">List View</property>
+                        <property name="tooltip" translatable="yes">列表视图</property>
                         <property name="name">list</property>
                       </object>
                     </child>
@@ -93,18 +104,19 @@
                   <object class="AdwToggleGroup" id="adgroup">
                     <style>
                       <class name="segmented-control"/>
+                      <class name="media-sort-order"/>
                     </style>
                     <child>
                       <object class="AdwToggle">
                         <property name="icon-name">view-sort-ascending-symbolic</property>
-                        <property name="tooltip" translatable="yes">Ascending</property>
+                        <property name="tooltip" translatable="yes">升序</property>
                         <property name="name">asce</property>
                       </object>
                     </child>
                     <child>
                       <object class="AdwToggle">
                         <property name="icon-name">view-sort-descending-symbolic</property>
-                        <property name="tooltip" translatable="yes">Descending</property>
+                        <property name="tooltip" translatable="yes">降序</property>
                         <property name="name">desc</property>
                       </object>
                     </child>
@@ -115,30 +127,30 @@
                   <object class="GtkDropDown" id="dropdown">
                     <property name="halign">end</property>
                     <property name="valign">center</property>
-                    <property name="tooltip-text" translatable="yes">Sort By</property>
+                    <property name="tooltip-text" translatable="yes">排序字段</property>
+                    <style>
+                      <class name="media-sort-dropdown"/>
+                    </style>
                     
                     <property name="model">
                       <object class="GtkStringList">
                         <items>
-                          <item translatable="yes">Title</item>
-                          <item translatable="yes">Bitrate</item>
-                          <item translatable="yes">Date Created</item>
-                          <item translatable="yes">Imdb Rate</item>
-                          <item translatable="yes">Critic Rating</item>
-                          <item translatable="yes">Premiere Date</item>
-                          <item translatable="yes">Offical Rating</item>
-                          <item translatable="yes">Production Year</item>
-                          <item translatable="yes">Date Played</item>
-                          <item translatable="yes">Runtime</item>
-                          <item translatable="yes">Updated At</item>
+                          <item translatable="yes">标题</item>
+                          <item translatable="yes">比特率</item>
+                          <item translatable="yes">创建日期</item>
+                          <item translatable="yes">IMDb 评分</item>
+                          <item translatable="yes">影评人评分</item>
+                          <item translatable="yes">首播日期</item>
+                          <item translatable="yes">官方分级</item>
+                          <item translatable="yes">制作年份</item>
+                          <item translatable="yes">播放日期</item>
+                          <item translatable="yes">时长</item>
+                          <item translatable="yes">更新时间</item>
                         </items>
                       </object>
                     </property>
                   </object>
                 </child>
-                <style>
-                  <class name="flat" />
-                </style>
               </object>
             </child>
           </object>

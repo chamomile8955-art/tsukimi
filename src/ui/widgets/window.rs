@@ -1,44 +1,28 @@
+use crate::ui::{
+    mpv::tsukimi_mpv::{MpvTrack, MpvTracks},
+    widgets::utils::run_time_ticks_to_label,
+};
 use adw::prelude::*;
 use gettextrs::gettext;
-use gtk::{
-    Widget,
-    subclass::prelude::*,
-};
+use gtk::{Widget, subclass::prelude::*};
 mod imp {
-    use std::cell::{
-        OnceCell,
-        RefCell,
-    };
+    use std::cell::{OnceCell, RefCell};
 
     use adw::subclass::application_window::AdwApplicationWindowImpl;
     use glib::subclass::InitializingObject;
-    use gtk::{
-        CompositeTemplate,
-        glib,
-        prelude::*,
-        subclass::prelude::*,
-    };
+    use gtk::{CompositeTemplate, glib, prelude::*, subclass::prelude::*};
 
     use crate::{
         client::Account,
         ui::{
             SETTINGS,
-            mpv::{
-                control_sidebar::MPVControlSidebar,
-                page::MPVPage,
-            },
+            mpv::{control_sidebar::MPVControlSidebar, page::MPVPage, tsukimi_mpv::MpvTracks},
             provider::tu_object::TuObject,
             widgets::{
-                content_viewer::MediaContentViewer,
-                home::HomePage,
-                image_dialog::ImageDialog,
-                item_actionbox::ItemActionsBox,
-                liked::LikedPage,
-                media_viewer::MediaViewer,
-                player_toolbar::PlayerToolbarBox,
-                search::SearchPage,
-                tu_overview_item::imp::ViewGroup,
-                utils::TuItemBuildExt,
+                content_viewer::MediaContentViewer, home::HomePage, image_dialog::ImageDialog,
+                item_actionbox::ItemActionsBox, liked::LikedPage, media_viewer::MediaViewer,
+                player_toolbar::PlayerToolbarBox, search::SearchPage,
+                tu_overview_item::imp::ViewGroup, utils::TuItemBuildExt,
             },
         },
     };
@@ -80,6 +64,8 @@ mod imp {
         #[template_child]
         pub mainpage: TemplateChild<adw::NavigationPage>,
         #[template_child]
+        pub main_header: TemplateChild<adw::HeaderBar>,
+        #[template_child]
         pub mainview: TemplateChild<adw::NavigationView>,
         #[template_child]
         pub homepage: TemplateChild<adw::Bin>,
@@ -100,6 +86,14 @@ mod imp {
         pub mpv_view_stack: TemplateChild<adw::ViewStack>,
         #[template_child]
         pub mpv_shortcuts_box: TemplateChild<gtk::Box>,
+        #[template_child]
+        pub mpv_media_info_box: TemplateChild<gtk::Box>,
+        #[template_child]
+        pub mpv_settings_tab: TemplateChild<gtk::Button>,
+        #[template_child]
+        pub mpv_shortcuts_tab: TemplateChild<gtk::Button>,
+        #[template_child]
+        pub mpv_media_info_tab: TemplateChild<gtk::Button>,
 
         #[template_child]
         pub main_menu_button: TemplateChild<gtk::MenuButton>,
@@ -121,6 +115,7 @@ mod imp {
         pub mpv_playlist_selection: gtk::SingleSelection,
 
         pub suspend_cookie: RefCell<Option<u32>>,
+        pub mpv_tracks: RefCell<Option<MpvTracks>>,
 
         #[template_child]
         pub sidebar_breakpoint: TemplateChild<adw::Breakpoint>,
@@ -203,6 +198,12 @@ mod imp {
             });
             klass.install_action("win.mpv-shortcuts", None, |obj, _, _| {
                 obj.view_shortcuts();
+            });
+            klass.install_action("win.mpv-settings", None, |obj, _, _| {
+                obj.view_control_sidebar();
+            });
+            klass.install_action("win.mpv-media-info", None, |obj, _, _| {
+                obj.view_media_info();
             });
             klass.install_action("win.mpv-info", None, |obj, _, _| {
                 obj.imp().mpvnav.toggle_media_info();
@@ -297,10 +298,7 @@ mod imp {
 
 use super::{
     home::HomePage,
-    item::{
-        ItemPage,
-        SelectedVideoSubInfo,
-    },
+    item::{ItemPage, SelectedVideoSubInfo},
     liked::LikedPage,
     search::SearchPage,
     server_panel::ServerPanel,
@@ -308,29 +306,15 @@ use super::{
     utils::GlobalToast,
 };
 use crate::{
-    client::{
-        Account,
-        jellyfin_client::JELLYFIN_CLIENT,
-    },
+    client::{Account, jellyfin_client::JELLYFIN_CLIENT},
     ui::{
         models::SETTINGS,
-        provider::{
-            IS_ADMIN,
-            core_song::CoreSong,
-            tu_item::TuItem,
-            tu_object::TuObject,
-        },
+        provider::{IS_ADMIN, core_song::CoreSong, tu_item::TuItem, tu_object::TuObject},
     },
-    utils::{
-        spawn,
-    },
+    utils::spawn,
 };
 use glib::Object;
-use gtk::{
-    gio,
-    glib,
-    template_callbacks,
-};
+use gtk::{gio, glib, template_callbacks};
 
 glib::wrapper! {
     pub struct Window(ObjectSubclass<imp::Window>)
@@ -424,13 +408,8 @@ impl Window {
             fn GetWindowLongPtrW(hwnd: *mut c_void, index: i32) -> isize;
             fn SetWindowLongPtrW(hwnd: *mut c_void, index: i32, value: isize) -> isize;
             fn SetWindowPos(
-                hwnd: *mut c_void,
-                hwnd_insert_after: *mut c_void,
-                x: i32,
-                y: i32,
-                cx: i32,
-                cy: i32,
-                flags: u32,
+                hwnd: *mut c_void, hwnd_insert_after: *mut c_void, x: i32, y: i32, cx: i32,
+                cy: i32, flags: u32,
             ) -> i32;
         }
 
@@ -452,8 +431,7 @@ impl Window {
         let Some(surface) = self.surface() else {
             return;
         };
-        let hwnd =
-            unsafe { gdk_win32_surface_get_handle(surface.as_ptr().cast::<c_void>()) };
+        let hwnd = unsafe { gdk_win32_surface_get_handle(surface.as_ptr().cast::<c_void>()) };
         if hwnd.is_null() {
             tracing::warn!("Unable to get the Win32 window handle for native rounded corners");
             return;
@@ -586,8 +564,7 @@ impl Window {
 
     pub fn log_ui_runtime_diagnostics(&self) {
         fn visit(widget: &gtk::Widget, circular_count: &mut usize) {
-            let is_button =
-                widget.is::<gtk::Button>() || widget.is::<gtk::MenuButton>();
+            let is_button = widget.is::<gtk::Button>() || widget.is::<gtk::MenuButton>();
             let is_circular = widget.has_css_class("circular-icon-button");
 
             if is_circular {
@@ -654,19 +631,10 @@ impl Window {
             Some(&gettext("Switch to This Server")),
             Some("win.server-switch"),
         );
-        menu.append(
-            Some(&gettext("Set as Default")),
-            Some("win.server-default"),
-        );
+        menu.append(Some(&gettext("Set as Default")), Some("win.server-default"));
         menu.append(Some(&gettext("Edit Server")), Some("win.server-edit"));
-        menu.append(
-            Some(&gettext("Delete Server")),
-            Some("win.server-delete"),
-        );
-        menu.append(
-            Some(&gettext("Add Server")),
-            Some("win.add-server"),
-        );
+        menu.append(Some(&gettext("Delete Server")), Some("win.server-delete"));
+        menu.append(Some(&gettext("Add Server")), Some("win.add-server"));
         self.imp().servers_section.set_menu_model(Some(&menu));
 
         self.imp().selectlist.connect_setup_menu(glib::clone!(
@@ -990,6 +958,7 @@ impl Window {
         }
 
         let imp = self.imp();
+        self.set_detail_hero_mode(false);
         imp.home_nav.set_active(true);
         if imp.homepage.child().is_none() {
             imp.homepage.set_child(Some(&HomePage::new()));
@@ -1008,6 +977,7 @@ impl Window {
         }
 
         let imp = self.imp();
+        self.set_detail_hero_mode(false);
         imp.favorites_nav.set_active(true);
         if imp.likedpage.child().is_none() {
             imp.likedpage.set_child(Some(&LikedPage::new()));
@@ -1026,6 +996,7 @@ impl Window {
         }
 
         let imp = self.imp();
+        self.set_detail_hero_mode(false);
         imp.recommend_nav.set_active(true);
         imp.navipage.set_title(&gettext("Recommend"));
         imp.mainview.pop_to_tag("mainpage");
@@ -1041,6 +1012,7 @@ impl Window {
         }
 
         let imp = self.imp();
+        self.set_detail_hero_mode(false);
         imp.search_nav.set_active(true);
         if imp.searchpage.child().is_none() {
             imp.searchpage.set_child(Some(&SearchPage::new()));
@@ -1063,10 +1035,12 @@ impl Window {
             return;
         };
         if tag != "mainpage" {
+            self.set_detail_hero_mode(true);
             imp.navipage.set_title(&now_page.title());
             return;
         }
 
+        self.set_detail_hero_mode(false);
         imp.popbutton.set_visible(false);
         imp.navipage.set_title("");
         self.refresh_homepage_if_needed();
@@ -1079,10 +1053,8 @@ impl Window {
     }
 
     pub async fn set_servers(&self) {
-        let track_startup = !STARTUP_SERVER_RESTORE_RECORDED.swap(
-            true,
-            std::sync::atomic::Ordering::Relaxed,
-        );
+        let track_startup =
+            !STARTUP_SERVER_RESTORE_RECORDED.swap(true, std::sync::atomic::Ordering::Relaxed);
         if track_startup {
             crate::log_startup_timing("server restore started");
         }
@@ -1184,9 +1156,12 @@ impl Window {
         for (index, account) in accounts.iter().enumerate() {
             let item = adw::SidebarItem::new(&account.servername);
             item.set_icon_name(Some("network-server-symbolic"));
-            item.set_subtitle(account.active_route().map(|route| {
-                format!("{} · {}", route.name, route.url)
-            }).as_deref());
+            item.set_subtitle(
+                account
+                    .active_route()
+                    .map(|route| format!("{} · {}", route.name, route.url))
+                    .as_deref(),
+            );
             imp.servers_section.append(item);
             if account.servername == selected_server {
                 selected_index = Some(index as u32);
@@ -1435,6 +1410,7 @@ impl Window {
         T: NavigationPageExt,
     {
         let imp = self.imp();
+        self.set_detail_hero_mode(true);
         page.set_title(name);
         imp.navipage.set_title(name);
         if imp.mainview.find_page(tag).is_some() {
@@ -1444,6 +1420,16 @@ impl Window {
         page.set_tag(Some(tag));
         imp.mainview.push(page);
         imp.popbutton.set_visible(true);
+    }
+
+    fn set_detail_hero_mode(&self, enabled: bool) {
+        let imp = self.imp();
+        imp.main_header.set_visible(!enabled);
+        if enabled {
+            self.add_css_class("detail-hero-mode");
+        } else {
+            self.remove_css_class("detail-hero-mode");
+        }
     }
 
     #[template_callback]
@@ -1598,7 +1584,163 @@ impl Window {
     }
 
     pub fn view_media_info(&self) {
+        self.rebuild_mpv_media_info();
         self.toggle_mpv_settings_page("media-info");
+    }
+
+    pub fn update_mpv_media_info_tracks(&self, tracks: MpvTracks) {
+        self.imp().mpv_tracks.replace(Some(tracks));
+        self.rebuild_mpv_media_info();
+    }
+
+    pub fn reset_mpv_media_info(&self) {
+        self.imp().mpv_tracks.take();
+        self.rebuild_mpv_media_info();
+    }
+
+    fn rebuild_mpv_media_info(&self) {
+        let imp = self.imp();
+        let container = imp.mpv_media_info_box.get();
+        while let Some(child) = container.first_child() {
+            container.remove(&child);
+        }
+
+        let current_video = imp.mpvnav.current_video();
+        let tracks = imp.mpv_tracks.borrow();
+
+        if current_video.is_none() && tracks.is_none() {
+            let group = Self::media_info_group("媒体信息");
+            group.add(&Self::media_info_row(
+                "等待媒体加载",
+                Some("开始播放后会在这里显示媒体、音频和字幕信息"),
+                "info-symbolic",
+            ));
+            container.append(&group);
+            return;
+        }
+
+        if let Some(item) = current_video {
+            let group = Self::media_info_group("当前媒体");
+            let subtitle = item.fmt_subtitle();
+            group.add(&Self::media_info_row(
+                &item.fmt_title(),
+                (!subtitle.is_empty()).then_some(subtitle.as_str()),
+                "video-x-generic-symbolic",
+            ));
+
+            if item.run_time_ticks() > 0 {
+                group.add(&Self::media_info_row(
+                    "时长",
+                    Some(&run_time_ticks_to_label(item.run_time_ticks())),
+                    "appointment-soon-symbolic",
+                ));
+            }
+
+            if let Some(overview) = item.overview().filter(|overview| !overview.is_empty()) {
+                let label = gtk::Label::builder()
+                    .label(overview)
+                    .wrap(true)
+                    .xalign(0.0)
+                    .selectable(true)
+                    .build();
+                label.add_css_class("mpv-media-overview");
+                group.add(&label);
+            }
+
+            container.append(&group);
+        }
+
+        if let Some(tracks) = tracks.as_ref() {
+            Self::append_track_group(
+                &container,
+                "音频轨道",
+                "audio-speakers-symbolic",
+                &tracks.audio_tracks,
+                "暂无音频轨道",
+            );
+            Self::append_track_group(
+                &container,
+                "字幕轨道",
+                "closed-captioning-symbolic",
+                &tracks.sub_tracks,
+                "暂无字幕轨道",
+            );
+        } else {
+            let group = Self::media_info_group("轨道信息");
+            group.add(&Self::media_info_row(
+                "正在加载",
+                Some("轨道列表会在视频载入后自动显示"),
+                "view-refresh-symbolic",
+            ));
+            container.append(&group);
+        }
+
+        let group = Self::media_info_group("播放统计");
+        let row = Self::media_info_row(
+            "视频信息覆盖层",
+            Some("显示或隐藏 mpv 播放统计"),
+            "info-symbolic",
+        );
+        let button = gtk::Button::builder()
+            .label("切换")
+            .action_name("win.mpv-info")
+            .valign(gtk::Align::Center)
+            .build();
+        button.add_css_class("mpv-media-action");
+        row.add_suffix(&button);
+        group.add(&row);
+        container.append(&group);
+    }
+
+    fn media_info_group(title: &str) -> adw::PreferencesGroup {
+        let group = adw::PreferencesGroup::builder().title(title).build();
+        group.add_css_class("mpv-settings-group");
+        group.add_css_class("mpv-media-info-group");
+        group
+    }
+
+    fn media_info_row(title: &str, subtitle: Option<&str>, icon_name: &str) -> adw::ActionRow {
+        let row = adw::ActionRow::builder().title(title).build();
+        if let Some(subtitle) = subtitle {
+            row.set_subtitle(subtitle);
+        }
+        let icon = gtk::Image::from_icon_name(icon_name);
+        icon.add_css_class("mpv-media-info-icon");
+        row.add_prefix(&icon);
+        row.add_css_class("mpv-media-info-row");
+        row
+    }
+
+    fn append_track_group(
+        container: &gtk::Box, title: &str, icon_name: &str, tracks: &[MpvTrack], empty_title: &str,
+    ) {
+        let group = Self::media_info_group(title);
+        if tracks.is_empty() {
+            group.add(&Self::media_info_row(
+                empty_title,
+                Some("当前视频未提供此类轨道"),
+                icon_name,
+            ));
+        } else {
+            for track in tracks {
+                let track_title = if track.title.is_empty() || track.title == "unknown" {
+                    format!("轨道 {}", track.id)
+                } else {
+                    track.title.to_owned()
+                };
+                let language = if track.lang.is_empty() || track.lang == "unknown" {
+                    "语言未知".to_string()
+                } else {
+                    format!("语言：{}", track.lang)
+                };
+                group.add(&Self::media_info_row(
+                    &track_title,
+                    Some(&language),
+                    icon_name,
+                ));
+            }
+        }
+        container.append(&group);
     }
 
     fn setup_mpv_shortcuts_panel(&self) {
@@ -1663,9 +1805,7 @@ impl Window {
             group.add_css_class("mpv-settings-group");
 
             for (label, accelerator) in *shortcuts {
-                let row = adw::ActionRow::builder()
-                    .title(gettext(*label))
-                    .build();
+                let row = adw::ActionRow::builder().title(gettext(*label)).build();
                 let key = gtk::Label::builder()
                     .label(*accelerator)
                     .valign(gtk::Align::Center)
@@ -1680,23 +1820,39 @@ impl Window {
 
     fn toggle_mpv_settings_page(&self, page: &str) {
         let imp = self.imp();
-        let settings_panel_is_visible = imp
-            .mpv_sidebar_stack
-            .visible_child_name()
-            .as_deref()
-            == Some("settings-panel");
+        let settings_panel_is_visible =
+            imp.mpv_sidebar_stack.visible_child_name().as_deref() == Some("settings-panel");
         let page_is_visible = settings_panel_is_visible
-            &&
-            imp.mpv_view_stack.visible_child_name().as_deref() == Some(page);
+            && imp.mpv_view_stack.visible_child_name().as_deref() == Some(page);
 
         if imp.mpv_view.shows_sidebar() && page_is_visible {
             imp.mpv_view.set_show_sidebar(false);
             return;
         }
 
-        imp.mpv_sidebar_stack.set_visible_child_name("settings-panel");
+        imp.mpv_sidebar_stack
+            .set_visible_child_name("settings-panel");
         imp.mpv_view_stack.set_visible_child_name(page);
+        self.sync_mpv_settings_tabs(page);
         imp.mpv_view.set_show_sidebar(true);
+    }
+
+    fn sync_mpv_settings_tabs(&self, page: &str) {
+        let imp = self.imp();
+        for button in [
+            imp.mpv_settings_tab.get(),
+            imp.mpv_shortcuts_tab.get(),
+            imp.mpv_media_info_tab.get(),
+        ] {
+            button.remove_css_class("active");
+        }
+
+        match page {
+            "control-bar" => imp.mpv_settings_tab.add_css_class("active"),
+            "shortcuts" => imp.mpv_shortcuts_tab.add_css_class("active"),
+            "media-info" => imp.mpv_media_info_tab.add_css_class("active"),
+            _ => {}
+        }
     }
 
     fn setup_mpv_sidebar_dismissal(&self) {
@@ -1716,9 +1872,7 @@ impl Window {
                 };
                 let clicked_inside_sidebar = view
                     .pick(x, y, gtk::PickFlags::DEFAULT)
-                    .is_some_and(|widget| {
-                        widget == sidebar || widget.is_ancestor(&sidebar)
-                    });
+                    .is_some_and(|widget| widget == sidebar || widget.is_ancestor(&sidebar));
 
                 if !clicked_inside_sidebar {
                     view.set_show_sidebar(false);

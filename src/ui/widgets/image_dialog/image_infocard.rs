@@ -1,36 +1,20 @@
 use gettextrs::gettext;
 use glib::Object;
-use gtk::{
-    gio,
-    glib,
-    glib::subclass::types::ObjectSubclassIsExt,
-    prelude::*,
-    template_callbacks,
-};
+use gtk::{gio, glib, glib::subclass::types::ObjectSubclassIsExt, prelude::*, template_callbacks};
 
 use crate::{
     client::jellyfin_client::JELLYFIN_CLIENT,
-    ui::{
-        GlobalToast,
-        widgets::window::Window,
-    },
+    ui::{GlobalToast, widgets::window::Window},
     utils::spawn_tokio,
 };
 
 mod imp {
-    use std::cell::{
-        OnceCell,
-        RefCell,
-    };
+    use std::cell::{OnceCell, RefCell};
 
     use adw::subclass::prelude::*;
     use gettextrs::gettext;
     use glib::subclass::InitializingObject;
-    use gtk::{
-        CompositeTemplate,
-        glib,
-        prelude::*,
-    };
+    use gtk::{CompositeTemplate, glib, prelude::*};
 
     use crate::ui::provider::IS_ADMIN;
 

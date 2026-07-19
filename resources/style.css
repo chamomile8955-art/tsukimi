@@ -280,7 +280,7 @@ button.pill.ultrasmall {
 }
 
 .item-hero {
-  min-height: 560px;
+  min-height: 740px;
 }
 
 .tu-listview>row {
@@ -778,7 +778,7 @@ window.app-window.windows-native-frame .app-shell > stack,
 window.app-window.windows-native-frame .app-shell > widget.background,
 window.app-window.windows-native-frame overlay-split-view > widget.background,
 window.app-window.windows-native-frame .window-stack > box {
-  background-color: transparent;
+  background-color: @tsukimi_base_bg_light;
   background-image: none;
 }
 
@@ -790,6 +790,13 @@ window.app-window.maximized .window-root-overlay,
 window.app-window.maximized .window-toast-overlay,
 window.app-window.maximized .window-stack,
 window.app-window.maximized .app-shell,
+window.app-window.maximized .window-frame > overlay,
+window.app-window.maximized .window-frame > box,
+window.app-window.maximized .app-shell > overlay,
+window.app-window.maximized .app-shell > box,
+window.app-window.maximized .app-shell > stack,
+window.app-window.maximized overlay-split-view > widget.background,
+window.app-window.maximized .window-stack > box,
 window.app-window.fullscreen,
 window.app-window.fullscreen.background,
 window.app-window.fullscreen > contents,
@@ -797,7 +804,14 @@ window.app-window.fullscreen .window-frame,
 window.app-window.fullscreen .window-root-overlay,
 window.app-window.fullscreen .window-toast-overlay,
 window.app-window.fullscreen .window-stack,
-window.app-window.fullscreen .app-shell {
+window.app-window.fullscreen .app-shell,
+window.app-window.fullscreen .window-frame > overlay,
+window.app-window.fullscreen .window-frame > box,
+window.app-window.fullscreen .app-shell > overlay,
+window.app-window.fullscreen .app-shell > box,
+window.app-window.fullscreen .app-shell > stack,
+window.app-window.fullscreen overlay-split-view > widget.background,
+window.app-window.fullscreen .window-stack > box {
   background-color: #000000;
   background-image: none;
 }
@@ -884,6 +898,24 @@ window.app-window.fullscreen .app-shell {
 .app-window .main-page,
 .app-window .content-stack {
   border-radius: 0 0 32px 32px;
+}
+
+.app-window.detail-hero-mode .main-toolbar,
+.app-window.detail-hero-mode .main-content-pane,
+.app-window.detail-hero-mode .main-navigation,
+.app-window.detail-hero-mode .main-page,
+.app-window.detail-hero-mode .content-stack {
+  border-radius: 32px;
+}
+
+.app-window.detail-hero-mode .item-hero {
+  min-height: 740px;
+  border-radius: 30px;
+  box-shadow: none;
+}
+
+.app-window.detail-hero-mode .boxshadow.item-hero {
+  box-shadow: none;
 }
 
 .media-library-scroll,
@@ -1014,6 +1046,23 @@ window.app-window.fullscreen .app-shell {
   border-radius: 999px;
 }
 
+.app-window button.glass-button,
+.app-window togglebutton.glass-button,
+.app-window menubutton.glass-button > button,
+.app-window button.circular-icon-button,
+.app-window togglebutton.circular-icon-button,
+.app-window menubutton.circular-icon-button > button,
+.app-window .segmented-control > button,
+.app-window stackswitcher.segmented-control > button,
+.app-window .control-group > button,
+.app-window .control-group > togglebutton,
+.app-window .control-group > menubutton > button,
+.app-window box.linked > button,
+.app-window box.linked > togglebutton,
+.app-window box.linked > menubutton > button {
+  transition: background-color 120ms ease-out, border-color 120ms ease-out, color 120ms ease-out;
+}
+
 .app-window button.circular-icon-button,
 .app-window togglebutton.circular-icon-button,
 .app-window menubutton.circular-icon-button > button {
@@ -1090,7 +1139,7 @@ menubutton.glass-button > button:hover,
 .app-window button.circular-icon-button:hover,
 .app-window togglebutton.circular-icon-button:hover,
 .app-window menubutton.circular-icon-button > button:hover {
-  background-color: mix(@window_fg_color, @tsukimi_panel_bg_light, 0.08);
+  background-color: rgba(255, 255, 255, 0.88);
   background-image: none;
   box-shadow: none;
 }
@@ -1105,7 +1154,7 @@ menubutton.glass-button > button:active,
 .app-window togglebutton.circular-icon-button:active,
 .app-window togglebutton.circular-icon-button:checked,
 .app-window menubutton.circular-icon-button > button:active {
-  background-color: mix(@window_fg_color, @tsukimi_panel_bg_light, 0.12);
+  background-color: rgba(255, 255, 255, 0.78);
   background-image: none;
   box-shadow: none;
 }
@@ -1189,7 +1238,7 @@ menubutton.glass-button > button:focus-visible {
 .app-window box.linked > button:hover,
 .app-window box.linked > togglebutton:hover,
 .app-window box.linked > menubutton > button:hover {
-  background-color: rgba(0, 0, 0, 0.055);
+  background-color: rgba(0, 0, 0, 0.032);
 }
 
 .app-window .segmented-control > button:checked,
@@ -1197,6 +1246,84 @@ menubutton.glass-button > button:focus-visible {
 .app-window .control-group > togglebutton:checked,
 .app-window box.linked > togglebutton:checked {
   background-color: rgba(0, 0, 0, 0.095);
+}
+
+.app-window .media-toolbar-actions {
+  min-height: 46px;
+}
+
+.app-window .media-toolbar-actions .media-view-switch,
+.app-window .media-toolbar-actions .media-sort-order {
+  min-height: 44px;
+  padding: 4px;
+  border-color: alpha(@window_fg_color, 0.10);
+  background-color: rgba(255, 255, 255, 0.82);
+}
+
+.app-window .media-toolbar-actions .media-view-switch > button,
+.app-window .media-toolbar-actions .media-sort-order > button {
+  min-width: 38px;
+  min-height: 36px;
+  padding: 0;
+  -gtk-icon-size: 18px;
+}
+
+.app-window dropdown.media-sort-dropdown,
+.app-window dropdown.media-sort-dropdown > button {
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid alpha(@window_fg_color, 0.10);
+  border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.82);
+  background-image: none;
+  box-shadow: none;
+}
+
+.app-window dropdown.media-sort-dropdown > button:hover {
+  background-color: rgba(255, 255, 255, 0.92);
+}
+
+.app-window dropdown.media-sort-dropdown > button:active {
+  background-color: rgba(255, 255, 255, 0.98);
+}
+
+.app-window .media-toolbar-summary {
+  min-height: 46px;
+}
+
+.app-window .media-toolbar-summary label {
+  margin: 0;
+  padding: 0;
+}
+
+.app-window menubutton.media-poster-menu > button,
+.app-window button.media-filter-button {
+  min-height: 44px;
+  border: 1px solid alpha(@window_fg_color, 0.10);
+  border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.82);
+  background-image: none;
+  box-shadow: none;
+}
+
+.app-window menubutton.media-poster-menu > button {
+  padding: 0 14px;
+}
+
+.app-window button.media-filter-button {
+  min-width: 44px;
+  padding: 0;
+  -gtk-icon-size: 18px;
+}
+
+.app-window menubutton.media-poster-menu > button:hover,
+.app-window button.media-filter-button:hover {
+  background-color: rgba(255, 255, 255, 0.92);
+}
+
+.app-window menubutton.media-poster-menu > button:active,
+.app-window button.media-filter-button:active {
+  background-color: rgba(255, 255, 255, 0.98);
 }
 
 .app-window .control-group > button,
@@ -1260,6 +1387,17 @@ menubutton.glass-button > button:focus-visible {
 .app-window .media-choice-panel image {
   color: #ffffff;
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.72);
+}
+
+.app-window .poster-info-overlay {
+  min-height: 360px;
+  padding-top: 96px;
+  background-image: linear-gradient(to bottom,
+      rgba(12, 13, 16, 0.00) 0%,
+      rgba(12, 13, 16, 0.26) 28%,
+      rgba(12, 13, 16, 0.54) 62%,
+      rgba(12, 13, 16, 0.72) 100%);
+  background-color: transparent;
 }
 
 .app-window .poster-info-overlay button,
@@ -1505,7 +1643,7 @@ popover.floating-menu contents > * {
   background-clip: padding-box;
   border: 1px solid alpha(@window_fg_color, 0.10);
   border-radius: 18px;
-  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.12);
   color: @window_fg_color;
 }
 
@@ -1519,7 +1657,7 @@ popover.menu.floating-dialog contents > * {
   background-clip: padding-box;
   border: 1px solid alpha(@window_fg_color, 0.10);
   border-radius: 22px;
-  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.12);
   color: @window_fg_color;
 }
 
@@ -1546,7 +1684,7 @@ window.settings-dialog {
   background-image: none;
   border: 1px solid alpha(@window_fg_color, 0.10);
   border-radius: 22px;
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.20);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.14);
   color: @window_fg_color;
 }
 
@@ -1572,7 +1710,7 @@ dialog.add-server-dialog sheet {
   background-clip: padding-box;
   border: 1px solid alpha(@window_fg_color, 0.10);
   border-radius: 22px;
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.20);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.14);
   color: @window_fg_color;
 }
 
@@ -1603,23 +1741,27 @@ dialog.add-server-dialog sheet {
   color: @window_fg_color;
 }
 
-/* Keep the server-type selector visually inside its entry row instead of
- * drawing a second, mismatched button surface around “Emby/Jellyfin”. */
+/* Standalone server-type selector in the add-server form. */
 .add-server-dialog dropdown.server-type-selector,
 .add-server-dialog dropdown.server-type-selector > button {
-  background-color: transparent;
+  min-width: 132px;
+  min-height: 38px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.84);
   background-image: none;
-  border: none;
+  border: 1px solid alpha(@window_fg_color, 0.10);
   box-shadow: none;
+  transition: background-color 120ms ease-out, border-color 120ms ease-out;
 }
 
 .add-server-dialog dropdown.server-type-selector > button:hover {
-  background-color: @glass_hover;
+  background-color: rgba(255, 255, 255, 0.94);
 }
 
 .add-server-dialog dropdown.server-type-selector > button:active,
 .add-server-dialog dropdown.server-type-selector > button:checked {
-  background-color: @glass_pressed;
+  background-color: rgba(255, 255, 255, 0.76);
 }
 
 .account-settings .boxed-list,
@@ -1709,11 +1851,32 @@ popover.glass-popover label {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.32);
 }
 
+.media-count-badge {
+  min-width: 28px;
+  min-height: 28px;
+  padding: 0 7px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  background-color: #6c5cff;
+  background-image: none;
+  color: #ffffff;
+  font-size: 0.9em;
+  font-weight: 800;
+  line-height: 1;
+  text-shadow: none;
+  box-shadow: 0 3px 12px rgba(40, 31, 128, 0.32);
+}
+
 .app-window label.media-rating-badge,
-.app-window label.media-playback-badge {
+.app-window label.media-playback-badge,
+.app-window label.media-count-badge {
   background-color: rgba(8, 9, 11, 0.92);
   background-image: none;
   color: #ffffff;
+}
+
+.app-window label.media-count-badge {
+  background-color: #6c5cff;
 }
 
 .media-card-progress {
@@ -1878,6 +2041,7 @@ popover.glass-popover label {
 .app-window .poster-info-overlay dropdown.media-choice-dropdown button image,
 .app-window label.media-rating-badge,
 .app-window label.media-playback-badge,
+.app-window label.media-count-badge,
 .app-window button.played-mark,
 .app-window button.played-mark image {
   color: #ffffff;
@@ -1888,6 +2052,133 @@ popover.glass-popover label {
 .app-window .poster-info-overlay button.suggested-action image {
   color: @tsukimi_text_light;
   text-shadow: none;
+}
+
+.app-window .poster-info-overlay button.hero-play-button {
+  min-height: 52px;
+  padding-left: 28px;
+  padding-right: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.94);
+  background-image: none;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
+  color: #17161c;
+  transition: background-color 120ms ease-out, border-color 120ms ease-out, box-shadow 120ms ease-out;
+}
+
+.app-window .poster-info-overlay button.hero-play-button:hover {
+  background-color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.62);
+}
+
+.app-window .poster-info-overlay button.hero-play-button:active {
+  background-color: rgba(224, 222, 232, 0.96);
+  border-color: rgba(255, 255, 255, 0.36);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18);
+}
+
+.app-window .poster-info-overlay button.hero-play-button label,
+.app-window .poster-info-overlay button.hero-play-button image {
+  color: #17161c;
+  text-shadow: none;
+}
+
+.app-window .poster-info-overlay .hero-action-group.control-group {
+  min-height: 52px;
+  padding: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.36);
+  border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.88);
+  background-image: none;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.14);
+}
+
+.app-window .poster-info-overlay .hero-action-group > togglebutton.hero-favorite-button,
+.app-window .poster-info-overlay .hero-action-group > menubutton.hero-more-button > button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background-color: transparent;
+  background-image: none;
+  color: #23212b;
+  box-shadow: none;
+}
+
+.app-window .poster-info-overlay .hero-action-group > togglebutton.hero-favorite-button:hover,
+.app-window .poster-info-overlay .hero-action-group > menubutton.hero-more-button > button:hover {
+  background-color: rgba(0, 0, 0, 0.08);
+}
+
+.app-window .poster-info-overlay .hero-action-group > togglebutton.hero-favorite-button:active,
+.app-window .poster-info-overlay .hero-action-group > menubutton.hero-more-button > button:active,
+.app-window .poster-info-overlay .hero-action-group > menubutton.hero-more-button > button:checked {
+  background-color: rgba(0, 0, 0, 0.16);
+}
+
+.app-window .poster-info-overlay .hero-action-group > togglebutton.hero-favorite-button:checked {
+  background-color: #6c5cff;
+  color: #ffffff;
+}
+
+.app-window .poster-info-overlay .hero-action-group > togglebutton.hero-favorite-button image,
+.app-window .poster-info-overlay .hero-action-group > menubutton.hero-more-button > button image {
+  color: inherit;
+  text-shadow: none;
+  -gtk-icon-shadow: none;
+}
+
+.app-window .poster-info-overlay .media-choice-row {
+  min-height: 44px;
+}
+
+.app-window .poster-info-overlay .media-choice-label {
+  min-height: 44px;
+  margin-right: 2px;
+  padding-top: 0;
+  padding-bottom: 0;
+  color: #ffffff;
+  font-size: 1.02em;
+  font-weight: 750;
+  line-height: 1.2;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.72);
+}
+
+.app-window .poster-info-overlay dropdown.media-choice-dropdown > button {
+  min-height: 44px;
+  padding-left: 18px;
+  padding-right: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  background-color: rgba(0, 0, 0, 0.78);
+  background-image: none;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+  color: #ffffff;
+  transition: background-color 120ms ease-out, border-color 120ms ease-out, box-shadow 120ms ease-out;
+}
+
+.app-window .poster-info-overlay dropdown.media-choice-dropdown > button:hover {
+  background-color: rgba(0, 0, 0, 0.86);
+  border-color: rgba(255, 255, 255, 0.32);
+}
+
+.app-window .poster-info-overlay dropdown.media-choice-dropdown > button:active {
+  background-color: rgba(0, 0, 0, 0.94);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.20);
+}
+
+.app-window .poster-info-overlay dropdown.media-choice-dropdown label,
+.app-window .poster-info-overlay dropdown.media-choice-dropdown image,
+.app-window .poster-info-overlay dropdown.media-choice-dropdown > button label,
+.app-window .poster-info-overlay dropdown.media-choice-dropdown > button image {
+  color: #ffffff;
+  font-size: 0.96em;
+  font-weight: 700;
+  line-height: 1.2;
+  text-shadow: none;
+  -gtk-icon-shadow: none;
 }
 
 button.media-card-play-button {
@@ -1927,6 +2218,11 @@ window.app-window.compact-1080 .content-stack {
 
 window.app-window.compact-1080 .top-navigation {
   min-height: 44px;
+}
+
+window.app-window.compact-1080 .item-hero,
+window.app-window.compact-1080.detail-hero-mode .item-hero {
+  min-height: 650px;
 }
 
 window.app-window.compact-1080 .media-library-content {
@@ -2059,7 +2355,7 @@ popover.floating-menu separator {
 .app-window .mpv-player .mpv-top-bar {
   min-height: 76px;
   padding: 12px 24px;
-  background-color: #1a1b1d;
+  background-color: #0b0b0c;
   background-image: none;
   border: none;
   border-radius: 0;
@@ -2139,6 +2435,56 @@ popover.floating-menu separator {
   background-color: rgba(255, 255, 255, 0.16);
 }
 
+.app-window .mpv-player .mpv-transport-controls {
+  min-height: 84px;
+  padding: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.075);
+  background-image: none;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
+}
+
+.app-window .mpv-player .mpv-transport-controls button.mpv-control-button {
+  min-width: 60px;
+  min-height: 60px;
+  border-color: rgba(255, 255, 255, 0.12);
+  background-color: rgba(255, 255, 255, 0.10);
+  -gtk-icon-size: 25px;
+}
+
+.app-window .mpv-player .mpv-transport-controls button.mpv-control-button:hover {
+  border-color: rgba(255, 255, 255, 0.22);
+  background-color: rgba(255, 255, 255, 0.18);
+}
+
+.app-window .mpv-player .mpv-transport-controls button.mpv-control-button:active {
+  background-color: rgba(255, 255, 255, 0.26);
+}
+
+.app-window .mpv-player .mpv-transport-controls button.mpv-play-button {
+  min-width: 68px;
+  min-height: 68px;
+  border-color: rgba(255, 255, 255, 0.28);
+  background-color: #6c5cff;
+  box-shadow: 0 8px 22px rgba(64, 52, 196, 0.34);
+  -gtk-icon-size: 30px;
+}
+
+.app-window .mpv-player .mpv-transport-controls button.mpv-play-button:hover {
+  border-color: rgba(255, 255, 255, 0.34);
+  background-color: #7a6cff;
+}
+
+.app-window .mpv-player .mpv-transport-controls button.mpv-play-button:active {
+  background-color: #5849e8;
+  box-shadow: 0 4px 12px rgba(64, 52, 196, 0.28);
+}
+
+.app-window .mpv-player .mpv-transport-controls button.mpv-play-button image {
+  color: #ffffff;
+}
+
 .app-window .mpv-player button.mpv-info-button {
   min-height: 52px;
   padding: 0 16px;
@@ -2187,11 +2533,16 @@ popover.floating-menu separator {
   background-color: rgba(255, 255, 255, 0.22);
 }
 
-.app-window .mpv-player .mpv-seekbar > trough > highlight,
+.app-window .mpv-player .mpv-seekbar > trough > highlight {
+  min-height: 6px;
+  border-radius: 999px;
+  background-color: #6c5cff;
+}
+
 .app-window .mpv-player .mpv-seekbar > trough > fill {
   min-height: 6px;
   border-radius: 999px;
-  background-color: #3584e4;
+  background-color: rgba(82, 84, 96, 0.86);
 }
 
 .app-window .mpv-player .mpv-seekbar > trough > slider {
@@ -2282,15 +2633,24 @@ popover.track-list-popover checkbutton {
 /* The playback utility pane is an overlay menu and therefore uses the
  * player's dark surface in both application color schemes. */
 .app-window overlay-split-view.mpv-overlay-menu > widget.background {
-  margin: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 24px;
-  background-color: rgba(16, 17, 20, 0.84);
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  background-color: transparent;
   background-image: none;
-  box-shadow: 0 20px 52px rgba(0, 0, 0, 0.42);
+  box-shadow: none;
 }
 
-.app-window .mpv-sidebar-panel,
+.app-window .mpv-sidebar-panel {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 24px;
+  background-color: rgba(15, 16, 21, 0.96);
+  background-image: none;
+  background-clip: padding-box;
+  box-shadow: 0 20px 52px rgba(0, 0, 0, 0.46);
+  color: #f5f6f7;
+}
+
 .app-window .mpv-sidebar-panel toolbarview,
 .app-window .mpv-sidebar-panel headerbar,
 .app-window .mpv-sidebar-panel viewstack,
@@ -2303,42 +2663,63 @@ popover.track-list-popover checkbutton {
 }
 
 .app-window .mpv-sidebar-panel headerbar {
-  min-height: 68px;
-  padding: 10px 14px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  background-color: rgba(255, 255, 255, 0.025);
+  min-height: 78px;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  background-color: rgba(255, 255, 255, 0.045);
   background-image: none;
   box-shadow: none;
 }
 
 .app-window .mpv-sidebar-switcher {
-  padding: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.10);
+  min-height: 50px;
+  padding: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 999px;
-  background-color: rgba(255, 255, 255, 0.055);
+  background-color: rgba(255, 255, 255, 0.075);
   background-image: none;
 }
 
 .app-window .mpv-sidebar-switcher button,
-.app-window .mpv-sidebar-switcher togglebutton {
-  min-height: 38px;
+.app-window .mpv-sidebar-switcher togglebutton,
+.app-window .mpv-sidebar-tab {
+  min-height: 40px;
+  min-width: 104px;
   margin: 0;
-  padding: 0 14px;
+  padding: 0 16px;
   border: none;
   border-radius: 999px;
   background-color: transparent;
   background-image: none;
   box-shadow: none;
+  color: rgba(245, 246, 247, 0.82);
+  font-weight: 750;
 }
 
 .app-window .mpv-sidebar-switcher button:hover,
-.app-window .mpv-sidebar-switcher togglebutton:hover {
-  background-color: rgba(255, 255, 255, 0.08);
+.app-window .mpv-sidebar-switcher togglebutton:hover,
+.app-window .mpv-sidebar-tab:hover {
+  background-color: rgba(255, 255, 255, 0.11);
+  color: #ffffff;
 }
 
 .app-window .mpv-sidebar-switcher button:checked,
-.app-window .mpv-sidebar-switcher togglebutton:checked {
-  background-color: rgba(255, 255, 255, 0.14);
+.app-window .mpv-sidebar-switcher togglebutton:checked,
+.app-window .mpv-sidebar-tab.active {
+  background-color: rgba(255, 255, 255, 0.20);
+  color: #ffffff;
+}
+
+.app-window .mpv-sidebar-tab:active {
+  background-color: rgba(255, 255, 255, 0.26);
+}
+
+.app-window .mpv-sidebar-tab image,
+.app-window .mpv-sidebar-tab label {
+  color: inherit;
+  font-weight: 750;
+  text-shadow: none;
+  -gtk-icon-shadow: none;
 }
 
 .app-window .mpv-settings-scroller,
@@ -2355,17 +2736,17 @@ popover.track-list-popover checkbutton {
   padding: 2px 9px;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 999px;
-  background-color: rgba(255, 255, 255, 0.09);
+  background-color: rgba(255, 255, 255, 0.13);
   color: #f5f6f7;
   font-size: 0.84em;
-  font-weight: 650;
+  font-weight: 750;
 }
 
 .app-window .mpv-settings-group {
   padding: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(255, 255, 255, 0.13);
   border-radius: 20px;
-  background-color: rgba(255, 255, 255, 0.045);
+  background-color: rgba(255, 255, 255, 0.075);
   background-image: none;
   box-shadow: none;
 }
@@ -2374,9 +2755,9 @@ popover.track-list-popover checkbutton {
 .app-window .mpv-settings-group .heading {
   margin-left: 4px;
   margin-bottom: 8px;
-  color: rgba(245, 246, 247, 0.88);
-  font-size: 1.04em;
-  font-weight: 650;
+  color: rgba(245, 246, 247, 0.96);
+  font-size: 1.08em;
+  font-weight: 800;
 }
 
 .app-window .mpv-sidebar-panel label,
@@ -2396,9 +2777,9 @@ popover.track-list-popover checkbutton {
 .app-window .mpv-settings-panel entry {
   min-height: 38px;
   border-radius: 999px;
-  background-color: rgba(255, 255, 255, 0.06);
+  background-color: rgba(255, 255, 255, 0.10);
   background-image: none;
-  border-color: rgba(255, 255, 255, 0.10);
+  border-color: rgba(255, 255, 255, 0.14);
   box-shadow: none;
   color: #f5f6f7;
 }
@@ -2407,14 +2788,14 @@ popover.track-list-popover checkbutton {
 .app-window .mpv-sidebar-panel togglebutton:hover,
 .app-window .mpv-settings-panel button:hover,
 .app-window .mpv-settings-panel togglebutton:hover {
-  background-color: rgba(255, 255, 255, 0.11);
+  background-color: rgba(255, 255, 255, 0.16);
 }
 
 .app-window .mpv-sidebar-panel button:active,
 .app-window .mpv-sidebar-panel togglebutton:checked,
 .app-window .mpv-settings-panel button:active,
 .app-window .mpv-settings-panel togglebutton:checked {
-  background-color: rgba(255, 255, 255, 0.16);
+  background-color: rgba(255, 255, 255, 0.22);
 }
 
 .app-window .mpv-settings-panel switch {
@@ -2434,9 +2815,9 @@ popover.track-list-popover checkbutton {
 .app-window .mpv-settings-panel row,
 .app-window .mpv-sidebar-panel .boxed-list,
 .app-window .mpv-settings-panel .boxed-list {
-  background-color: rgba(255, 255, 255, 0.055);
+  background-color: rgba(255, 255, 255, 0.085);
   background-image: none;
-  border-color: rgba(255, 255, 255, 0.10);
+  border-color: rgba(255, 255, 255, 0.12);
   border-radius: 14px;
   color: #f5f6f7;
 }
@@ -2450,9 +2831,47 @@ popover.track-list-popover checkbutton {
   min-height: 52px;
 }
 
+.app-window .mpv-media-info-group {
+  padding: 16px;
+}
+
+.app-window .mpv-media-info-row {
+  min-height: 58px;
+}
+
+.app-window .mpv-media-info-row .title {
+  font-weight: 760;
+}
+
+.app-window .mpv-media-info-row .subtitle {
+  color: rgba(245, 246, 247, 0.72);
+  font-size: 0.93em;
+  line-height: 1.25;
+}
+
+.app-window .mpv-media-info-icon {
+  min-width: 22px;
+  color: rgba(245, 246, 247, 0.82);
+}
+
+.app-window .mpv-media-overview {
+  margin: 8px 8px 2px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background-color: rgba(255, 255, 255, 0.085);
+  color: rgba(245, 246, 247, 0.9);
+  line-height: 1.32;
+}
+
+.app-window .mpv-media-action {
+  min-width: 68px;
+  padding: 0 16px;
+  font-weight: 750;
+}
+
 .app-window .mpv-sidebar-panel row:hover,
 .app-window .mpv-settings-panel row:hover {
-  background-color: rgba(255, 255, 255, 0.09);
+  background-color: rgba(255, 255, 255, 0.13);
 }
 
 /* Fullscreen playback must cover the native content area without an inner

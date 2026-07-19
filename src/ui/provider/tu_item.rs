@@ -5,10 +5,7 @@ use gettextrs::gettext;
 use glib::DateTime;
 use gtk::{
     gio,
-    glib::{
-        self,
-        subclass::prelude::*,
-    },
+    glib::{self, subclass::prelude::*},
 };
 
 #[allow(dead_code)] //FIXME: refactor with this
@@ -48,21 +45,13 @@ use crate::{
     client::{
         error::UserFacingError,
         jellyfin_client::JELLYFIN_CLIENT,
-        structs::{
-            SimpleListItem,
-            SongWidgetView,
-            UserData,
-        },
+        structs::{SimpleListItem, SongWidgetView, UserData},
     },
     ui::{
         GlobalToast,
         provider::{
             core_song::CoreSong,
-            tu_item::item_type::{
-                EPISODE,
-                SERIES,
-                TV_CHANNEL,
-            },
+            tu_item::item_type::{EPISODE, SERIES, TV_CHANNEL},
         },
         widgets::{
             hortu_scrolled::UnifySize,
@@ -70,22 +59,13 @@ use crate::{
             list::ListPage,
             music_album::AlbumPage,
             other::OtherPage,
-            single_grid::{
-                SingleGrid,
-                imp::ListType,
-            },
+            single_grid::{SingleGrid, imp::ListType},
             song_widget::SongWidget,
             utils::*,
             window::Window,
         },
     },
-    utils::{
-        CacheEvent,
-        CachePolicy,
-        fetch_with_cache,
-        spawn,
-        spawn_tokio,
-    },
+    utils::{CacheEvent, CachePolicy, fetch_with_cache, spawn, spawn_tokio},
 };
 
 #[derive(Default, Clone)]
@@ -565,17 +545,16 @@ impl TuItem {
         }
 
         let seasons_id = id.clone();
-        let mut seasons = match spawn_tokio(async move {
-            JELLYFIN_CLIENT.get_season_list(&seasons_id).await
-        })
-        .await
-        {
-            Ok(seasons) => seasons.items,
-            Err(e) => {
-                obj.toast(e.to_user_facing());
-                return;
-            }
-        };
+        let mut seasons =
+            match spawn_tokio(async move { JELLYFIN_CLIENT.get_season_list(&seasons_id).await })
+                .await
+            {
+                Ok(seasons) => seasons.items,
+                Err(e) => {
+                    obj.toast(e.to_user_facing());
+                    return;
+                }
+            };
         seasons.sort_by_key(|season| {
             (
                 season.index_number.unwrap_or(u32::MAX) == 0,
@@ -602,12 +581,10 @@ impl TuItem {
                 .into_iter()
                 .map(TuItem::from_simple)
                 .collect::<Vec<_>>();
-            if let Some(first_episode) = episode_items.iter().min_by_key(|episode| {
-                (
-                    episode.parent_index_number(),
-                    episode.index_number(),
-                )
-            }) {
+            if let Some(first_episode) = episode_items
+                .iter()
+                .min_by_key(|episode| (episode.parent_index_number(), episode.index_number()))
+            {
                 self.direct_play_video_id(obj, first_episode.clone(), episode_items)
                     .await;
                 return;
@@ -719,16 +696,20 @@ impl TuItem {
     }
 
     pub fn fmt_title(&self) -> String {
-        let title = match self.item_type().as_str() {
+        
+
+        match self.item_type().as_str() {
             TV_CHANNEL => self.fmt_tv_name(),
             EPISODE if let Some(series_name) = self.series_name() => series_name,
             _ => self.name(),
-        };
+        }
+    }
 
+    pub fn fmt_count_badge(&self) -> Option<String> {
         if self.has_unplayed_item() && self.unplayed_item_count() > 0 {
-            format!("{} ({})", title, self.unplayed_item_count())
+            Some(self.unplayed_item_count().to_string())
         } else {
-            title
+            None
         }
     }
 
@@ -831,8 +812,7 @@ impl TuItem {
     }
 
     pub fn can_direct_play(&self) -> bool {
-        self.item_type() == MOVIE
-            || (self.item_type() == EPISODE && self.is_resume())
+        self.item_type() == MOVIE || (self.item_type() == EPISODE && self.is_resume())
     }
 
     pub fn key(&self) -> String {

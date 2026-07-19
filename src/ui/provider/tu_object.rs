@@ -1,18 +1,11 @@
 use std::cell::RefCell;
 
-use gtk::glib::{
-    self,
-    prelude::*,
-    subclass::prelude::*,
-};
+use gtk::glib::{self, prelude::*, subclass::prelude::*};
 
 use super::tu_item::TuItem;
 use crate::{
     client::structs::SimpleListItem,
-    ui::widgets::{
-        lazy_diff_view::OnSameKey,
-        tu_list_item::TuListItem,
-    },
+    ui::widgets::{lazy_diff_view::OnSameKey, tu_list_item::TuListItem},
 };
 
 pub mod imp {

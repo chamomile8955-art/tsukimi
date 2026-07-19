@@ -1,33 +1,12 @@
 use std::{
-    io::{
-        BufRead,
-        BufReader,
-        Cursor,
-        Error as IoError,
-        ErrorKind,
-        Seek,
-    },
+    io::{BufRead, BufReader, Cursor, Error as IoError, ErrorKind, Seek},
     time::Duration,
 };
 
-use gtk::{
-    gdk,
-    gio,
-    glib,
-    graphene,
-    prelude::*,
-    subclass::prelude::*,
-};
+use gtk::{gdk, gio, glib, graphene, prelude::*, subclass::prelude::*};
 use image::{
-    AnimationDecoder,
-    DynamicImage,
-    ImageFormat,
-    ImageReader,
-    codecs::{
-        gif::GifDecoder,
-        png::PngDecoder,
-        webp::WebPDecoder,
-    },
+    AnimationDecoder, DynamicImage, ImageFormat, ImageReader,
+    codecs::{gif::GifDecoder, png::PngDecoder, webp::WebPDecoder},
     flat::SampleLayout,
 };
 use tracing::error;
@@ -44,10 +23,7 @@ pub struct DecodedPaintable {
 
 mod imp {
     use std::{
-        cell::{
-            Cell,
-            RefCell,
-        },
+        cell::{Cell, RefCell},
         marker::PhantomData,
     };
 

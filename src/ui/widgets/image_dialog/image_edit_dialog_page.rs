@@ -2,11 +2,7 @@ use std::io::Read;
 
 use adw::subclass::prelude::*;
 use gettextrs::gettext;
-use gtk::{
-    CompositeTemplate,
-    glib,
-    prelude::*,
-};
+use gtk::{CompositeTemplate, glib, prelude::*};
 
 use gtk::template_callbacks;
 use reqwest::Response;
@@ -14,10 +10,7 @@ use reqwest::Response;
 use crate::{
     client::jellyfin_client::JELLYFIN_CLIENT,
     ui::GlobalToast,
-    utils::{
-        spawn,
-        spawn_tokio,
-    },
+    utils::{spawn, spawn_tokio},
 };
 
 use super::ImageDialogNavigtion;
@@ -25,10 +18,7 @@ use super::ImageDialogNavigtion;
 mod imp {
     use std::cell::OnceCell;
 
-    use glib::{
-        Properties,
-        subclass::InitializingObject,
-    };
+    use glib::{Properties, subclass::InitializingObject};
 
     use crate::ui::widgets::image_dialog::ImageDropRow;
 
@@ -91,10 +81,7 @@ glib::wrapper! {
         @extends gtk::Widget, adw::NavigationPage, @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget;
 }
 
-use anyhow::{
-    Result,
-    anyhow,
-};
+use anyhow::{Result, anyhow};
 
 #[template_callbacks]
 impl ImageDialogEditPage {
@@ -135,10 +122,7 @@ impl ImageDialogEditPage {
             "image/jpeg".to_string()
         };
 
-        use base64::{
-            Engine as _,
-            engine::general_purpose::STANDARD,
-        };
+        use base64::{Engine as _, engine::general_purpose::STANDARD};
         let bytes = STANDARD.encode(bytes);
 
         spawn_tokio(async move {

@@ -1,31 +1,14 @@
 use std::{
     any::Any,
-    cell::{
-        Cell,
-        RefCell,
-    },
-    collections::{
-        HashMap,
-        HashSet,
-    },
+    cell::{Cell, RefCell},
+    collections::{HashMap, HashSet},
     ops::Range,
     rc::Rc,
     time::Duration,
 };
 
-use adw::{
-    CallbackAnimationTarget,
-    Easing,
-    TimedAnimation,
-    prelude::*,
-};
-use gtk::{
-    Orientation,
-    ScrolledWindow,
-    Widget,
-    glib,
-    subclass::prelude::*,
-};
+use adw::{CallbackAnimationTarget, Easing, TimedAnimation, prelude::*};
+use gtk::{Orientation, ScrolledWindow, Widget, glib, subclass::prelude::*};
 
 mod animated_bin;
 mod virtual_viewport;

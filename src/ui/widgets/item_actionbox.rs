@@ -1,25 +1,10 @@
 use adw::subclass::prelude::*;
-use gtk::{
-    CompositeTemplate,
-    gio,
-    glib,
-    prelude::*,
-    template_callbacks,
-};
+use gtk::{CompositeTemplate, gio, glib, prelude::*, template_callbacks};
 
-use super::{
-    star_toggle::StarToggle,
-    utils::GlobalToast,
-};
+use super::{star_toggle::StarToggle, utils::GlobalToast};
 use crate::{
-    client::{
-        error::UserFacingError,
-        jellyfin_client::JELLYFIN_CLIENT,
-    },
-    utils::{
-        spawn,
-        spawn_tokio,
-    },
+    client::{error::UserFacingError, jellyfin_client::JELLYFIN_CLIENT},
+    utils::{spawn, spawn_tokio},
 };
 
 mod imp {
@@ -130,8 +115,7 @@ impl ItemActionsBox {
                 self,
                 move |_, _, _| {
                     use crate::{
-                        insert_editm_dialog,
-                        ui::widgets::metadata_dialog::MetadataDialog,
+                        insert_editm_dialog, ui::widgets::metadata_dialog::MetadataDialog,
                     };
                     let id = obj.target_id();
                     if let Some(id) = id {
@@ -146,10 +130,7 @@ impl ItemActionsBox {
                 #[weak(rename_to = obj)]
                 self,
                 move |_, _, _| {
-                    use crate::{
-                        insert_editm_dialog,
-                        ui::widgets::image_dialog::ImageDialog,
-                    };
+                    use crate::{insert_editm_dialog, ui::widgets::image_dialog::ImageDialog};
                     let id = obj.target_id();
                     if let Some(id) = id {
                         let dialog = ImageDialog::new(&id);

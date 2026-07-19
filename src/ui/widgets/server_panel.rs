@@ -1,33 +1,12 @@
-use adw::{
-    prelude::*,
-    subclass::prelude::*,
-};
-use chrono::{
-    DateTime,
-    Datelike,
-    Timelike,
-    Utc,
-};
+use adw::{prelude::*, subclass::prelude::*};
+use chrono::{DateTime, Datelike, Timelike, Utc};
 use gettextrs::gettext;
-use gtk::{
-    Button,
-    CompositeTemplate,
-    Image,
-    glib,
-    template_callbacks,
-};
+use gtk::{Button, CompositeTemplate, Image, glib, template_callbacks};
 
 use crate::{
-    client::{
-        error::UserFacingError,
-        jellyfin_client::JELLYFIN_CLIENT,
-    },
-    fraction,
-    fraction_reset,
-    utils::{
-        spawn,
-        spawn_tokio,
-    },
+    client::{error::UserFacingError, jellyfin_client::JELLYFIN_CLIENT},
+    fraction, fraction_reset,
+    utils::{spawn, spawn_tokio},
 };
 
 use super::utils::GlobalToast;

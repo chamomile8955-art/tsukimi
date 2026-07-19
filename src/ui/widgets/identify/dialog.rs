@@ -1,40 +1,24 @@
 use std::collections::HashMap;
 
-use adw::{
-    prelude::*,
-    subclass::prelude::*,
-};
+use adw::{prelude::*, subclass::prelude::*};
 use gettextrs::gettext;
-use gtk::{
-    glib,
-    template_callbacks,
-};
+use gtk::{glib, template_callbacks};
 
 use crate::{
     client::{
         error::UserFacingError,
         jellyfin_client::JELLYFIN_CLIENT,
-        structs::{
-            ExternalIdInfo,
-            RemoteSearchInfo,
-            SearchInfo,
-        },
+        structs::{ExternalIdInfo, RemoteSearchInfo, SearchInfo},
     },
     ui::GlobalToast,
-    utils::{
-        spawn,
-        spawn_tokio,
-    },
+    utils::{spawn, spawn_tokio},
 };
 
 mod imp {
     use std::cell::OnceCell;
 
     use glib::subclass::InitializingObject;
-    use gtk::{
-        CompositeTemplate,
-        glib,
-    };
+    use gtk::{CompositeTemplate, glib};
 
     use super::*;
 

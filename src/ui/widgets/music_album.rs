@@ -1,71 +1,38 @@
 use std::collections::BTreeMap;
 
-use adw::{
-    prelude::*,
-    subclass::prelude::*,
-};
+use adw::{prelude::*, subclass::prelude::*};
 use gettextrs::gettext;
-use gtk::{
-    CompositeTemplate,
-    gio,
-    gio::ListStore,
-    glib,
-    template_callbacks,
-};
+use gtk::{CompositeTemplate, gio, gio::ListStore, glib, template_callbacks};
 
 use super::{
     song_widget::format_duration,
-    utils::{
-        GlobalToast,
-        run_time_ticks_to_label,
-    },
+    utils::{GlobalToast, run_time_ticks_to_label},
 };
 use crate::{
     bing_song_model,
     client::{
         error::UserFacingError,
         jellyfin_client::JELLYFIN_CLIENT,
-        structs::{
-            List,
-            SongWidgetView,
-        },
+        structs::{List, SongWidgetView},
     },
     ui::{
-        provider::{
-            core_song::CoreSong,
-            tu_item::TuItem,
-        },
-        widgets::song_widget::{
-            SongWidget,
-            State,
-        },
+        provider::{core_song::CoreSong, tu_item::TuItem},
+        widgets::song_widget::{SongWidget, State},
     },
-    utils::{
-        CacheEvent,
-        CachePolicy,
-        fetch_with_cache,
-        get_image_with_cache,
-    },
+    utils::{CacheEvent, CachePolicy, fetch_with_cache, get_image_with_cache},
 };
 
 pub(crate) mod imp {
-    use std::cell::{
-        OnceCell,
-        RefCell,
-    };
+    use std::cell::{OnceCell, RefCell};
 
-    use glib::{
-        SignalHandlerId,
-        subclass::InitializingObject,
-    };
+    use glib::{SignalHandlerId, subclass::InitializingObject};
 
     use super::*;
     use crate::{
         ui::{
             provider::tu_item::TuItem,
             widgets::{
-                hortu_scrolled::HortuScrolled,
-                item_actionbox::ItemActionsBox,
+                hortu_scrolled::HortuScrolled, item_actionbox::ItemActionsBox,
                 star_toggle::StarToggle,
             },
         },

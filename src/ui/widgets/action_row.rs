@@ -1,16 +1,10 @@
 use adw::subclass::prelude::*;
-use gtk::{
-    CompositeTemplate,
-    glib,
-};
+use gtk::{CompositeTemplate, glib};
 
 mod imp {
     use std::cell::Cell;
 
-    use glib::{
-        Properties,
-        subclass::InitializingObject,
-    };
+    use glib::{Properties, subclass::InitializingObject};
     use gtk::prelude::*;
 
     use super::*;

@@ -1,30 +1,17 @@
-use adw::{
-    prelude::*,
-    subclass::prelude::*,
-};
-use gtk::{
-    CompositeTemplate,
-    glib,
-    template_callbacks,
-};
+use adw::{prelude::*, subclass::prelude::*};
+use gtk::{CompositeTemplate, glib, template_callbacks};
 
 use crate::{
     client::structs::SimpleListItem,
     ui::{
         provider::{
-            tu_item::{
-                PreferPoster,
-                PreferSize,
-            },
+            tu_item::{PreferPoster, PreferSize},
             tu_object::TuObject,
         },
         widgets::{
             fix::ScrolledWindowFixExt,
             lazy_diff_view::LazyDiffView,
-            tu_list_item::{
-                TuListItem,
-                imp::PosterType,
-            },
+            tu_list_item::{TuListItem, imp::PosterType},
         },
     },
 };
@@ -71,11 +58,7 @@ pub fn resolve_prefer_size(unify_size: UnifySize, items: &[SimpleListItem]) -> P
 
 mod imp {
     use std::{
-        cell::{
-            Cell,
-            OnceCell,
-            RefCell,
-        },
+        cell::{Cell, OnceCell, RefCell},
         collections::HashMap,
     };
 

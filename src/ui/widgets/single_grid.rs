@@ -1,82 +1,43 @@
-use std::{
-    future::Future,
-    sync::atomic::Ordering,
-};
+use std::{future::Future, sync::atomic::Ordering};
 
 use adw::prelude::*;
 use anyhow::Result;
 use glib::Object;
-use gtk::{
-    SignalListItemFactory,
-    gio,
-    glib,
-    subclass::prelude::*,
-};
-use imp::{
-    ListType,
-    ViewType,
-};
+use gtk::{SignalListItemFactory, gio, glib, subclass::prelude::*};
+use imp::{ListType, ViewType};
 
 use super::{
-    filter_panel::{
-        FilterPanelDialog,
-        FiltersList,
-    },
+    filter_panel::{FilterPanelDialog, FiltersList},
     hortu_scrolled::UnifySize,
     tu_list_item::imp::PosterType,
     tu_overview_item::imp::ViewGroup,
-    utils::{
-        GlobalToast,
-        TuItemBuildExt,
-    },
+    utils::{GlobalToast, TuItemBuildExt},
 };
 use crate::{
     client::{
         error::UserFacingError,
-        structs::{
-            List,
-            SimpleListItem,
-        },
+        structs::{List, SimpleListItem},
     },
     ui::provider::tu_item::PreferPoster,
-    utils::{
-        spawn,
-        spawn_tokio,
-    },
+    utils::{spawn, spawn_tokio},
 };
 
 pub mod imp {
 
     use std::{
-        cell::{
-            Cell,
-            RefCell,
-        },
+        cell::{Cell, RefCell},
         fmt::Display,
-        sync::{
-            Arc,
-            OnceLock,
-            atomic::AtomicBool,
-        },
+        sync::{Arc, OnceLock, atomic::AtomicBool},
     };
 
-    use glib::subclass::{
-        InitializingObject,
-        Signal,
-    };
-    use gtk::{
-        CompositeTemplate,
-        glib,
-        prelude::*,
-        subclass::prelude::*,
-    };
+    use glib::subclass::{InitializingObject, Signal};
+    use gtk::{CompositeTemplate, glib, prelude::*, subclass::prelude::*};
     use std::cell::OnceCell;
 
     use crate::ui::{
         models::SETTINGS,
         widgets::{
-            filter_panel::FilterPanelDialog,
-            tu_list_item::imp::PosterType,
+            filter_panel::FilterPanelDialog, tu_list_item::imp::PosterType,
             tuview_scrolled::TuViewScrolled,
         },
     };

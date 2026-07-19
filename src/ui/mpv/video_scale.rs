@@ -1,19 +1,11 @@
-use gtk::{
-    glib,
-    prelude::*,
-    subclass::prelude::*,
-};
+use gtk::{glib, prelude::*, subclass::prelude::*};
 
 use super::tsukimi_mpv::ChapterList;
 
 mod imp {
     use std::cell::Cell;
 
-    use gtk::{
-        glib,
-        prelude::*,
-        subclass::prelude::*,
-    };
+    use gtk::{glib, prelude::*, subclass::prelude::*};
 
     use crate::ui::mpv::mpvglarea::MPVGLArea;
 

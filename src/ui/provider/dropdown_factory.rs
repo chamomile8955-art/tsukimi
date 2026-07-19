@@ -1,8 +1,5 @@
 use derive_builder::Builder;
-use gtk::{
-    glib,
-    prelude::*,
-};
+use gtk::{glib, prelude::*};
 
 #[derive(Builder, Default, Clone, PartialEq, Debug)]
 #[builder(default)]
