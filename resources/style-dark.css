@@ -151,6 +151,10 @@
 	box-shadow: 0 3px 12px rgba(0, 0, 0, 0.34);
 }
 
+.app-window label.media-count-badge.media-count-badge-circle {
+	padding: 0;
+}
+
 .people-section {
 	margin-top: 8px;
 	margin-bottom: 22px;
@@ -789,43 +793,21 @@ menubutton.glass-button > button:focus-visible {
 	background-color: rgba(255, 255, 255, 0.13);
 }
 
-.app-window .media-toolbar-actions {
-	min-height: 46px;
-}
-
-.app-window .media-toolbar-actions .media-view-switch,
-.app-window .media-toolbar-actions .media-sort-order {
-	min-height: 44px;
-	padding: 4px;
-	border-color: rgba(255, 255, 255, 0.18);
-	background-color: rgba(45, 45, 51, 0.92);
-}
-
 .app-window .media-toolbar-actions .media-view-switch > button,
-.app-window .media-toolbar-actions .media-sort-order > button {
-	min-width: 38px;
+.app-window .media-toolbar-actions .media-view-switch button,
+.app-window .media-toolbar-actions .media-view-switch toggle,
+.app-window .media-toolbar-actions .media-sort-order > button,
+.app-window .media-toolbar-actions .media-sort-order button,
+.app-window .media-toolbar-actions .media-sort-order toggle {
+	min-width: 36px;
 	min-height: 36px;
 	padding: 0;
+	border-radius: 999px;
 	-gtk-icon-size: 18px;
 }
 
-.app-window dropdown.media-sort-dropdown,
 .app-window dropdown.media-sort-dropdown > button {
-	min-height: 44px;
-	padding: 0 12px;
-	border: 1px solid rgba(255, 255, 255, 0.18);
 	border-radius: 999px;
-	background-color: rgba(45, 45, 51, 0.92);
-	background-image: none;
-	box-shadow: none;
-}
-
-.app-window dropdown.media-sort-dropdown > button:hover {
-	background-color: #383840;
-}
-
-.app-window dropdown.media-sort-dropdown > button:active {
-	background-color: #42424b;
 }
 
 .app-window .media-toolbar-summary {
@@ -1041,36 +1023,38 @@ menubutton.glass-button > button:focus-visible {
 
 .app-window .poster-info-overlay .hero-action-group.control-group {
 	min-height: 52px;
-	padding: 4px;
-	border: 1px solid rgba(255, 255, 255, 0.36);
-	border-radius: 999px;
-	background-color: rgba(255, 255, 255, 0.88);
+	padding: 0;
+	border: none;
+	border-radius: 0;
+	background-color: transparent;
 	background-image: none;
-	box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
+	box-shadow: none;
 }
 
 .app-window .poster-info-overlay .hero-action-group > togglebutton.hero-favorite-button,
 .app-window .poster-info-overlay .hero-action-group > menubutton.hero-more-button > button {
-	min-width: 44px;
-	min-height: 44px;
+	min-width: 52px;
+	min-height: 52px;
 	padding: 0;
-	border: none;
+	border: 1px solid rgba(255, 255, 255, 0.42);
 	border-radius: 999px;
-	background-color: transparent;
+	background-color: rgba(255, 255, 255, 0.94);
 	background-image: none;
-	color: #23212b;
-	box-shadow: none;
+	color: #17161c;
+	box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
 }
 
 .app-window .poster-info-overlay .hero-action-group > togglebutton.hero-favorite-button:hover,
 .app-window .poster-info-overlay .hero-action-group > menubutton.hero-more-button > button:hover {
-	background-color: rgba(0, 0, 0, 0.08);
+	background-color: #ffffff;
+	border-color: rgba(255, 255, 255, 0.62);
 }
 
 .app-window .poster-info-overlay .hero-action-group > togglebutton.hero-favorite-button:active,
 .app-window .poster-info-overlay .hero-action-group > menubutton.hero-more-button > button:active,
 .app-window .poster-info-overlay .hero-action-group > menubutton.hero-more-button > button:checked {
-	background-color: rgba(0, 0, 0, 0.16);
+	background-color: rgba(224, 222, 232, 0.96);
+	border-color: rgba(255, 255, 255, 0.36);
 }
 
 .app-window .poster-info-overlay .hero-action-group > togglebutton.hero-favorite-button:checked {
@@ -1393,27 +1377,36 @@ dialog.add-server-dialog sheet {
 	color: @window_fg_color;
 }
 
-/* Standalone server-type selector in the add-server form. */
+/* Keep the server-type selector visually inside its entry row instead of
+ * drawing a second, mismatched button surface around “Emby/Jellyfin”. */
 .add-server-dialog dropdown.server-type-selector,
-.add-server-dialog dropdown.server-type-selector > button {
-	min-width: 132px;
-	min-height: 38px;
-	padding: 0 10px;
-	border-radius: 999px;
-	background-color: @tsukimi_dark_panel_raised;
+.add-server-dialog dropdown.server-type-selector > button,
+.add-server-dialog dropdown.server-type-selector button,
+.add-server-dialog dropdown.server-type-selector button > *,
+.add-server-dialog dropdown.server-type-selector box,
+.add-server-dialog dropdown.server-type-selector stack {
+	background-color: transparent;
 	background-image: none;
-	border: 1px solid @tsukimi_dark_border;
+	border: none;
 	box-shadow: none;
-	transition: background-color 120ms ease-out, border-color 120ms ease-out;
 }
 
-.add-server-dialog dropdown.server-type-selector > button:hover {
-	background-color: #383840;
+.add-server-dialog dropdown.server-type-selector label,
+.add-server-dialog dropdown.server-type-selector image {
+	background-color: transparent;
+	background-image: none;
+}
+
+.add-server-dialog dropdown.server-type-selector > button:hover,
+.add-server-dialog dropdown.server-type-selector button:hover {
+	background-color: @glass_hover;
 }
 
 .add-server-dialog dropdown.server-type-selector > button:active,
-.add-server-dialog dropdown.server-type-selector > button:checked {
-	background-color: #42424b;
+.add-server-dialog dropdown.server-type-selector > button:checked,
+.add-server-dialog dropdown.server-type-selector button:active,
+.add-server-dialog dropdown.server-type-selector button:checked {
+	background-color: @glass_pressed;
 }
 
 .account-settings .boxed-list,

@@ -192,8 +192,6 @@ pub mod imp {
         #[template_child]
         pub count: TemplateChild<gtk::Label>,
         #[template_child]
-        pub postmenu: TemplateChild<gtk::MenuButton>,
-        #[template_child]
         pub dropdown: TemplateChild<gtk::DropDown>,
         #[template_child]
         pub adgroup: TemplateChild<adw::ToggleGroup>,
@@ -387,43 +385,29 @@ impl SingleGrid {
     pub fn handle_type(&self) {
         let imp = self.imp();
         match self.list_type() {
-            ListType::All => {
-                imp.postmenu.set_visible(true);
-            }
+            ListType::All => {}
             ListType::Resume | ListType::NextUp => {
-                imp.postmenu.set_visible(false);
                 imp.dropdown.set_visible(false);
                 imp.adgroup.set_visible(false);
                 imp.glgroup.set_visible(false);
                 imp.filter.set_visible(false);
             }
             ListType::BoxSet => {
-                imp.postmenu.set_visible(false);
                 imp.filter.set_visible(false);
             }
             ListType::Tags => {
-                imp.postmenu.set_visible(false);
                 imp.dropdown.set_visible(false);
                 imp.adgroup.set_visible(false);
                 imp.glgroup.set_visible(false);
                 imp.filter.set_visible(false);
             }
             ListType::Genres => {
-                imp.postmenu.set_visible(false);
                 imp.dropdown.set_visible(false);
                 imp.adgroup.set_visible(false);
                 imp.glgroup.set_visible(false);
                 imp.filter.set_visible(false);
             }
-            ListType::Liked => {
-                imp.postmenu.set_visible(false);
-            }
-            ListType::Folder => {
-                imp.postmenu.set_visible(false);
-            }
-            ListType::None => {
-                imp.postmenu.set_visible(false);
-            }
+            ListType::Liked | ListType::Folder | ListType::None => {}
         }
     }
 

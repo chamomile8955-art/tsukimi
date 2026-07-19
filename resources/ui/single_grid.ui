@@ -30,27 +30,6 @@
                   </object>
                 </child>
                 <child>
-                  <object class="GtkMenuButton" id="postmenu">
-                    <property name="halign">start</property>
-                    <property name="valign">center</property>
-                    <property name="tooltip-text" translatable="yes">Change Poster</property>
-                    <property name="menu-model">poster-menu</property>
-                    <property name="direction">GTK_ARROW_RIGHT</property>
-                    <property name="child">
-                      <object class="AdwButtonContent">
-                        <property name="icon-name">view-grid-symbolic</property>
-                        <property name="label" translatable="yes">View</property>
-                        <property name="use-underline">True</property>
-                      </object>
-                    </property>
-                    <style>
-                      <class name="flat"/>
-                      <class name="glass-button"/>
-                      <class name="media-poster-menu"/>
-                    </style>
-                  </object>
-                </child>
-                <child>
                   <object class="GtkButton" id="filter">
                     <property name="icon-name">funnel-outline-symbolic</property>
                     <property name="tooltip-text" translatable="yes">Filter Panel</property>

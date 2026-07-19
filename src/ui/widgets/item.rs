@@ -762,8 +762,17 @@ impl ItemPage {
                                     continue;
                                 };
 
-                                lang_list
-                                    .push((stream.index, dl.line1.to_owned().unwrap_or_default()));
+                                let match_text = [
+                                    stream.display_title.as_deref(),
+                                    stream.title.as_deref(),
+                                    stream.language.as_deref(),
+                                    stream.display_language.as_deref(),
+                                ]
+                                .into_iter()
+                                .flatten()
+                                .collect::<Vec<_>>()
+                                .join(" ");
+                                lang_list.push((stream.index, match_text));
                                 let object = glib::BoxedAnyObject::new(dl);
                                 sstore.append(&object);
                             }
@@ -780,7 +789,7 @@ impl ItemPage {
             }
         ));
 
-        for media in &playbackinfo.media_sources {
+        for (index, media) in playbackinfo.media_sources.iter().enumerate() {
             let line2 = media
                 .bit_rate
                 .map(|bit_rate| format!("{:.2} Kbps", bit_rate as f64 / 1_000.0))
@@ -791,6 +800,7 @@ impl ItemPage {
                 .line2(Some(line2))
                 .url(play_url)
                 .id(Some(media.id.to_owned()))
+                .index(Some(index as i64))
                 .build()
             else {
                 continue;
@@ -1405,8 +1415,8 @@ impl ItemPage {
         let (sub_index, sub_lang) = sub_dl
             .map(|sub_dl| {
                 (
-                    sub_dl.index.unwrap_or_default(),
-                    sub_dl.sub_lang.to_owned().unwrap_or_default(),
+                    sub_dl.index,
+                    sub_dl.sub_lang.to_owned(),
                 )
             })
             .unwrap_or_default();
@@ -1584,8 +1594,8 @@ pub fn dt(date: Option<chrono::DateTime<Utc>>) -> String {
 
 #[derive(Debug, Clone)]
 pub struct SelectedVideoSubInfo {
-    pub sub_lang: String,
-    pub sub_index: i64,
+    pub sub_lang: Option<String>,
+    pub sub_index: Option<i64>,
     pub video_index: i64,
     pub media_source_id: String,
 }

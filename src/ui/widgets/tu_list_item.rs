@@ -419,8 +419,14 @@ impl TuListItem {
 
         if let Some(count_badge) = item.fmt_count_badge() {
             imp.count_badge.set_text(&count_badge);
+            if count_badge.chars().count() <= 2 {
+                imp.count_badge.add_css_class("media-count-badge-circle");
+            } else {
+                imp.count_badge.remove_css_class("media-count-badge-circle");
+            }
             imp.count_badge.set_visible(true);
         } else {
+            imp.count_badge.remove_css_class("media-count-badge-circle");
             imp.count_badge.set_visible(false);
         }
 

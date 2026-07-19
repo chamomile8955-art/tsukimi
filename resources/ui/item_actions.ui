@@ -3,7 +3,7 @@
   <requires lib="gtk" version="4.0" />
   <template parent="GtkBox" class="ItemActionsBox">
     <property name="orientation">horizontal</property>
-    <property name="spacing">0</property>
+    <property name="spacing">10</property>
     <property name="valign">center</property>
     <style>
       <class name="control-group"/>
@@ -11,8 +11,8 @@
     </style>
     <child>
       <object class="StarToggle" id="favourite_button">
-        <property name="width-request">40</property>
-        <property name="height-request">40</property>
+        <property name="width-request">52</property>
+        <property name="height-request">52</property>
         <property name="icon-name">non-starred-symbolic</property>
         <property name="valign">center</property>
         <signal name="clicked" handler="on_favourite_button_toggled" swapped="yes" />
@@ -26,8 +26,8 @@
     </child>
     <child>
       <object class="GtkMenuButton" id="menu_button">
-        <property name="width-request">40</property>
-        <property name="height-request">40</property>
+        <property name="width-request">52</property>
+        <property name="height-request">52</property>
         <property name="halign">start</property>
         <property name="valign">center</property>
         <property name="focus_on_click">False</property>

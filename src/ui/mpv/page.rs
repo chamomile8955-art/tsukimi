@@ -573,7 +573,7 @@ impl MPVPage {
                 imp.network_speed_label
                     .set_text(&gettext("Initializing..."));
 
-                let sub_stream_index = selected.as_ref().map(|s| s.sub_index);
+                let sub_stream_index = selected.as_ref().and_then(|s| s.sub_index);
                 let media_source_id = selected.as_ref().map(|s| s.media_source_id.clone());
                 let id_clone = id.to_owned();
                 let playback_info = match spawn_tokio(async move {
@@ -599,7 +599,14 @@ impl MPVPage {
                 };
 
                 let media_source =
-                    if let Some(video_stream_index) = selected.as_ref().map(|s| s.video_index) {
+                    if let Some(media_source_id) = selected.as_ref().map(|s| &s.media_source_id)
+                        && let Some(media_source) = playback_info
+                            .media_sources
+                            .iter()
+                            .find(|source| source.id == *media_source_id)
+                    {
+                        Some(media_source)
+                    } else if let Some(video_stream_index) = selected.as_ref().map(|s| s.video_index) {
                         playback_info.media_sources.get(video_stream_index as usize)
                     } else {
                         let video_version_list: Vec<_> = playback_info
@@ -637,30 +644,51 @@ impl MPVPage {
                 imp.back.replace(Some(back));
 
                 let media_stream =
-                    if let Some(sub_stream_index) = selected.as_ref().map(|s| s.sub_index) {
-                        media_source.media_streams.get(sub_stream_index as usize)
+                    if let Some(sub_stream_index) = selected.as_ref().and_then(|s| s.sub_index) {
+                        media_source
+                            .media_streams
+                            .iter()
+                            .find(|stream| stream.index == sub_stream_index)
                     } else {
                         let sub_version_list: Vec<_> = media_source
                             .media_streams
                             .iter()
                             .filter(|stream| stream.stream_type == "Subtitle")
                             .map(|stream| {
+                                let match_text = [
+                                    stream.display_title.as_deref(),
+                                    stream.title.as_deref(),
+                                    stream.language.as_deref(),
+                                    stream.display_language.as_deref(),
+                                ]
+                                .into_iter()
+                                .flatten()
+                                .collect::<Vec<_>>()
+                                .join(" ");
                                 (
                                     stream.index,
-                                    stream.display_title.to_owned().unwrap_or_default(),
+                                    match_text,
                                 )
                             })
                             .collect();
 
                         make_subtitle_version_choice(sub_version_list)
-                            .and_then(|index| media_source.media_streams.get(index.0 as usize))
+                            .and_then(|index| {
+                                media_source
+                                    .media_streams
+                                    .iter()
+                                    .find(|stream| stream.index == index.0)
+                            })
                     };
 
-                if let Some(slang) = selected.map(|s| s.sub_lang) {
+                if let Some(slang) = selected
+                    .as_ref()
+                    .and_then(|s| s.sub_lang.clone())
+                    .filter(|slang| !slang.is_empty())
+                {
                     imp.video.set_slang(slang);
                 } else {
-                    imp.video
-                        .set_slang(SETTINGS.mpv_subtitle_preferred_lang_str());
+                    imp.video.set_slang("chs".to_string());
                 }
 
                 let sub_url = match media_stream {

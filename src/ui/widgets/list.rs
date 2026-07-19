@@ -110,11 +110,8 @@ impl ListPage {
         let pages = [
             ("all", &gettext("All"), ListType::All),
             ("resume", &gettext("Resume"), ListType::Resume),
-            ("boxset", &gettext("BoxSet"), ListType::BoxSet),
-            ("tags", &gettext("Tags"), ListType::Tags),
             ("genres", &gettext("Genres"), ListType::Genres),
             ("liked", &gettext("Liked"), ListType::Liked),
-            ("folder", &gettext("Folder"), ListType::Folder),
         ];
 
         for (name, title, list_type) in pages {

@@ -209,6 +209,7 @@
                                     <child>
                                       <object class="GtkBox" id="dropdown_box">
                                         <property name="orientation">vertical</property>
+                                        <property name="visible">False</property>
                                         <property name="valign">end</property>
                                         <property name="spacing">6</property>
                                         <property name="margin-end">50</property>

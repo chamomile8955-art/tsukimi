@@ -56,8 +56,8 @@
                                           <object class="AdwPreferencesGroup">
                                             <property name="description" translatable="yes">请在下方填写服务器信息。</property>
                                             <child>
-                                              <object class="AdwActionRow">
-                                                <property name="title" translatable="yes">服务器类型</property>
+                                              <object class="AdwEntryRow" id="servername_entry">
+                                                <property name="title" translatable="yes">名称</property>
                                                 <child type="suffix">
                                                   <object class="GtkDropDown" id="server_type">
                                                     <property name="valign">center</property>
@@ -74,11 +74,6 @@
                                                     </property>
                                                   </object>
                                                 </child>
-                                              </object>
-                                            </child>
-                                            <child>
-                                              <object class="AdwEntryRow" id="servername_entry">
-                                                <property name="title" translatable="yes">名称</property>
                                               </object>
                                             </child>
                                             <child>
