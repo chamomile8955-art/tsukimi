@@ -18,7 +18,7 @@
 }
 
 .item-hero {
-	min-height: 740px;
+	min-height: 880px;
 }
 
 .media-info-source {
@@ -444,6 +444,21 @@ window.app-window > contents,
 	border: none;
 	border-bottom: none;
 	box-shadow: none;
+}
+
+.app-window.detail-hero-mode .main-header,
+.app-window.detail-hero-mode headerbar.main-header {
+	background-color: transparent;
+	background-image: none;
+	box-shadow: none;
+}
+
+.app-window.detail-hero-mode .main-content-pane {
+	margin-top: -76px;
+}
+
+.app-window.detail-hero-mode .top-navigation {
+	opacity: 0;
 }
 
 .app-window .main-toolbar {
@@ -1574,7 +1589,7 @@ window.app-window.compact-1080 .top-navigation {
 
 window.app-window.compact-1080 .item-hero,
 window.app-window.compact-1080.detail-hero-mode .item-hero {
-	min-height: 650px;
+	min-height: 820px;
 }
 
 window.app-window.compact-1080 .media-library-content {

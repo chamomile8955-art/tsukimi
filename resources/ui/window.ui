@@ -82,7 +82,7 @@
                                       <class name="source-toolbar"/>
                                     </style>
                                     <child type="top">
-                                      <object class="AdwHeaderBar" id="main_header">
+                                      <object class="AdwHeaderBar" id="source_header">
                                         <property name="show-start-title-buttons">false</property>
                                         <property name="show-end-title-buttons">false</property>
                                         <style>
@@ -183,7 +183,7 @@
                                       <class name="main-toolbar"/>
                                     </style>
                                     <child type="top">
-                                      <object class="AdwHeaderBar">
+                                      <object class="AdwHeaderBar" id="main_header">
                                         <property name="show-back-button">False</property>
                                         <property name="show-start-title-buttons">False</property>
                                         <property name="show-end-title-buttons">False</property>

@@ -1424,7 +1424,11 @@ impl Window {
 
     fn set_detail_hero_mode(&self, enabled: bool) {
         let imp = self.imp();
-        imp.main_header.set_visible(!enabled);
+        imp.main_header.set_visible(true);
+        imp.home_nav.set_visible(!enabled);
+        imp.recommend_nav.set_visible(!enabled);
+        imp.favorites_nav.set_visible(!enabled);
+        imp.search_nav.set_visible(!enabled);
         if enabled {
             self.add_css_class("detail-hero-mode");
         } else {
