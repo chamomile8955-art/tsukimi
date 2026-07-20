@@ -102,6 +102,8 @@
                         <child>
                           <object class="GtkButton" id="_back_button">
                             <property name="icon-name">arrow4-left-symbolic</property>
+                            <property name="height-request">52</property>
+                            <property name="width-request">52</property>
                             <property name="valign">center</property>
                             <signal name="clicked" handler="on_stop_clicked" swapped="yes" />
                             <style>
@@ -158,6 +160,8 @@
                         <child>
                           <object class="GtkButton" id="player_settings_menu_button">
                             <property name="valign">center</property>
+                            <property name="height-request">52</property>
+                            <property name="width-request">52</property>
                             <property name="icon-name">settings-symbolic</property>
                             <property name="tooltip-text" translatable="yes">Settings</property>
                             <property name="action-name">mpv.show-settings</property>
@@ -219,6 +223,8 @@
                               <object class="GtkButton" id="_previous_button">
                                 <property name="icon-name">media-skip-backward-symbolic</property>
                                 <property name="action-name">mpv.previous-video</property>
+                                <property name="height-request">60</property>
+                                <property name="width-request">60</property>
                                 <property name="valign">center</property>
                                 <style>
                                   <class name="flat" />
@@ -255,6 +261,8 @@
                               <object class="GtkButton" id="_next_button">
                                 <property name="icon-name">media-skip-forward-symbolic</property>
                                 <property name="action-name">mpv.next-video</property>
+                                <property name="height-request">60</property>
+                                <property name="width-request">60</property>
                                 <property name="valign">center</property>
                                 <style>
                                   <class name="flat" />
@@ -300,6 +308,8 @@
                                   <object class="GtkMenuButton" id="audio_tracks_menu_button">
                                     <property name="popover">audio_tracks_popover</property>
                                     <property name="icon-name">audio-x-generic-symbolic</property>
+                                    <property name="height-request">52</property>
+                                    <property name="width-request">52</property>
                                     <property name="valign">center</property>
                                     <style>
                                       <class name="flat" />
@@ -312,6 +322,8 @@
                                   <object class="GtkMenuButton" id="subtitle_tracks_menu_button">
                                     <property name="popover">subtitle_tracks_popover</property>
                                     <property name="icon-name">media-view-subtitles-symbolic</property>
+                                    <property name="height-request">52</property>
+                                    <property name="width-request">52</property>
                                     <property name="valign">center</property>
                                     <style>
                                       <class name="flat" />
@@ -324,6 +336,8 @@
                                     <object class="GtkMenuButton" id="volume_button">
                                         <property name="popover">volume_adj_popover</property>
                                         <property name="icon-name">audio-volume-high-symbolic</property>
+                                        <property name="height-request">52</property>
+                                        <property name="width-request">52</property>
                                         <property name="valign">center</property>
                                         <style>
                                             <class name="flat" />
@@ -336,6 +350,8 @@
                                   <object class="GtkButton">
                                     <property name="icon-name">view-dual-symbolic</property>
                                     <property name="action-name">mpv.show-playlist</property>
+                                    <property name="height-request">52</property>
+                                    <property name="width-request">52</property>
                                     <property name="valign">center</property>
                                     <style>
                                       <class name="flat" />
@@ -349,6 +365,8 @@
                                     <property name="visible" bind-source="MPVPage" bind-property="fullscreened" bind-flags="sync-create|invert-boolean"/>
                                     <property name="icon-name">view-fullscreen-symbolic</property>
                                     <property name="action-name">win.toggle-fullscreen</property>
+                                    <property name="height-request">52</property>
+                                    <property name="width-request">52</property>
                                     <property name="valign">center</property>
                                     <accessibility>
                                         <property name="label" translatable="yes">Fullscreen</property>
@@ -365,6 +383,8 @@
                                     <property name="visible" bind-source="MPVPage" bind-property="fullscreened" bind-flags="sync-create"/>
                                     <property name="icon-name">view-restore-symbolic</property>
                                     <property name="action-name">win.toggle-fullscreen</property>
+                                    <property name="height-request">52</property>
+                                    <property name="width-request">52</property>
                                     <property name="valign">center</property>
                                     <accessibility>
                                       <property name="label" translatable="yes">Exit Fullscreen</property>

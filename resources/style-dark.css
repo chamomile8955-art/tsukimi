@@ -1585,3 +1585,170 @@ window.app-window.compact-1080 .mpv-player button.mpv-play-button {
 	min-width: 48px;
 	min-height: 48px;
 }
+
+/* Final dark-mode readability guard for floating surfaces.  The light
+ * stylesheet also styles generated popovers/toasts, so keep this explicit
+ * instead of relying on theme aliases that can resolve differently in
+ * detached popup windows. */
+popover.menu contents > *,
+popover.floating-menu contents > *,
+popover.glass-popover contents > *,
+popover.menu.glass-popover contents > *,
+popover.floating-dialog contents > *,
+popover.menu.floating-dialog contents > * {
+	background-color: #242428;
+	border-color: rgba(255, 255, 255, 0.18);
+	color: #f6f3ff;
+}
+
+popover.menu label,
+popover.menu image,
+popover.menu modelbutton,
+popover.menu modelbutton label,
+popover.menu modelbutton image,
+popover.floating-menu label,
+popover.floating-menu image,
+popover.floating-menu modelbutton,
+popover.floating-menu modelbutton label,
+popover.floating-menu modelbutton image,
+popover.glass-popover label,
+popover.glass-popover image,
+popover.glass-popover modelbutton,
+popover.glass-popover modelbutton label,
+popover.glass-popover modelbutton image,
+popover.floating-dialog label,
+popover.floating-dialog image,
+popover.floating-dialog modelbutton,
+popover.floating-dialog modelbutton label,
+popover.floating-dialog modelbutton image {
+	color: #f6f3ff;
+}
+
+popover.menu modelbutton:hover,
+popover.floating-menu modelbutton:hover,
+popover.glass-popover modelbutton:hover,
+popover.floating-dialog modelbutton:hover {
+	background-color: rgba(255, 255, 255, 0.12);
+	color: #ffffff;
+}
+
+popover.menu modelbutton:active,
+popover.floating-menu modelbutton:active,
+popover.glass-popover modelbutton:active,
+popover.floating-dialog modelbutton:active {
+	background-color: rgba(255, 255, 255, 0.18);
+	color: #ffffff;
+}
+
+toast,
+.app-window toast,
+.app-window toastoverlay toast,
+.glass-dialog toast,
+.solid-dialog toast,
+.floating-dialog toast {
+	background-color: #242428;
+	border-color: rgba(255, 255, 255, 0.18);
+	color: #f6f3ff;
+}
+
+toast label,
+toast image,
+toast button,
+toast button label,
+toast button image,
+.app-window toast label,
+.app-window toast image,
+.app-window toast button,
+.app-window toast button label,
+.app-window toast button image,
+.glass-dialog toast label,
+.glass-dialog toast image,
+.solid-dialog toast label,
+.solid-dialog toast image,
+.floating-dialog toast label,
+.floating-dialog toast image {
+	color: #f6f3ff;
+}
+
+.account-settings,
+.app-window .settings-dialog,
+window.floating-dialog,
+window.settings-dialog,
+dialog.add-server-dialog floating-sheet > sheet,
+dialog.add-server-dialog sheet,
+.account-settings preferencespage,
+.account-settings navigationview,
+.account-settings toolbarview,
+.glass-dialog .floating-dialog-content,
+.glass-dialog navigationview,
+.glass-dialog toolbarview,
+.glass-dialog headerbar,
+.glass-dialog stack,
+.glass-dialog scrolledwindow,
+.glass-dialog viewport,
+.add-server-dialog-content,
+.add-server-dialog navigationview,
+.add-server-dialog toolbarview,
+.add-server-dialog headerbar,
+.add-server-dialog stack,
+.add-server-dialog scrolledwindow,
+.add-server-dialog viewport {
+	background-color: #242428;
+	color: #f6f3ff;
+}
+
+.account-settings label,
+.account-settings image,
+.account-settings button label,
+.account-settings button image,
+.floating-dialog label,
+.floating-dialog image,
+.floating-dialog button label,
+.floating-dialog button image,
+.solid-dialog label,
+.solid-dialog image,
+.solid-dialog button label,
+.solid-dialog button image,
+.glass-dialog label,
+.glass-dialog image,
+.glass-dialog button label,
+.glass-dialog button image,
+.add-server-dialog label,
+.add-server-dialog image,
+.add-server-dialog button label,
+.add-server-dialog button image,
+.settings-dialog label,
+.settings-dialog image,
+.settings-dialog button label,
+.settings-dialog button image {
+	color: #f6f3ff;
+}
+
+.account-settings .boxed-list,
+.glass-dialog .boxed-list {
+	background-color: rgba(255, 255, 255, 0.07);
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+.account-settings button.flat,
+.glass-dialog button.flat,
+window.floating-dialog button,
+dialog.floating-dialog button {
+	background-color: rgba(255, 255, 255, 0.08);
+	border-color: rgba(255, 255, 255, 0.18);
+	color: #f6f3ff;
+}
+
+.account-settings button.flat:hover,
+.glass-dialog button.flat:hover,
+window.floating-dialog button:hover,
+dialog.floating-dialog button:hover {
+	background-color: rgba(255, 255, 255, 0.14);
+}
+
+.account-settings button.flat:active,
+.glass-dialog button.flat:active,
+window.floating-dialog button:active,
+dialog.floating-dialog button:active {
+	background-color: rgba(255, 255, 255, 0.20);
+}

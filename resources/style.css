@@ -2748,13 +2748,22 @@ popover.track-list-popover checkbutton {
   box-shadow: none;
 }
 
+.app-window overlay-split-view.mpv-overlay-menu,
+.app-window overlay-split-view.mpv-overlay-menu > widget,
+.app-window overlay-split-view.mpv-overlay-menu > widget.sidebar,
+.app-window overlay-split-view.mpv-overlay-menu > widget.background,
+.app-window overlay-split-view.mpv-overlay-menu .background {
+  background-color: transparent;
+  background-image: none;
+}
+
 .app-window .mpv-sidebar-panel {
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 24px;
-  background-color: rgba(15, 16, 21, 0.96);
+  background-color: transparent;
   background-image: none;
   background-clip: padding-box;
-  box-shadow: 0 20px 52px rgba(0, 0, 0, 0.46);
+  box-shadow: none;
   color: #f5f6f7;
 }
 
@@ -2767,6 +2776,16 @@ popover.track-list-popover checkbutton {
   background-color: transparent;
   background-image: none;
   color: #f5f6f7;
+}
+
+.app-window .mpv-sidebar-stack,
+.app-window .mpv-playlist-scroller,
+.app-window .mpv-playlist-scroller viewport,
+.app-window .mpv-sidebar-panel listview,
+.app-window .mpv-sidebar-panel list,
+.app-window .mpv-sidebar-panel .vertical-listview {
+  background-color: transparent;
+  background-image: none;
 }
 
 .app-window .mpv-sidebar-panel headerbar {
