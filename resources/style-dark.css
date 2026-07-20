@@ -786,11 +786,87 @@ menubutton.glass-button > button:focus-visible {
 	background-color: rgba(255, 255, 255, 0.08);
 }
 
+.app-window .media-toolbar-actions .media-view-switch > button:hover,
+.app-window .media-toolbar-actions .media-view-switch button:hover,
+.app-window .media-toolbar-actions .media-view-switch toggle:hover,
+.app-window .media-toolbar-actions .media-sort-order > button:hover,
+.app-window .media-toolbar-actions .media-sort-order button:hover,
+.app-window .media-toolbar-actions .media-sort-order toggle:hover {
+	background-color: rgba(255, 255, 255, 0.13);
+}
+
 .app-window .segmented-control > button:checked,
 .app-window stackswitcher.segmented-control > button:checked,
 .app-window .control-group > togglebutton:checked,
 .app-window box.linked > togglebutton:checked {
 	background-color: rgba(255, 255, 255, 0.13);
+}
+
+.app-window .media-toolbar-actions .media-view-switch > button:active,
+.app-window .media-toolbar-actions .media-view-switch > button:checked,
+.app-window .media-toolbar-actions .media-view-switch > button:selected,
+.app-window .media-toolbar-actions .media-view-switch > button.active,
+.app-window .media-toolbar-actions .media-view-switch > button.media-toolbar-selected,
+.app-window .media-toolbar-actions .media-view-switch button:active,
+.app-window .media-toolbar-actions .media-view-switch button:checked,
+.app-window .media-toolbar-actions .media-view-switch button:selected,
+.app-window .media-toolbar-actions .media-view-switch button.active,
+.app-window .media-toolbar-actions .media-view-switch button.media-toolbar-selected,
+.app-window .media-toolbar-actions .media-view-switch toggle:active,
+.app-window .media-toolbar-actions .media-view-switch toggle:checked,
+.app-window .media-toolbar-actions .media-view-switch toggle:selected,
+.app-window .media-toolbar-actions .media-view-switch toggle.active,
+.app-window .media-toolbar-actions .media-view-switch toggle.media-toolbar-selected,
+.app-window .media-toolbar-actions .media-sort-order > button:active,
+.app-window .media-toolbar-actions .media-sort-order > button:checked,
+.app-window .media-toolbar-actions .media-sort-order > button:selected,
+.app-window .media-toolbar-actions .media-sort-order > button.active,
+.app-window .media-toolbar-actions .media-sort-order > button.media-toolbar-selected,
+.app-window .media-toolbar-actions .media-sort-order button:active,
+.app-window .media-toolbar-actions .media-sort-order button:checked,
+.app-window .media-toolbar-actions .media-sort-order button:selected,
+.app-window .media-toolbar-actions .media-sort-order button.active,
+.app-window .media-toolbar-actions .media-sort-order button.media-toolbar-selected,
+.app-window .media-toolbar-actions .media-sort-order toggle:active,
+.app-window .media-toolbar-actions .media-sort-order toggle:checked,
+.app-window .media-toolbar-actions .media-sort-order toggle:selected,
+.app-window .media-toolbar-actions .media-sort-order toggle.active,
+.app-window .media-toolbar-actions .media-sort-order toggle.media-toolbar-selected {
+	background-color: rgba(255, 255, 255, 0.22);
+	color: #ffffff;
+}
+
+.app-window .media-toolbar-actions .media-view-switch > button:active image,
+.app-window .media-toolbar-actions .media-view-switch > button:checked image,
+.app-window .media-toolbar-actions .media-view-switch > button:selected image,
+.app-window .media-toolbar-actions .media-view-switch > button.active image,
+.app-window .media-toolbar-actions .media-view-switch > button.media-toolbar-selected image,
+.app-window .media-toolbar-actions .media-view-switch button:active image,
+.app-window .media-toolbar-actions .media-view-switch button:checked image,
+.app-window .media-toolbar-actions .media-view-switch button:selected image,
+.app-window .media-toolbar-actions .media-view-switch button.active image,
+.app-window .media-toolbar-actions .media-view-switch button.media-toolbar-selected image,
+.app-window .media-toolbar-actions .media-view-switch toggle:active image,
+.app-window .media-toolbar-actions .media-view-switch toggle:checked image,
+.app-window .media-toolbar-actions .media-view-switch toggle:selected image,
+.app-window .media-toolbar-actions .media-view-switch toggle.active image,
+.app-window .media-toolbar-actions .media-view-switch toggle.media-toolbar-selected image,
+.app-window .media-toolbar-actions .media-sort-order > button:active image,
+.app-window .media-toolbar-actions .media-sort-order > button:checked image,
+.app-window .media-toolbar-actions .media-sort-order > button:selected image,
+.app-window .media-toolbar-actions .media-sort-order > button.active image,
+.app-window .media-toolbar-actions .media-sort-order > button.media-toolbar-selected image,
+.app-window .media-toolbar-actions .media-sort-order button:active image,
+.app-window .media-toolbar-actions .media-sort-order button:checked image,
+.app-window .media-toolbar-actions .media-sort-order button:selected image,
+.app-window .media-toolbar-actions .media-sort-order button.active image,
+.app-window .media-toolbar-actions .media-sort-order button.media-toolbar-selected image,
+.app-window .media-toolbar-actions .media-sort-order toggle:active image,
+.app-window .media-toolbar-actions .media-sort-order toggle:checked image,
+.app-window .media-toolbar-actions .media-sort-order toggle:selected image,
+.app-window .media-toolbar-actions .media-sort-order toggle.active image,
+.app-window .media-toolbar-actions .media-sort-order toggle.media-toolbar-selected image {
+	color: #ffffff;
 }
 
 .app-window .media-toolbar-actions .media-view-switch > button,
@@ -1603,14 +1679,22 @@ popover.menu.floating-dialog contents > * {
 
 popover.menu label,
 popover.menu image,
+popover.menu accelerator,
+popover.menu .accelerator,
 popover.menu modelbutton,
 popover.menu modelbutton label,
 popover.menu modelbutton image,
+popover.menu modelbutton accelerator,
+popover.menu modelbutton .accelerator,
 popover.floating-menu label,
 popover.floating-menu image,
+popover.floating-menu accelerator,
+popover.floating-menu .accelerator,
 popover.floating-menu modelbutton,
 popover.floating-menu modelbutton label,
 popover.floating-menu modelbutton image,
+popover.floating-menu modelbutton accelerator,
+popover.floating-menu modelbutton .accelerator,
 popover.glass-popover label,
 popover.glass-popover image,
 popover.glass-popover modelbutton,
@@ -1751,4 +1835,54 @@ dialog.floating-dialog button:hover {
 window.floating-dialog button:active,
 dialog.floating-dialog button:active {
 	background-color: rgba(255, 255, 255, 0.20);
+}
+
+tooltip,
+tooltip.background,
+tooltip > box {
+	background-color: #242428;
+	background-image: none;
+	border: 1px solid rgba(255, 255, 255, 0.18);
+	border-radius: 12px;
+	box-shadow: 0 8px 22px rgba(0, 0, 0, 0.28);
+	color: #f6f3ff;
+}
+
+tooltip label,
+tooltip image {
+	color: #f6f3ff;
+}
+
+popover.menu modelbutton:hover label,
+popover.menu modelbutton:hover image,
+popover.floating-menu modelbutton:hover label,
+popover.floating-menu modelbutton:hover image,
+popover.glass-popover modelbutton:hover label,
+popover.glass-popover modelbutton:hover image,
+popover.floating-dialog modelbutton:hover label,
+popover.floating-dialog modelbutton:hover image,
+popover.menu modelbutton:active label,
+popover.menu modelbutton:active image,
+popover.floating-menu modelbutton:active label,
+popover.floating-menu modelbutton:active image,
+popover.glass-popover modelbutton:active label,
+popover.glass-popover modelbutton:active image,
+popover.floating-dialog modelbutton:active label,
+popover.floating-dialog modelbutton:active image {
+	color: #ffffff;
+}
+
+popover.menu modelbutton:disabled,
+popover.menu modelbutton:disabled label,
+popover.menu modelbutton:disabled image,
+popover.floating-menu modelbutton:disabled,
+popover.floating-menu modelbutton:disabled label,
+popover.floating-menu modelbutton:disabled image,
+popover.glass-popover modelbutton:disabled,
+popover.glass-popover modelbutton:disabled label,
+popover.glass-popover modelbutton:disabled image,
+popover.floating-dialog modelbutton:disabled,
+popover.floating-dialog modelbutton:disabled label,
+popover.floating-dialog modelbutton:disabled image {
+	color: rgba(246, 243, 255, 0.62);
 }

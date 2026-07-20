@@ -283,6 +283,19 @@ pub mod imp {
                 .build();
 
             self.parent_constructed();
+
+            let obj = self.obj();
+            self.glgroup.connect_active_name_notify(glib::clone!(
+                #[weak]
+                obj,
+                move |_| obj.sync_toolbar_button_states()
+            ));
+            self.adgroup.connect_active_name_notify(glib::clone!(
+                #[weak]
+                obj,
+                move |_| obj.sync_toolbar_button_states()
+            ));
+            self.obj().sync_toolbar_button_states();
         }
 
         fn signals() -> &'static [Signal] {
@@ -351,6 +364,39 @@ impl Default for SingleGrid {
 impl SingleGrid {
     pub fn new() -> Self {
         Object::new()
+    }
+
+    fn sync_toolbar_button_states(&self) {
+        fn collect_buttons(widget: &gtk::Widget, buttons: &mut Vec<gtk::Widget>) {
+            if widget.is::<gtk::Button>() || widget.is::<gtk::ToggleButton>() {
+                buttons.push(widget.clone());
+            }
+
+            let mut child = widget.first_child();
+            while let Some(widget) = child {
+                collect_buttons(&widget, buttons);
+                child = widget.next_sibling();
+            }
+        }
+
+        fn sync_group(group: &adw::ToggleGroup, names: &[&str]) {
+            let active_name = group.active_name();
+            let group_widget: gtk::Widget = group.clone().upcast();
+            let mut buttons = Vec::new();
+            collect_buttons(&group_widget, &mut buttons);
+
+            for (index, button) in buttons.into_iter().enumerate().take(names.len()) {
+                if active_name.as_deref() == Some(names[index]) {
+                    button.add_css_class("media-toolbar-selected");
+                } else {
+                    button.remove_css_class("media-toolbar-selected");
+                }
+            }
+        }
+
+        let imp = self.imp();
+        sync_group(&imp.glgroup, &["grid", "list"]);
+        sync_group(&imp.adgroup, &["asce", "desc"]);
     }
 
     #[template_callback]

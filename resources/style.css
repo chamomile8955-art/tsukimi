@@ -1261,21 +1261,73 @@ menubutton.glass-button > button:focus-visible {
 
 .app-window .media-toolbar-actions .media-view-switch > button:active,
 .app-window .media-toolbar-actions .media-view-switch > button:checked,
+.app-window .media-toolbar-actions .media-view-switch > button:selected,
+.app-window .media-toolbar-actions .media-view-switch > button.active,
+.app-window .media-toolbar-actions .media-view-switch > button.media-toolbar-selected,
 .app-window .media-toolbar-actions .media-view-switch button:active,
 .app-window .media-toolbar-actions .media-view-switch button:checked,
+.app-window .media-toolbar-actions .media-view-switch button:selected,
+.app-window .media-toolbar-actions .media-view-switch button.active,
+.app-window .media-toolbar-actions .media-view-switch button.media-toolbar-selected,
 .app-window .media-toolbar-actions .media-view-switch toggle:active,
 .app-window .media-toolbar-actions .media-view-switch toggle:checked,
+.app-window .media-toolbar-actions .media-view-switch toggle:selected,
+.app-window .media-toolbar-actions .media-view-switch toggle.active,
+.app-window .media-toolbar-actions .media-view-switch toggle.media-toolbar-selected,
 .app-window .media-toolbar-actions .media-sort-order > button:active,
 .app-window .media-toolbar-actions .media-sort-order > button:checked,
+.app-window .media-toolbar-actions .media-sort-order > button:selected,
+.app-window .media-toolbar-actions .media-sort-order > button.active,
+.app-window .media-toolbar-actions .media-sort-order > button.media-toolbar-selected,
 .app-window .media-toolbar-actions .media-sort-order button:active,
 .app-window .media-toolbar-actions .media-sort-order button:checked,
+.app-window .media-toolbar-actions .media-sort-order button:selected,
+.app-window .media-toolbar-actions .media-sort-order button.active,
+.app-window .media-toolbar-actions .media-sort-order button.media-toolbar-selected,
 .app-window .media-toolbar-actions .media-sort-order toggle:active,
 .app-window .media-toolbar-actions .media-sort-order toggle:checked,
+.app-window .media-toolbar-actions .media-sort-order toggle:selected,
+.app-window .media-toolbar-actions .media-sort-order toggle.active,
+.app-window .media-toolbar-actions .media-sort-order toggle.media-toolbar-selected,
 .app-window dropdown.media-sort-dropdown > button:active,
 .app-window dropdown.media-sort-dropdown > button:checked,
 .app-window button.media-filter-button:active,
 .app-window button.media-filter-button:checked {
   background-color: rgba(0, 0, 0, 0.095);
+  color: @window_fg_color;
+}
+
+.app-window .media-toolbar-actions .media-view-switch > button:active image,
+.app-window .media-toolbar-actions .media-view-switch > button:checked image,
+.app-window .media-toolbar-actions .media-view-switch > button:selected image,
+.app-window .media-toolbar-actions .media-view-switch > button.active image,
+.app-window .media-toolbar-actions .media-view-switch > button.media-toolbar-selected image,
+.app-window .media-toolbar-actions .media-view-switch button:active image,
+.app-window .media-toolbar-actions .media-view-switch button:checked image,
+.app-window .media-toolbar-actions .media-view-switch button:selected image,
+.app-window .media-toolbar-actions .media-view-switch button.active image,
+.app-window .media-toolbar-actions .media-view-switch button.media-toolbar-selected image,
+.app-window .media-toolbar-actions .media-view-switch toggle:active image,
+.app-window .media-toolbar-actions .media-view-switch toggle:checked image,
+.app-window .media-toolbar-actions .media-view-switch toggle:selected image,
+.app-window .media-toolbar-actions .media-view-switch toggle.active image,
+.app-window .media-toolbar-actions .media-view-switch toggle.media-toolbar-selected image,
+.app-window .media-toolbar-actions .media-sort-order > button:active image,
+.app-window .media-toolbar-actions .media-sort-order > button:checked image,
+.app-window .media-toolbar-actions .media-sort-order > button:selected image,
+.app-window .media-toolbar-actions .media-sort-order > button.active image,
+.app-window .media-toolbar-actions .media-sort-order > button.media-toolbar-selected image,
+.app-window .media-toolbar-actions .media-sort-order button:active image,
+.app-window .media-toolbar-actions .media-sort-order button:checked image,
+.app-window .media-toolbar-actions .media-sort-order button:selected image,
+.app-window .media-toolbar-actions .media-sort-order button.active image,
+.app-window .media-toolbar-actions .media-sort-order button.media-toolbar-selected image,
+.app-window .media-toolbar-actions .media-sort-order toggle:active image,
+.app-window .media-toolbar-actions .media-sort-order toggle:checked image,
+.app-window .media-toolbar-actions .media-sort-order toggle:selected image,
+.app-window .media-toolbar-actions .media-sort-order toggle.active image,
+.app-window .media-toolbar-actions .media-sort-order toggle.media-toolbar-selected image {
+  color: @window_fg_color;
 }
 
 .app-window .media-toolbar-actions .media-view-switch > button,
@@ -1870,14 +1922,22 @@ popover.glass-popover label {
 
 popover.menu label,
 popover.menu image,
+popover.menu accelerator,
+popover.menu .accelerator,
 popover.menu modelbutton,
 popover.menu modelbutton label,
 popover.menu modelbutton image,
+popover.menu modelbutton accelerator,
+popover.menu modelbutton .accelerator,
 popover.floating-menu label,
 popover.floating-menu image,
+popover.floating-menu accelerator,
+popover.floating-menu .accelerator,
 popover.floating-menu modelbutton,
 popover.floating-menu modelbutton label,
 popover.floating-menu modelbutton image,
+popover.floating-menu modelbutton accelerator,
+popover.floating-menu modelbutton .accelerator,
 popover.glass-popover label,
 popover.glass-popover image,
 popover.glass-popover modelbutton,
@@ -2438,6 +2498,131 @@ popover.floating-menu separator {
   min-height: 1px;
   margin: 5px 12px;
   background-color: alpha(@window_fg_color, 0.10);
+}
+
+/* Final light-mode readability guard for detached menus, popovers, toasts
+ * and tooltips. These windows can resolve theme aliases differently from the
+ * main app window, so use explicit colors here. */
+popover.menu contents > *,
+popover.floating-menu contents > *,
+popover.glass-popover contents > *,
+popover.menu.glass-popover contents > *,
+popover.floating-dialog contents > *,
+popover.menu.floating-dialog contents > * {
+  background-color: #f7f7f7;
+  border-color: rgba(23, 22, 28, 0.12);
+  color: #17161c;
+}
+
+popover.menu label,
+popover.menu image,
+popover.menu modelbutton,
+popover.menu modelbutton label,
+popover.menu modelbutton image,
+popover.floating-menu label,
+popover.floating-menu image,
+popover.floating-menu modelbutton,
+popover.floating-menu modelbutton label,
+popover.floating-menu modelbutton image,
+popover.glass-popover label,
+popover.glass-popover image,
+popover.glass-popover modelbutton,
+popover.glass-popover modelbutton label,
+popover.glass-popover modelbutton image,
+popover.floating-dialog label,
+popover.floating-dialog image,
+popover.floating-dialog modelbutton,
+popover.floating-dialog modelbutton label,
+popover.floating-dialog modelbutton image {
+  color: #17161c;
+}
+
+popover.menu modelbutton:hover,
+popover.floating-menu modelbutton:hover,
+popover.glass-popover modelbutton:hover,
+popover.floating-dialog modelbutton:hover {
+  background-color: rgba(23, 22, 28, 0.075);
+  color: #17161c;
+}
+
+popover.menu modelbutton:hover label,
+popover.menu modelbutton:hover image,
+popover.floating-menu modelbutton:hover label,
+popover.floating-menu modelbutton:hover image,
+popover.glass-popover modelbutton:hover label,
+popover.glass-popover modelbutton:hover image,
+popover.floating-dialog modelbutton:hover label,
+popover.floating-dialog modelbutton:hover image {
+  color: #17161c;
+}
+
+popover.menu modelbutton:active,
+popover.floating-menu modelbutton:active,
+popover.glass-popover modelbutton:active,
+popover.floating-dialog modelbutton:active {
+  background-color: rgba(23, 22, 28, 0.13);
+  color: #17161c;
+}
+
+popover.menu modelbutton:disabled,
+popover.menu modelbutton:disabled label,
+popover.menu modelbutton:disabled image,
+popover.floating-menu modelbutton:disabled,
+popover.floating-menu modelbutton:disabled label,
+popover.floating-menu modelbutton:disabled image,
+popover.glass-popover modelbutton:disabled,
+popover.glass-popover modelbutton:disabled label,
+popover.glass-popover modelbutton:disabled image,
+popover.floating-dialog modelbutton:disabled,
+popover.floating-dialog modelbutton:disabled label,
+popover.floating-dialog modelbutton:disabled image {
+  color: rgba(23, 22, 28, 0.68);
+}
+
+tooltip,
+tooltip.background,
+tooltip > box {
+  background-color: #f7f7f7;
+  background-image: none;
+  border: 1px solid rgba(23, 22, 28, 0.12);
+  border-radius: 12px;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.14);
+  color: #17161c;
+}
+
+tooltip label,
+tooltip image {
+  color: #17161c;
+}
+
+toast,
+.app-window toast,
+.app-window toastoverlay toast,
+.glass-dialog toast,
+.solid-dialog toast,
+.floating-dialog toast {
+  background-color: #f7f7f7;
+  border-color: rgba(23, 22, 28, 0.12);
+  color: #17161c;
+}
+
+toast label,
+toast image,
+toast button,
+toast button label,
+toast button image,
+.app-window toast label,
+.app-window toast image,
+.app-window toast button,
+.app-window toast button label,
+.app-window toast button image,
+.glass-dialog toast label,
+.glass-dialog toast image,
+.solid-dialog toast label,
+.solid-dialog toast image,
+.floating-dialog toast label,
+.floating-dialog toast image {
+  color: #17161c;
 }
 
 .theme-menu-panel {
