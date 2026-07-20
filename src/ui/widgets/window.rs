@@ -64,6 +64,8 @@ mod imp {
         #[template_child]
         pub mainpage: TemplateChild<adw::NavigationPage>,
         #[template_child]
+        pub main_toolbar_view: TemplateChild<adw::ToolbarView>,
+        #[template_child]
         pub main_header: TemplateChild<adw::HeaderBar>,
         #[template_child]
         pub mainview: TemplateChild<adw::NavigationView>,
@@ -1425,6 +1427,7 @@ impl Window {
     fn set_detail_hero_mode(&self, enabled: bool) {
         let imp = self.imp();
         imp.main_header.set_visible(true);
+        imp.main_toolbar_view.set_extend_content_to_top_edge(enabled);
         imp.home_nav.set_visible(!enabled);
         imp.recommend_nav.set_visible(!enabled);
         imp.favorites_nav.set_visible(!enabled);

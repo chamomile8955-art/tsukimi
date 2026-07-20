@@ -280,7 +280,7 @@ button.pill.ultrasmall {
 }
 
 .item-hero {
-  min-height: 880px;
+  min-height: 1170px;
 }
 
 .tu-listview>row {
@@ -910,26 +910,50 @@ window.app-window.fullscreen .window-stack > box {
 
 .app-window.detail-hero-mode .main-header,
 .app-window.detail-hero-mode headerbar.main-header {
-  background-color: transparent;
-  background-image: none;
+  min-height: 76px;
+  background-color: rgba(18, 18, 22, 0.26);
+  background-image: linear-gradient(to bottom,
+      rgba(16, 16, 20, 0.52) 0%,
+      rgba(16, 16, 20, 0.30) 56%,
+      rgba(16, 16, 20, 0.00) 100%);
+  border-bottom: none;
   box-shadow: none;
-}
-
-.app-window.detail-hero-mode .main-content-pane {
-  margin-top: -76px;
 }
 
 .app-window.detail-hero-mode .top-navigation {
   opacity: 0;
 }
 
+.app-window.detail-hero-mode .main-toolbar,
+.app-window.detail-hero-mode .main-toolbar > box,
+.app-window.detail-hero-mode .main-toolbar > box > box {
+  background-color: transparent;
+  background-image: none;
+}
+
+.app-window.detail-hero-mode .main-header button,
+.app-window.detail-hero-mode .main-header togglebutton,
+.app-window.detail-hero-mode .main-header menubutton > button {
+  background-color: rgba(255, 255, 255, 0.82);
+  border-color: rgba(255, 255, 255, 0.42);
+  color: #17161c;
+}
+
+.app-window.detail-hero-mode .main-header button image,
+.app-window.detail-hero-mode .main-header togglebutton image,
+.app-window.detail-hero-mode .main-header menubutton > button image {
+  color: #17161c;
+}
+
 .app-window.detail-hero-mode .item-hero {
-  min-height: 880px;
-  border-radius: 30px;
+  min-height: 1170px;
+  border-radius: 0;
   box-shadow: none;
 }
 
 .app-window.detail-hero-mode .boxshadow.item-hero {
+  border-radius: 0;
+  border: none;
   box-shadow: none;
 }
 
@@ -2244,7 +2268,7 @@ popover.menu modelbutton {
   background-image: none;
   box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
   color: #17161c;
-  transition: background-color 120ms ease-out, border-color 120ms ease-out, box-shadow 120ms ease-out;
+  transition: background-color 90ms ease-out, border-color 90ms ease-out, box-shadow 90ms ease-out, color 90ms ease-out;
 }
 
 .app-window .poster-info-overlay button.hero-play-button:hover {
@@ -2253,9 +2277,10 @@ popover.menu modelbutton {
 }
 
 .app-window .poster-info-overlay button.hero-play-button:active {
-  background-color: rgba(224, 222, 232, 0.96);
-  border-color: rgba(255, 255, 255, 0.36);
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18);
+  background-color: rgba(190, 186, 204, 0.98);
+  border-color: rgba(108, 92, 255, 0.54);
+  box-shadow: inset 0 2px 8px rgba(23, 22, 28, 0.28), 0 2px 8px rgba(0, 0, 0, 0.14);
+  color: #111015;
 }
 
 .app-window .poster-info-overlay button.hero-play-button label,
@@ -2285,6 +2310,7 @@ popover.menu modelbutton {
   background-image: none;
   color: #17161c;
   box-shadow: 0 8px 22px rgba(0, 0, 0, 0.16);
+  transition: background-color 90ms ease-out, border-color 90ms ease-out, box-shadow 90ms ease-out, color 90ms ease-out;
 }
 
 .app-window .poster-info-overlay .hero-action-group > togglebutton.hero-favorite-button:hover,
@@ -2296,13 +2322,23 @@ popover.menu modelbutton {
 .app-window .poster-info-overlay .hero-action-group > togglebutton.hero-favorite-button:active,
 .app-window .poster-info-overlay .hero-action-group > menubutton.hero-more-button > button:active,
 .app-window .poster-info-overlay .hero-action-group > menubutton.hero-more-button > button:checked {
-  background-color: rgba(224, 222, 232, 0.96);
-  border-color: rgba(255, 255, 255, 0.36);
+  background-color: rgba(190, 186, 204, 0.98);
+  border-color: rgba(108, 92, 255, 0.54);
+  box-shadow: inset 0 2px 8px rgba(23, 22, 28, 0.28), 0 2px 8px rgba(0, 0, 0, 0.14);
+  color: #111015;
 }
 
 .app-window .poster-info-overlay .hero-action-group > togglebutton.hero-favorite-button:checked {
   background-color: #6c5cff;
+  border-color: rgba(255, 255, 255, 0.52);
   color: #ffffff;
+  box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.20), 0 8px 22px rgba(108, 92, 255, 0.28);
+}
+
+.app-window .poster-info-overlay .hero-action-group > togglebutton.hero-favorite-button:checked:active {
+  background-color: #5848e8;
+  border-color: rgba(255, 255, 255, 0.44);
+  box-shadow: inset 0 2px 8px rgba(20, 16, 88, 0.38), 0 2px 8px rgba(0, 0, 0, 0.18);
 }
 
 .app-window .poster-info-overlay .hero-action-group > togglebutton.hero-favorite-button image,
@@ -2404,7 +2440,7 @@ window.app-window.compact-1080 .top-navigation {
 
 window.app-window.compact-1080 .item-hero,
 window.app-window.compact-1080.detail-hero-mode .item-hero {
-  min-height: 820px;
+  min-height: 1090px;
 }
 
 window.app-window.compact-1080 .media-library-content {
@@ -2531,14 +2567,22 @@ popover.menu.floating-dialog contents > * {
 
 popover.menu label,
 popover.menu image,
+popover.menu accelerator,
+popover.menu .accelerator,
 popover.menu modelbutton,
 popover.menu modelbutton label,
 popover.menu modelbutton image,
+popover.menu modelbutton accelerator,
+popover.menu modelbutton .accelerator,
 popover.floating-menu label,
 popover.floating-menu image,
+popover.floating-menu accelerator,
+popover.floating-menu .accelerator,
 popover.floating-menu modelbutton,
 popover.floating-menu modelbutton label,
 popover.floating-menu modelbutton image,
+popover.floating-menu modelbutton accelerator,
+popover.floating-menu modelbutton .accelerator,
 popover.glass-popover label,
 popover.glass-popover image,
 popover.glass-popover modelbutton,
@@ -2552,6 +2596,17 @@ popover.floating-dialog modelbutton image {
   color: #17161c;
 }
 
+popover.menu accelerator,
+popover.menu .accelerator,
+popover.menu modelbutton accelerator,
+popover.menu modelbutton .accelerator,
+popover.floating-menu accelerator,
+popover.floating-menu .accelerator,
+popover.floating-menu modelbutton accelerator,
+popover.floating-menu modelbutton .accelerator {
+  color: rgba(23, 22, 28, 0.72);
+}
+
 popover.menu modelbutton:hover,
 popover.floating-menu modelbutton:hover,
 popover.glass-popover modelbutton:hover,
@@ -2562,8 +2617,12 @@ popover.floating-dialog modelbutton:hover {
 
 popover.menu modelbutton:hover label,
 popover.menu modelbutton:hover image,
+popover.menu modelbutton:hover accelerator,
+popover.menu modelbutton:hover .accelerator,
 popover.floating-menu modelbutton:hover label,
 popover.floating-menu modelbutton:hover image,
+popover.floating-menu modelbutton:hover accelerator,
+popover.floating-menu modelbutton:hover .accelerator,
 popover.glass-popover modelbutton:hover label,
 popover.glass-popover modelbutton:hover image,
 popover.floating-dialog modelbutton:hover label,
@@ -2582,9 +2641,13 @@ popover.floating-dialog modelbutton:active {
 popover.menu modelbutton:disabled,
 popover.menu modelbutton:disabled label,
 popover.menu modelbutton:disabled image,
+popover.menu modelbutton:disabled accelerator,
+popover.menu modelbutton:disabled .accelerator,
 popover.floating-menu modelbutton:disabled,
 popover.floating-menu modelbutton:disabled label,
 popover.floating-menu modelbutton:disabled image,
+popover.floating-menu modelbutton:disabled accelerator,
+popover.floating-menu modelbutton:disabled .accelerator,
 popover.glass-popover modelbutton:disabled,
 popover.glass-popover modelbutton:disabled label,
 popover.glass-popover modelbutton:disabled image,
@@ -2592,6 +2655,19 @@ popover.floating-dialog modelbutton:disabled,
 popover.floating-dialog modelbutton:disabled label,
 popover.floating-dialog modelbutton:disabled image {
   color: rgba(23, 22, 28, 0.68);
+}
+
+.app-window .poster-info-overlay popover.menu label,
+.app-window .poster-info-overlay popover.menu image,
+.app-window .poster-info-overlay popover.menu accelerator,
+.app-window .poster-info-overlay popover.menu .accelerator,
+.app-window .poster-info-overlay popover.menu modelbutton,
+.app-window .poster-info-overlay popover.menu modelbutton label,
+.app-window .poster-info-overlay popover.menu modelbutton image,
+.app-window .poster-info-overlay popover.menu modelbutton accelerator,
+.app-window .poster-info-overlay popover.menu modelbutton .accelerator {
+  color: #17161c;
+  text-shadow: none;
 }
 
 tooltip,

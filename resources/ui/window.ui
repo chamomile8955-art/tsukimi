@@ -176,7 +176,7 @@
                                   <class name="main-surface"/>
                                 </style>
                                 <property name="child">
-                                  <object class="AdwToolbarView">
+                                  <object class="AdwToolbarView" id="main_toolbar_view">
                                     <property name="bottom-bar-style">raised</property>
                                     <property name="overflow">hidden</property>
                                     <style>

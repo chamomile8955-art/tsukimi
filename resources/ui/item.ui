@@ -24,7 +24,7 @@
                     <property name="vexpand">true</property>
                     <child>
                       <object class="GtkOverlay">
-                        <property name="height-request">880</property>
+                        <property name="height-request">1170</property>
                         <property name="overflow">hidden</property>
                         <style>
                           <class name="boxshadow" />
