@@ -17,7 +17,7 @@ use crate::{
 };
 
 #[derive(Clone)]
-pub(crate) struct RouteEditor {
+struct RouteEditor {
     row: adw::ExpanderRow,
     name: adw::EntryRow,
     url: adw::EntryRow,
@@ -68,7 +68,7 @@ pub mod imp {
         #[property(get, set, builder(ActionType::default()))]
         pub action_type: Cell<ActionType>,
         pub old_account: RefCell<Option<Account>>,
-        pub route_editors: RefCell<Vec<RouteEditor>>,
+        pub(super) route_editors: RefCell<Vec<RouteEditor>>,
     }
 
     #[glib::object_subclass]

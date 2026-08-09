@@ -37,5 +37,13 @@ preview-inspector *ARGS: install
             XDG_DATA_DIRS="$PWD/dev-prefix/share:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}" \
             ./src/tsukimi --ui-preview {{ ARGS }}
 
+test *ARGS:
+    mkdir -p target/test-schemas
+    glib-compile-schemas --strict --targetdir target/test-schemas resources
+    env \
+        GSETTINGS_BACKEND=memory \
+        GSETTINGS_SCHEMA_DIR="$PWD/target/test-schemas" \
+        cargo test {{ ARGS }}
+
 update-i18n:
     meson compile -C {{ builddir }} tsukimi-pot

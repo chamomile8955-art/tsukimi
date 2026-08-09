@@ -2,9 +2,19 @@ use glib::Object;
 use gtk::{gio, glib, subclass::prelude::*};
 use libmpv2::SetData;
 use tracing::info;
+use url::Url;
 
 use super::tsukimi_mpv::{ACTIVE, TrackSelection};
 use crate::{client::jellyfin_client::JELLYFIN_CLIENT, ui::models::SETTINGS, utils::spawn};
+
+fn playback_url_for_log(value: &str) -> String {
+    let Ok(mut url) = Url::parse(value) else {
+        return "<invalid URL>".to_string();
+    };
+    url.set_query(None);
+    url.set_fragment(None);
+    url.to_string()
+}
 
 mod imp {
     use std::{cell::OnceCell as LocalOnceCell, ffi::c_void};
@@ -200,7 +210,7 @@ impl MPVGLArea {
 
                 let url = JELLYFIN_CLIENT.get_streaming_url(&url).await;
 
-                info!("Now Playing: {}", url);
+                info!(url = %playback_url_for_log(&url), "Now Playing");
                 mpv.configure_cache(SETTINGS.mpv_cache_size());
                 mpv.set_start(start_seconds);
 
@@ -288,5 +298,25 @@ impl MPVGLArea {
 
     pub fn configure_cache(&self, size_mib: i32) {
         self.imp().mpv().configure_cache(size_mib)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::playback_url_for_log;
+
+    #[test]
+    fn playback_log_url_drops_sensitive_query_data() {
+        let url = playback_url_for_log(
+            "https://media.example/emby/Videos/42/stream.mkv?api_key=secret&deviceId=test#part",
+        );
+
+        assert_eq!(url, "https://media.example/emby/Videos/42/stream.mkv");
+        assert!(!url.contains("secret"));
+    }
+
+    #[test]
+    fn playback_log_url_does_not_echo_invalid_input() {
+        assert_eq!(playback_url_for_log("api_key=secret"), "<invalid URL>");
     }
 }

@@ -794,7 +794,7 @@ impl JellyfinClient {
                 let bytes = response.bytes().await?;
 
                 let path = if bytes.len() > 1000 {
-                    self.save_image(id, image_type, tag, &bytes, etag).await
+                    self.save_image(id, image_type, tag, &bytes, etag).await?
                 } else {
                     String::new()
                 };
@@ -840,11 +840,13 @@ impl JellyfinClient {
 
     pub async fn save_image(
         &self, id: &str, image_type: &str, tag: Option<u8>, bytes: &[u8], etag: Option<String>,
-    ) -> String {
+    ) -> Result<String> {
         let cache_path = jellyfin_cache_path().await;
         let path = format!("{}-{}-{}", id, image_type, tag.unwrap_or(0));
         let path = cache_path.join(path);
-        tokio::fs::write(&path, bytes).await.unwrap();
+        tokio::fs::write(&path, bytes)
+            .await
+            .with_context(|| format!("Failed to write image cache: {}", path.display()))?;
         #[cfg(unix)]
         if let Some(etag) = etag {
             xattr::set(&path, "user.etag", etag.as_bytes()).unwrap_or_else(|e| {
@@ -853,7 +855,7 @@ impl JellyfinClient {
         }
         #[cfg(not(unix))]
         let _ = etag;
-        path.to_string_lossy().to_string()
+        Ok(path.to_string_lossy().to_string())
     }
 
     pub async fn get_artist_albums(&self, id: &str, artist_id: &str) -> Result<List> {
@@ -982,7 +984,7 @@ impl JellyfinClient {
         let bytes = response.bytes().await?;
         let path = self
             .save_image(&s.account.user_id, "Primary", None, &bytes, etag)
-            .await;
+            .await?;
         Ok(path)
     }
 
@@ -1647,44 +1649,43 @@ impl JellyfinClient {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::client::{account::ServerType, error::UserFacingError};
+    use crate::client::account::ServerType;
+
+    fn required_env(name: &str) -> String {
+        std::env::var(name).unwrap_or_else(|_| panic!("{name} must be set for this ignored test"))
+    }
+
+    async fn connect_to_test_server() {
+        let server = required_env("TSUKIMI_TEST_SERVER");
+        let username = required_env("TSUKIMI_TEST_USERNAME");
+        let password = std::env::var("TSUKIMI_TEST_PASSWORD").unwrap_or_default();
+
+        JELLYFIN_CLIENT.header_change_route(&server).unwrap();
+        let response = JELLYFIN_CLIENT.login(&username, &password).await.unwrap();
+        let account = Account {
+            servername: "integration-test".to_string(),
+            server,
+            username,
+            password: String::new(),
+            user_id: response.user.id,
+            access_token: response.access_token,
+            server_type: Some(ServerType::Jellyfin),
+            ..Account::default()
+        };
+        JELLYFIN_CLIENT.init(&account).await.unwrap();
+    }
 
     #[tokio::test]
-    async fn search() {
-        let _ = JELLYFIN_CLIENT.header_change_url("https://example.com", "443");
-        let result = JELLYFIN_CLIENT.login("test", "test").await;
-        match result {
-            Ok(response) => {
-                println!("{}", response.access_token);
-                let account = Account {
-                    servername: "test".to_string(),
-                    server: "https://example.com".to_string(),
-                    username: "inaha".to_string(),
-                    password: String::new(),
-                    port: "443".to_string(),
-                    user_id: response.user.id,
-                    access_token: response.access_token,
-                    server_type: Some(ServerType::Jellyfin),
-                    ..Account::default()
-                };
-                let _ = JELLYFIN_CLIENT.init(&account).await;
-            }
-            Err(e) => {
-                eprintln!("{}", e.to_user_facing());
-            }
-        }
+    #[ignore = "requires TSUKIMI_TEST_SERVER and TSUKIMI_TEST_USERNAME"]
+    async fn search_against_test_server() {
+        connect_to_test_server().await;
         let filters_list = FiltersList::default();
-        let result = JELLYFIN_CLIENT.search("你的名字", &["Movie"], "0", &filters_list);
-        match result.await {
-            Ok(items) => {
-                for item in items.items {
-                    println!("{}", item.name);
-                }
-            }
-            Err(e) => {
-                eprintln!("{}", e.to_user_facing());
-            }
-        }
+        let items = JELLYFIN_CLIENT
+            .search("test", &["Movie"], "0", &filters_list)
+            .await
+            .unwrap();
+
+        assert!(items.total_record_count >= items.items.len() as u32);
     }
 
     #[test]
@@ -1700,43 +1701,18 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_upload_image() {
-        let _ = JELLYFIN_CLIENT.header_change_url("http://127.0.0.1", "8096");
-        let result = JELLYFIN_CLIENT.login("inaha", "").await;
-        match result {
-            Ok(response) => {
-                println!("{}", response.access_token);
-                let account = Account {
-                    servername: "test".to_string(),
-                    server: "http://127.0.0.1".to_string(),
-                    username: "inaha".to_string(),
-                    password: String::new(),
-                    port: "8096".to_string(),
-                    user_id: response.user.id,
-                    access_token: response.access_token,
-                    server_type: Some(ServerType::Jellyfin),
-                    ..Account::default()
-                };
-                let _ = JELLYFIN_CLIENT.init(&account).await;
-            }
-            Err(e) => {
-                eprintln!("{}", e.to_user_facing());
-            }
-        }
-
-        let image = std::fs::read("/home/inaha/Works/tsukimi/target/debug/test.jpg").unwrap();
+    #[ignore = "requires a configured Jellyfin test server, image, and item ID"]
+    async fn upload_image_to_test_server() {
+        connect_to_test_server().await;
+        let image = std::fs::read(required_env("TSUKIMI_TEST_IMAGE")).unwrap();
+        let item_id = required_env("TSUKIMI_TEST_ITEM_ID");
         use base64::{Engine as _, engine::general_purpose::STANDARD};
         let image = STANDARD.encode(&image);
-        match JELLYFIN_CLIENT
-            .post_image("293", "Thumb", image, "image/jpeg")
+        JELLYFIN_CLIENT
+            .post_image(&item_id, "Thumb", image, "image/jpeg")
             .await
-        {
-            Ok(_) => {
-                println!("success");
-            }
-            Err(e) => {
-                eprintln!("{}", e.to_user_facing());
-            }
-        }
+            .unwrap()
+            .error_for_status()
+            .unwrap();
     }
 }
