@@ -14,6 +14,7 @@ mod macros;
 mod mpris_common;
 mod ui;
 mod utils;
+mod window_placement;
 
 pub mod client;
 

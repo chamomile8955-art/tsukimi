@@ -2,8 +2,8 @@
 <interface>
   <template class="AppWindow" parent="AdwApplicationWindow">
     <property name="title">Tsukimi</property>
-    <property name="default-width">1360</property>
-    <property name="default-height">860</property>
+    <property name="default-width">1152</property>
+    <property name="default-height">720</property>
     <property name="icon-name">moe.tsuna.tsukimi</property>
     <style>
       <class name="app-window"/>
@@ -49,7 +49,6 @@
                     <property name="overflow">hidden</property>
                     <property name="transition-type">none</property>
                     <property name="transition-duration">0</property>
-                    <property name="visible-child-name">main</property>
                     <style>
                       <class name="window-stack"/>
                     </style>
@@ -58,19 +57,15 @@
                         <property name="name">main</property>
                         <property name="child">
                           <object class="AdwOverlaySplitView" id="split_view">
-                            <property name="min-sidebar-width">280</property>
-                            <property name="max-sidebar-width">380</property>
-                            <property name="sidebar-width-fraction">0.15</property>
+                            <property name="min-sidebar-width">240</property>
+                            <property name="max-sidebar-width">280</property>
+                            <property name="sidebar-width-fraction">0.22</property>
                             <style>
                               <class name="app-shell"/>
                             </style>
                             <property name="sidebar">
                               <object class="AdwNavigationPage" id="source_navipage">
                                 <property name="title">Tsukimi</property>
-                                <property name="margin-top">16</property>
-                                <property name="margin-bottom">16</property>
-                                <property name="margin-start">16</property>
-                                <property name="margin-end">8</property>
                                 <property name="overflow">hidden</property>
                                 <style>
                                   <class name="surface"/>
@@ -102,8 +97,6 @@
                                         </property>
                                         <child type="start">
                                           <object class="GtkButton">
-                                            <property name="width-request">52</property>
-                                            <property name="height-request">52</property>
                                             <property name="valign">center</property>
                                             <property name="icon-name">list-add-symbolic</property>
                                             <property name="tooltip-text">添加服务器</property>
@@ -128,11 +121,9 @@
                                         <property name="margin-bottom">16</property>
                                         <child>
                                           <object class="GtkButton">
-                                            <property name="width-request">52</property>
-                                            <property name="height-request">52</property>
                                             <property name="halign">start</property>
                                             <property name="valign">center</property>
-                                            <property name="icon-name">applications-system-symbolic</property>
+                                            <property name="icon-name">settings-symbolic</property>
                                             <property name="tooltip-text" translatable="yes">Settings</property>
                                             <property name="action-name">setting.account</property>
                                             <style>
@@ -165,10 +156,6 @@
                             </property>
                             <property name="content">
                               <object class="AdwNavigationPage" id="navipage">
-                                <property name="margin-top">16</property>
-                                <property name="margin-bottom">16</property>
-                                <property name="margin-start">8</property>
-                                <property name="margin-end">16</property>
                                 <property name="title" translatable="yes"></property>
                                 <property name="overflow">hidden</property>
                                 <style>
@@ -254,10 +241,8 @@
                                         </property>
                                         <child type="start">
                                           <object class="GtkToggleButton" id="sidebar">
-                                            <property name="width-request">52</property>
-                                            <property name="height-request">52</property>
                                             <property name="valign">center</property>
-                                            <property name="icon-name">sidebar-show-symbolic</property>
+                                            <property name="icon-name">panel-left-symbolic</property>
                                             <property name="action-name">win.sidebar</property>
                                             <style>
                                               <class name="flat"/>
@@ -269,8 +254,6 @@
                                         </child>
                                         <child type="start">
                                           <object class="GtkButton" id="popbutton">
-                                            <property name="width-request">52</property>
-                                            <property name="height-request">52</property>
                                             <property name="valign">center</property>
                                             <property name="icon-name">go-previous-symbolic</property>
                                             <property name="visible">False</property>
@@ -295,8 +278,6 @@
                                         </child>
                                         <child type="end">
                                           <object class="GtkMenuButton" id="main_menu_button">
-                                            <property name="width-request">52</property>
-                                            <property name="height-request">52</property>
                                             <property name="valign">center</property>
                                             <property name="icon-name">open-menu-symbolic</property>
                                             <style>
@@ -348,7 +329,6 @@
                                                     <property name="hexpand">True</property>
                                                     <property name="transition-type">none</property>
                                                     <property name="transition-duration">0</property>
-                                                    <property name="visible-child-name">loading</property>
                                                     <style>
                                                       <class name="content-stack"/>
                                                     </style>

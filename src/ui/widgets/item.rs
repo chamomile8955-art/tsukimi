@@ -36,6 +36,7 @@ pub(crate) mod imp {
     use gtk::{CompositeTemplate, glib, prelude::*};
 
     use super::SimpleListItem;
+    use super::hero_height;
     use crate::{
         ui::{
             provider::{dropdown_factory::factory, tu_item::TuItem, tu_object::TuObject},
@@ -90,6 +91,8 @@ pub(crate) mod imp {
         pub mediainforevealer: TemplateChild<gtk::Revealer>,
         #[template_child]
         pub detail_scrolled: TemplateChild<gtk::ScrolledWindow>,
+        #[template_child]
+        pub hero: TemplateChild<gtk::Overlay>,
         #[template_child]
         pub scrolled: TemplateChild<gtk::ScrolledWindow>,
 
@@ -230,6 +233,26 @@ pub(crate) mod imp {
             }
 
             let obj = self.obj();
+            for adjustment in [
+                self.detail_scrolled.hadjustment(),
+                self.detail_scrolled.vadjustment(),
+            ] {
+                adjustment.connect_page_size_notify(glib::clone!(
+                    #[weak]
+                    obj,
+                    move |_| {
+                        let imp = obj.imp();
+                        let width = imp.detail_scrolled.hadjustment().page_size() as i32;
+                        let height = imp.detail_scrolled.vadjustment().page_size() as i32;
+                        if width > 0 && height > 0 {
+                            let requested = hero_height(width, height);
+                            if imp.hero.height_request() != requested {
+                                imp.hero.set_height_request(requested);
+                            }
+                        }
+                    }
+                ));
+            }
             spawn(glib::clone!(
                 #[weak]
                 obj,
@@ -247,6 +270,26 @@ pub(crate) mod imp {
     impl ApplicationWindowImpl for ItemPage {}
 
     impl adw::subclass::navigation_page::NavigationPageImpl for ItemPage {}
+}
+
+fn hero_height(width: i32, height: i32) -> i32 {
+    ((width as f64 * 9.0 / 16.0).min(height as f64 * 0.82) as i32).clamp(300, 720)
+}
+
+#[cfg(test)]
+mod layout_tests {
+    use super::hero_height;
+
+    #[test]
+    fn hero_leaves_room_for_details_at_supported_viewports() {
+        for (width, height) in [(500, 600), (1280, 720), (1920, 1080), (3840, 2160)] {
+            let hero = hero_height(width, height);
+            assert!(hero >= 300);
+            assert!(hero <= 720);
+            assert!(hero < height);
+        }
+        assert!(hero_height(1280, 720) < hero_height(1920, 1080));
+    }
 }
 
 glib::wrapper! {

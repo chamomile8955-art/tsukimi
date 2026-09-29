@@ -13,6 +13,8 @@ fn playback_url_for_log(value: &str) -> String {
     };
     url.set_query(None);
     url.set_fragment(None);
+    let _ = url.set_username("");
+    let _ = url.set_password(None);
     url.to_string()
 }
 
@@ -318,5 +320,13 @@ mod tests {
     #[test]
     fn playback_log_url_does_not_echo_invalid_input() {
         assert_eq!(playback_url_for_log("api_key=secret"), "<invalid URL>");
+    }
+
+    #[test]
+    fn playback_log_url_removes_user_credentials() {
+        assert_eq!(
+            playback_url_for_log("https://user:password@media.example/video?api_key=secret"),
+            "https://media.example/video"
+        );
     }
 }

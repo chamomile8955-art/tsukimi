@@ -1,6 +1,6 @@
 use std::{future::Future, path::PathBuf};
 
-use anyhow::Result;
+use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 use xxhash_rust::xxh3::xxh3_64;
 
@@ -226,6 +226,10 @@ where
         return Ok(CacheWrite::Unchanged);
     }
 
+    if let Some(parent) = path.parent() {
+        std::fs::create_dir_all(parent)
+            .with_context(|| format!("Failed to create cache directory: {}", parent.display()))?;
+    }
     std::fs::write(path, serialized)?;
     Ok(CacheWrite::Written)
 }
@@ -234,4 +238,35 @@ pub async fn get_image_with_cache(id: String, img_type: String, tag: Option<u8>)
     runtime()
         .spawn(async move { JELLYFIN_CLIENT.get_image(&id, &img_type, tag).await })
         .await?
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn cache_writer_creates_directories_and_reports_invalid_parent() -> Result<()> {
+        let directory =
+            std::env::temp_dir().join(format!("tsukimi-cache-test-{}", uuid::Uuid::new_v4()));
+        let path = directory.join("server/item.json");
+        let result = (|| -> Result<()> {
+            write_to_cache_if_changed(&path, &vec![1, 2, 3], None)?;
+            assert_eq!(std::fs::read_to_string(&path)?, "[1,2,3]");
+            // A file in the parent path reliably fails, even when running as root.
+            let blocked = path.join("item.json");
+            let error = write_to_cache_if_changed(&blocked, &vec![4], None)
+                .err()
+                .expect("Creating a cache below a file must fail");
+            assert!(
+                error
+                    .to_string()
+                    .contains("Failed to create cache directory")
+            );
+            Ok(())
+        })();
+        if directory.exists() {
+            std::fs::remove_dir_all(&directory)?;
+        }
+        result
+    }
 }

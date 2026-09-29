@@ -23,8 +23,8 @@
                     <property name="hexpand">true</property>
                     <property name="vexpand">true</property>
                     <child>
-                      <object class="GtkOverlay">
-                        <property name="height-request">1170</property>
+                      <object class="GtkOverlay" id="hero">
+                        <property name="height-request">480</property>
                         <property name="overflow">hidden</property>
                         <style>
                           <class name="boxshadow" />

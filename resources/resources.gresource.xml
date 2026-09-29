@@ -4,6 +4,9 @@
     <file alias="tsukimi">icons/moe.tsuna.tsukimi.svg</file>
     <file alias="moe.tsuna.tsukimi.svg">icons/moe.tsuna.tsukimi.svg</file>
     <file preprocess="xml-stripblanks" alias="settings-symbolic.svg">icons/scalable/actions/settings-symbolic.svg</file>
+    <file preprocess="xml-stripblanks" alias="panel-left-symbolic.svg">icons/scalable/actions/panel-left-symbolic.svg</file>
+    <file preprocess="xml-stripblanks" alias="user-round-symbolic.svg">icons/scalable/actions/user-round-symbolic.svg</file>
+    <file preprocess="xml-stripblanks" alias="captions-symbolic.svg">icons/scalable/actions/captions-symbolic.svg</file>
     <file preprocess="xml-stripblanks" alias="arrow-pointing-at-line-down-symbolic.svg">icons/scalable/actions/arrow-pointing-at-line-down-symbolic.svg</file>
     <file preprocess="xml-stripblanks" alias="large-brush-symbolic.svg">icons/scalable/actions/large-brush-symbolic.svg</file>
     <file preprocess="xml-stripblanks" alias="playback-options-symbolic.svg">icons/scalable/actions/playback-options-symbolic.svg</file>
@@ -43,7 +46,9 @@
   </gresource>
   <gresource prefix="/moe/tsuna/tsukimi/">
     <file compressed="true">style.css</file>
-    <file compressed="true">style-dark.css</file>
+    <file compressed="true" alias="theme-dark.css">style-dark.css</file>
+    <file compressed="true">icons/LUCIDE-LICENSE.txt</file>
+    <file compressed="true">style-settings.css</file>
     <file compressed="true">ui/window.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">ui/search.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">ui/item.ui</file>

@@ -1,0 +1,143 @@
+/* Settings share native theme colors; geometry and states are theme-independent. */
+window.account-settings,
+window.account-settings > contents,
+.account-settings preferencespage,
+.account-settings navigationview,
+.account-settings toolbarview,
+.account-settings headerbar,
+.settings-editor sheet,
+.settings-editor toolbarview,
+.settings-editor headerbar {
+  background-color: @window_bg_color;
+  background-image: none;
+  color: @window_fg_color;
+}
+
+window.account-settings {
+  border: none;
+  box-shadow: none;
+}
+
+.account-settings .boxed-list,
+.settings-editor .boxed-list {
+  border: 1px solid alpha(@window_fg_color, 0.10);
+  border-radius: 8px;
+  background-color: @card_bg_color;
+  box-shadow: none;
+}
+
+.account-settings .boxed-list > row,
+.settings-editor .boxed-list > row {
+  min-height: 56px;
+  border-radius: 0;
+}
+
+.account-settings .boxed-list > row:first-child,
+.settings-editor .boxed-list > row:first-child {
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.account-settings .boxed-list > row:last-child,
+.settings-editor .boxed-list > row:last-child {
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+.account-settings label,
+.account-settings image,
+.settings-editor label,
+.settings-editor image {
+  color: @window_fg_color;
+}
+
+.account-settings .subtitle,
+.settings-editor .subtitle {
+  color: alpha(@window_fg_color, 0.65);
+}
+
+.account-settings button.flat,
+.settings-editor button.flat {
+  min-width: 32px;
+  min-height: 32px;
+  padding: 4px 8px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.account-settings button.flat:hover,
+.settings-editor button.flat:hover {
+  background-color: alpha(@window_fg_color, 0.08);
+}
+
+.account-settings button.flat:active,
+.settings-editor button.flat:active {
+  background-color: alpha(@window_fg_color, 0.14);
+}
+
+/* Preserve the native switcher's wide/narrow measurement and selected state. */
+.account-settings viewswitcher.wide button {
+  min-width: 80px;
+  padding: 4px;
+}
+
+.account-settings viewswitcher.wide button box {
+  padding: 0;
+}
+
+.account-settings viewswitcher.narrow button {
+  min-width: 60px;
+  padding: 4px;
+}
+
+.account-settings viewswitcher button:checked {
+  background-color: alpha(@window_fg_color, 0.10);
+}
+
+.account-settings row.suggested-action,
+.account-settings button.suggested-action,
+.settings-editor button.suggested-action {
+  background-color: @accent_bg_color;
+  border-color: transparent;
+  color: @accent_fg_color;
+}
+
+.account-settings row.suggested-action:hover,
+.account-settings button.suggested-action:hover,
+.settings-editor button.suggested-action:hover {
+  background-color: shade(@accent_bg_color, 1.08);
+}
+
+.account-settings row.suggested-action:active,
+.account-settings button.suggested-action:active,
+.settings-editor button.suggested-action:active {
+  background-color: shade(@accent_bg_color, 0.92);
+}
+
+.account-settings row.suggested-action label,
+.account-settings row.suggested-action image,
+.account-settings button.suggested-action label,
+.account-settings button.suggested-action image,
+.settings-editor button.suggested-action label,
+.settings-editor button.suggested-action image {
+  color: @accent_fg_color;
+}
+
+.account-settings button:focus-visible,
+.settings-editor button:focus-visible {
+  outline: 2px solid @accent_color;
+  outline-offset: 2px;
+}
+
+.account-settings button:disabled,
+.account-settings row:disabled,
+.settings-editor button:disabled {
+  opacity: 0.45;
+}
+
+.account-settings .themeselector checkbutton {
+  min-width: 36px;
+  min-height: 36px;
+}

@@ -586,6 +586,14 @@ msgstr "首选字幕语言"
 msgid "Appearence"
 msgstr "外观"
 
+#: resources/ui/account_settings.ui
+msgid "Theme"
+msgstr "主题"
+
+#: resources/ui/account_settings.ui
+msgid "Advanced"
+msgstr "高级"
+
 #: resources/ui/account_settings.ui:76
 msgid "Use Custom Accent Color"
 msgstr "使用自定义强调色"

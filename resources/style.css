@@ -13,6 +13,7 @@
 @define-color tsukimi_panel_bg_dark #181818;
 @define-color tsukimi_base_bg_light #e7e7e7;
 @define-color tsukimi_panel_bg_light #f6f6f6;
+@define-color tsukimi_sidebar_bg #ededee;
 @define-color tsukimi_text_light #111111;
 @define-color window_fg_color @tsukimi_text_light;
 @define-color tsukimi_panel_border alpha(@window_fg_color, 0.08);
@@ -20,6 +21,9 @@
 
 * {
   font-family:
+    ".AppleSystemUIFont",
+    "SF Pro Text",
+    "PingFang SC",
     "Segoe UI Variable",
     "Segoe UI",
     "Microsoft YaHei UI",
@@ -38,6 +42,9 @@ headerbar label,
 .app-window .source-header label,
 .app-window .main-header label {
   font-family:
+    ".AppleSystemUIFont",
+    "SF Pro Text",
+    "PingFang SC",
     "Segoe UI Variable Display",
     "Segoe UI Variable",
     "Segoe UI",
@@ -57,6 +64,9 @@ popover label,
 .sidebar label,
 .source-sidebar label {
   font-family:
+    ".AppleSystemUIFont",
+    "SF Pro Text",
+    "PingFang SC",
     "Segoe UI Variable Text",
     "Segoe UI Variable",
     "Segoe UI",
@@ -74,6 +84,27 @@ pre {
     "Cascadia Code",
     "Consolas",
     monospace;
+}
+
+.startup-splash,
+.startup-splash > contents {
+  background-color: @window_bg_color;
+  color: @window_fg_color;
+}
+
+.startup-splash .startup-title {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.startup-splash .startup-message {
+  font-size: 14px;
+  color: alpha(@window_fg_color, 0.85);
+}
+
+.startup-splash .startup-status {
+  font-size: 12px;
+  color: alpha(@window_fg_color, 0.60);
 }
 
 .sbackground {
@@ -280,7 +311,7 @@ button.pill.ultrasmall {
 }
 
 .item-hero {
-  min-height: 1170px;
+  min-height: 0;
 }
 
 .tu-listview>row {
@@ -584,7 +615,7 @@ row image {
       rgba(255, 255, 255, 0.13),
       rgba(255, 255, 255, 0.06));
   border: 1px solid rgba(255, 255, 255, 0.055);
-  border-radius: 14px;
+  border-radius: 8px;
   box-shadow: 0 8px 24px @glass_shadow;
 }
 
@@ -735,10 +766,10 @@ window.app-window > contents,
   opacity: 0;
 }
 
-/* Floating panels */
+/* Continuous desktop shell */
 .app-window .window-frame {
   border: none;
-  border-radius: 32px;
+  border-radius: 14px;
   background-color: transparent;
   background-image: none;
   background-clip: padding-box;
@@ -821,8 +852,8 @@ window.app-window.fullscreen .window-stack > box {
   background-color: @tsukimi_panel_bg_light;
   background-image: none;
   background-clip: padding-box;
-  border: 1px solid @tsukimi_panel_border;
-  border-radius: 32px;
+  border: none;
+  border-radius: 0;
   box-shadow: none;
   opacity: 1;
 }
@@ -831,9 +862,9 @@ window.app-window.fullscreen .window-stack > box {
 .app-window .source-header,
 .app-window .main-header,
 .app-window .window-titlebar {
-  min-height: 76px;
-  padding-top: 12px;
-  padding-bottom: 12px;
+  min-height: 52px;
+  padding-top: 6px;
+  padding-bottom: 6px;
   padding-left: 16px;
   padding-right: 16px;
   background-color: @tsukimi_panel_bg_light;
@@ -851,7 +882,7 @@ window.app-window.fullscreen .window-stack > box {
 }
 
 .app-window .top-navigation {
-  min-height: 52px;
+  min-height: 40px;
   margin: 0;
   padding: 0;
 }
@@ -890,7 +921,21 @@ window.app-window.fullscreen .window-stack > box {
 }
 
 .app-window .main-toolbar {
-  border-radius: 32px 32px 0 0;
+  border-radius: 0;
+}
+
+.app-window .source-panel,
+.app-window .source-panel toolbarview,
+.app-window .source-panel toolbarview > box,
+.app-window .source-panel toolbarview > box > box,
+.app-window .source-panel .source-header,
+.app-window .source-panel .source-sidebar {
+  background-color: @tsukimi_sidebar_bg;
+}
+
+.app-window .app-shell .source-panel {
+  background-color: @tsukimi_sidebar_bg;
+  border-right: 1px solid alpha(@window_fg_color, 0.08);
 }
 
 .app-window .main-content-pane,
@@ -905,13 +950,13 @@ window.app-window.fullscreen .window-stack > box {
 .app-window.detail-hero-mode .main-navigation,
 .app-window.detail-hero-mode .main-page,
 .app-window.detail-hero-mode .content-stack {
-  border-radius: 32px;
+  border-radius: 0;
 }
 
 .app-window.detail-hero-mode .main-header,
 .app-window.detail-hero-mode headerbar.main-header {
-  min-height: 76px;
-  background-color: rgba(18, 18, 22, 0.26);
+  min-height: 52px;
+  background-color: transparent;
   background-image: linear-gradient(to bottom,
       rgba(16, 16, 20, 0.52) 0%,
       rgba(16, 16, 20, 0.30) 56%,
@@ -946,7 +991,7 @@ window.app-window.fullscreen .window-stack > box {
 }
 
 .app-window.detail-hero-mode .item-hero {
-  min-height: 1170px;
+  min-height: 0;
   border-radius: 0;
   box-shadow: none;
 }
@@ -967,8 +1012,7 @@ window.app-window.fullscreen .window-stack > box {
   padding-bottom: 32px;
 }
 
-/* Three control scales: 52px navigation/player controls, 44px standard
- * controls, and 40px compact overlay controls. */
+/* Shared desktop controls; navigation and playback specify their own targets. */
 .app-window button,
 .app-window togglebutton,
 .app-window menubutton > button {
@@ -1056,12 +1100,12 @@ window.app-window.fullscreen .window-stack > box {
   color: @error_fg_color;
 }
 
-/* Normal app circular buttons: 52px only. Window controls are excluded. */
+/* Shared toolbar targets. Window controls keep their native compact size. */
 .app-window button.circular-icon-button,
 .app-window togglebutton.circular-icon-button,
 .app-window menubutton.circular-icon-button > button {
-  min-width: 52px;
-  min-height: 52px;
+  min-width: 40px;
+  min-height: 40px;
   margin-top: 0;
   margin-bottom: 0;
   padding: 0;
@@ -1073,7 +1117,7 @@ window.app-window.fullscreen .window-stack > box {
   box-shadow: none;
   outline: none;
   text-shadow: none;
-  -gtk-icon-size: 20px;
+  -gtk-icon-size: 18px;
 }
 
 .app-window button.glass-button.circular,
@@ -1105,15 +1149,15 @@ window.app-window.fullscreen .window-stack > box {
 .app-window button.circular-icon-button,
 .app-window togglebutton.circular-icon-button,
 .app-window menubutton.circular-icon-button > button {
-  min-width: 52px;
-  min-height: 52px;
+  min-width: 40px;
+  min-height: 40px;
 }
 
 .app-window button.glass-button.circular.circular-icon-button,
 .app-window togglebutton.glass-button.circular.circular-icon-button,
 .app-window menubutton.glass-button.circular.circular-icon-button > button {
-  min-width: 52px;
-  min-height: 52px;
+  min-width: 40px;
+  min-height: 40px;
 }
 
 .app-window button.carousel-arrow-button,
@@ -1487,8 +1531,8 @@ menubutton.glass-button > button:focus-visible {
 }
 
 .app-window .poster-info-overlay {
-  min-height: 460px;
-  padding-top: 128px;
+  min-height: 0;
+  padding-top: 64px;
   background-image: linear-gradient(to bottom,
       rgba(12, 13, 16, 0.00) 0%,
       rgba(12, 13, 16, 0.18) 18%,
@@ -1601,9 +1645,9 @@ menubutton.glass-button > button:focus-visible {
 .app-window .source-bottom button.circular-icon-button,
 .app-window .source-actions button.circular-icon-button,
 .app-window .bottom-navigation button.circular-icon-button {
-  min-width: 52px;
-  min-height: 52px;
-  -gtk-icon-size: 20px;
+  min-width: 40px;
+  min-height: 40px;
+  -gtk-icon-size: 18px;
 }
 
 /* Apple-like traffic light window controls */
@@ -1611,7 +1655,7 @@ menubutton.glass-button > button:focus-visible {
 .app-window .macos-window-controls,
 window.floating-dialog windowcontrols,
 dialog.floating-dialog windowcontrols {
-  min-height: 52px;
+  min-height: 40px;
   margin: 0;
   padding: 0 8px;
   border: none;
@@ -1624,9 +1668,9 @@ dialog.floating-dialog windowcontrols {
 .app-window .macos-window-controls button,
 window.floating-dialog windowcontrols button,
 dialog.floating-dialog windowcontrols button {
-  min-width: 18px;
-  min-height: 18px;
-  margin: 17px 5px;
+  min-width: 14px;
+  min-height: 14px;
+  margin: 12px 5px;
   padding: 0;
   border-radius: 999px;
   border: 1px solid alpha(@window_fg_color, 0.08);
@@ -1650,6 +1694,27 @@ dialog.floating-dialog windowcontrols button image {
   padding: 0;
   -gtk-icon-size: 1px;
   -gtk-icon-shadow: none;
+}
+
+.app-window windowcontrols button.close,
+.app-window .mpv-player windowcontrols button.close,
+window.floating-dialog windowcontrols button.close {
+  background-color: #ff5f57;
+  border-color: #e0443e;
+}
+
+.app-window windowcontrols button.minimize,
+.app-window .mpv-player windowcontrols button.minimize,
+window.floating-dialog windowcontrols button.minimize {
+  background-color: #ffbd2e;
+  border-color: #dea123;
+}
+
+.app-window windowcontrols button.maximize,
+.app-window .mpv-player windowcontrols button.maximize,
+window.floating-dialog windowcontrols button.maximize {
+  background-color: #28c840;
+  border-color: #1fa934;
 }
 
 .app-window windowcontrols button.close:hover,
@@ -2005,7 +2070,7 @@ popover.floating-dialog modelbutton image,
 /* Non-shell component details retained outside the unified surface system. */
 .media-section,
 .media-card-image {
-  border-radius: 14px;
+  border-radius: 8px;
 }
 
 .media-card-title {
@@ -2039,7 +2104,7 @@ popover.floating-dialog modelbutton image,
   padding: 0 7px;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.34);
-  background-color: #6c5cff;
+  background-color: @accent_bg_color;
   background-image: none;
   color: #ffffff;
   font-size: 0.9em;
@@ -2409,22 +2474,22 @@ button.media-card-play-button {
 
 window.app-window.compact-1080 .source-panel,
 window.app-window.compact-1080 .main-surface {
-  border-radius: 24px;
+  border-radius: 0;
 }
 
 window.app-window.compact-1080 .window-frame {
-  border-radius: 24px;
+  border-radius: 14px;
 }
 
 window.app-window.compact-1080 .source-header,
 window.app-window.compact-1080 .main-header,
 window.app-window.compact-1080 .window-titlebar {
-  min-height: 64px;
-  padding: 8px 12px;
+  min-height: 52px;
+  padding: 6px 12px;
 }
 
 window.app-window.compact-1080 .main-toolbar {
-  border-radius: 24px 24px 0 0;
+  border-radius: 0;
 }
 
 window.app-window.compact-1080 .main-content-pane,
@@ -2440,7 +2505,7 @@ window.app-window.compact-1080 .top-navigation {
 
 window.app-window.compact-1080 .item-hero,
 window.app-window.compact-1080.detail-hero-mode .item-hero {
-  min-height: 1090px;
+  min-height: 0;
 }
 
 window.app-window.compact-1080 .media-library-content {
@@ -2463,8 +2528,8 @@ window.app-window.compact-1080 .source-bottom-bar button.circular-icon-button,
 window.app-window.compact-1080 .source-bottom button.circular-icon-button,
 window.app-window.compact-1080 .source-actions button.circular-icon-button,
 window.app-window.compact-1080 .bottom-navigation button.circular-icon-button {
-  min-width: 44px;
-  min-height: 44px;
+  min-width: 40px;
+  min-height: 40px;
   -gtk-icon-size: 18px;
 }
 
@@ -2507,12 +2572,12 @@ window.app-window.compact-1080 .bottom-navigation {
 
 window.app-window.compact-1080 .mpv-player headerbar.mpv-top-bar,
 window.app-window.compact-1080 .mpv-player .mpv-top-bar {
-  min-height: 62px;
-  padding: 8px 18px;
+  min-height: 52px;
+  padding: 6px 20px;
 }
 
 window.app-window.compact-1080 .mpv-player .mpv-bottom-bar {
-  padding: 14px 24px 18px;
+  padding: 12px 24px 18px;
 }
 
 window.app-window.compact-1080 .mpv-player button.mpv-control-button,
@@ -2736,8 +2801,8 @@ toast button image,
 
 .app-window .mpv-player headerbar.mpv-top-bar,
 .app-window .mpv-player .mpv-top-bar {
-  min-height: 76px;
-  padding: 12px 24px;
+  min-height: 52px;
+  padding: 6px 20px;
   background-color: #0b0b0c;
   background-image: none;
   border: none;
@@ -2747,7 +2812,7 @@ toast button image,
 }
 
 .app-window .mpv-player .mpv-bottom-bar {
-  padding: 20px 32px 24px;
+  padding: 12px 24px 18px;
   background-color: #0b0b0c;
   background-image: none;
   border: none;
@@ -2774,8 +2839,8 @@ toast button image,
 .app-window .mpv-player button.mpv-control-button,
 .app-window .mpv-player togglebutton.mpv-control-button,
 .app-window .mpv-player menubutton.mpv-control-button > button {
-  min-width: 52px;
-  min-height: 52px;
+  min-width: 44px;
+  min-height: 44px;
   margin: 0;
   padding: 0;
   border: 1px solid rgba(255, 255, 255, 0.10);
@@ -2813,13 +2878,13 @@ toast button image,
 }
 
 .app-window .mpv-player button.mpv-play-button {
-  min-width: 52px;
-  min-height: 52px;
+  min-width: 44px;
+  min-height: 44px;
   background-color: rgba(255, 255, 255, 0.16);
 }
 
 .app-window .mpv-player .mpv-transport-controls {
-  min-height: 68px;
+  min-height: 52px;
   padding: 0;
   border: none;
   border-radius: 0;
@@ -2829,8 +2894,8 @@ toast button image,
 }
 
 .app-window .mpv-player .mpv-transport-controls button.mpv-control-button {
-  min-width: 60px;
-  min-height: 60px;
+  min-width: 48px;
+  min-height: 48px;
   border-color: rgba(255, 255, 255, 0.12);
   background-color: rgba(255, 255, 255, 0.10);
   -gtk-icon-size: 25px;
@@ -2846,8 +2911,8 @@ toast button image,
 }
 
 .app-window .mpv-player .mpv-transport-controls button.mpv-play-button {
-  min-width: 68px;
-  min-height: 68px;
+  min-width: 52px;
+  min-height: 52px;
   border-color: rgba(255, 255, 255, 0.12);
   background-color: rgba(255, 255, 255, 0.10);
   box-shadow: none;
@@ -2869,7 +2934,7 @@ toast button image,
 }
 
 .app-window .mpv-player button.mpv-info-button {
-  min-height: 52px;
+  min-height: 44px;
   padding: 0 16px;
   border: 1px solid rgba(255, 255, 255, 0.10);
   border-radius: 999px;

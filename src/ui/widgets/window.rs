@@ -224,8 +224,14 @@ mod imp {
 
             let obj = self.obj();
             obj.connect_realize(|window| {
-                window.apply_startup_size();
                 window.sync_display_density_class();
+                if let Some(surface) = window.surface() {
+                    surface.connect_layout(glib::clone!(
+                        #[weak]
+                        window,
+                        move |_, _, _| window.sync_display_density_class()
+                    ));
+                }
             });
             #[cfg(target_os = "windows")]
             {
@@ -277,6 +283,11 @@ mod imp {
             obj.connect_fullscreened_notify(|window| {
                 window.sync_window_state_classes();
             });
+            self.mainview.connect_visible_page_notify(glib::clone!(
+                #[weak]
+                obj,
+                move |_| obj.sync_page_header()
+            ));
         }
     }
 
@@ -286,9 +297,9 @@ mod imp {
         // Save window state right before the window will be closed
         fn close_request(&self) -> glib::Propagation {
             // Save window size
-            self.obj()
-                .save_window_state()
-                .expect("Failed to save window state");
+            if let Err(error) = self.obj().save_window_state() {
+                tracing::warn!(%error, "Failed to save window state");
+            }
             // Allow to invoke other event handlers
             glib::Propagation::Proceed
         }
@@ -340,54 +351,18 @@ static STARTUP_SERVER_RESTORE_RECORDED: std::sync::atomic::AtomicBool =
 
 #[template_callbacks]
 impl Window {
-    fn apply_startup_size(&self) {
-        let Some(surface) = self.surface() else {
-            return;
-        };
-        let Some(monitor) = surface.display().monitor_at_surface(&surface) else {
-            return;
-        };
-        let geometry = monitor.geometry();
-        let physical_height = geometry.height() * monitor.scale_factor();
-        let ratio = if physical_height <= 1080 { 0.72 } else { 0.60 };
-        let width = (geometry.width() as f64 * ratio).round() as i32;
-        let height = (geometry.height() as f64 * ratio).round() as i32;
-        self.set_default_size(width, height);
-        tracing::info!(
-            width,
-            height,
-            ratio,
-            monitor_width = geometry.width(),
-            monitor_height = geometry.height(),
-            monitor_scale = monitor.scale_factor(),
-            physical_height,
-            "Applied display-aware startup window size"
-        );
-    }
-
     fn sync_display_density_class(&self) {
-        let Some(surface) = self.surface() else {
-            return;
-        };
-        let Some(monitor) = surface.display().monitor_at_surface(&surface) else {
-            return;
-        };
-        let geometry = monitor.geometry();
-        let physical_height = geometry.height() * monitor.scale_factor();
-        let compact = physical_height <= 1080;
+        let (width, height) = self
+            .surface()
+            .map(|surface| (surface.width(), surface.height()))
+            .filter(|(width, height)| *width > 0 && *height > 0)
+            .unwrap_or_else(|| self.default_size());
+        let compact = width <= 1280 || height <= 800;
         if compact {
             self.add_css_class("compact-1080");
         } else {
             self.remove_css_class("compact-1080");
         }
-        tracing::info!(
-            compact,
-            monitor_width = geometry.width(),
-            monitor_height = geometry.height(),
-            monitor_scale = monitor.scale_factor(),
-            physical_height,
-            "Synchronized display density class"
-        );
     }
 
     #[cfg(target_os = "windows")]
@@ -534,8 +509,8 @@ impl Window {
     fn sync_shell_spacing(&self) {
         let imp = self.imp();
 
-        set_widget_margins(&imp.source_navipage.get(), 16, 16, 16, 8);
-        set_widget_margins(&imp.navipage.get(), 16, 16, 8, 16);
+        set_widget_margins(&imp.source_navipage.get(), 0, 0, 0, 0);
+        set_widget_margins(&imp.navipage.get(), 0, 0, 0, 0);
     }
 
     fn log_shell_state(&self, stage: &str, saved_server_count: usize) {
@@ -1037,7 +1012,7 @@ impl Window {
             return;
         };
         if tag != "mainpage" {
-            self.set_detail_hero_mode(true);
+            self.sync_page_header();
             imp.navipage.set_title(&now_page.title());
             return;
         }
@@ -1227,7 +1202,10 @@ impl Window {
     }
 
     pub fn load_window_state(&self) {
-        let (width, height) = (1152, 648);
+        let (width, height) = (
+            crate::window_placement::DEFAULT_WIDTH,
+            crate::window_placement::DEFAULT_HEIGHT,
+        );
         self.set_default_size(width, height);
         tracing::info!(
             width,
@@ -1242,8 +1220,8 @@ impl Window {
     pub fn new(app: &crate::Application) -> Self {
         Object::builder()
             .property("application", app)
-            .property("default-width", 1152)
-            .property("default-height", 648)
+            .property("default-width", crate::window_placement::DEFAULT_WIDTH)
+            .property("default-height", crate::window_placement::DEFAULT_HEIGHT)
             .build()
     }
 
@@ -1412,7 +1390,6 @@ impl Window {
         T: NavigationPageExt,
     {
         let imp = self.imp();
-        self.set_detail_hero_mode(true);
         page.set_title(name);
         imp.navipage.set_title(name);
         if imp.mainview.find_page(tag).is_some() {
@@ -1424,10 +1401,19 @@ impl Window {
         imp.popbutton.set_visible(true);
     }
 
+    fn sync_page_header(&self) {
+        let page = self.imp().mainview.visible_page();
+        let has_hero = page
+            .as_ref()
+            .is_some_and(|page| page.is::<super::item::ItemPage>());
+        self.set_detail_hero_mode(has_hero);
+    }
+
     fn set_detail_hero_mode(&self, enabled: bool) {
         let imp = self.imp();
         imp.main_header.set_visible(true);
-        imp.main_toolbar_view.set_extend_content_to_top_edge(enabled);
+        imp.main_toolbar_view
+            .set_extend_content_to_top_edge(enabled);
         imp.home_nav.set_visible(!enabled);
         imp.recommend_nav.set_visible(!enabled);
         imp.favorites_nav.set_visible(!enabled);

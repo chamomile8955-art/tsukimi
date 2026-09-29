@@ -842,6 +842,9 @@ impl JellyfinClient {
         &self, id: &str, image_type: &str, tag: Option<u8>, bytes: &[u8], etag: Option<String>,
     ) -> Result<String> {
         let cache_path = jellyfin_cache_path().await;
+        tokio::fs::create_dir_all(&cache_path)
+            .await
+            .with_context(|| format!("Failed to create image cache: {}", cache_path.display()))?;
         let path = format!("{}-{}-{}", id, image_type, tag.unwrap_or(0));
         let path = cache_path.join(path);
         tokio::fs::write(&path, bytes)

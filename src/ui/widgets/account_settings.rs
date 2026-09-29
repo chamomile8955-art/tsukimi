@@ -33,6 +33,14 @@ mod imp {
         #[template_child]
         pub password_second_entry: TemplateChild<adw::PasswordEntryRow>,
         #[template_child]
+        pub password_group: TemplateChild<adw::PreferencesGroup>,
+        #[template_child]
+        pub change_password_row: TemplateChild<adw::ButtonRow>,
+        #[template_child]
+        pub account_identity: TemplateChild<adw::ActionRow>,
+        #[template_child]
+        pub server_panel_row: TemplateChild<adw::ButtonRow>,
+        #[template_child]
         pub sidebarcontrol: TemplateChild<adw::SwitchRow>,
         #[template_child]
         pub threadspinrow: TemplateChild<adw::SpinRow>,
@@ -109,6 +117,7 @@ mod imp {
 
         fn class_init(klass: &mut Self::Class) {
             AActionRow::ensure_type();
+            super::super::theme_switcher::ThemeSwitcher::ensure_type();
             klass.bind_template();
             klass.bind_template_instance_callbacks();
             klass.install_action_async(
@@ -216,20 +225,33 @@ impl AccountSettings {
     }
 
     #[template_callback]
-    async fn on_change_password(&self, _button: gtk::Button) {
+    async fn on_change_password(&self, _row: adw::ButtonRow) {
+        let imp = self.imp();
+        imp.password_entry.remove_css_class("error");
+        imp.password_second_entry.remove_css_class("error");
         let new_password = self.imp().password_entry.text();
         let new_password_second = self.imp().password_second_entry.text();
         if new_password.is_empty() || new_password_second.is_empty() {
+            if new_password.is_empty() {
+                imp.password_entry.add_css_class("error");
+            }
+            if new_password_second.is_empty() {
+                imp.password_second_entry.add_css_class("error");
+            }
             self.toast(gettext("Password cannot be empty!"));
             return;
         }
         if new_password != new_password_second {
+            imp.password_second_entry.add_css_class("error");
             self.toast(gettext("Passwords do not match!"));
             return;
         }
+        imp.change_password_row.set_sensitive(false);
         match spawn_tokio(async move { JELLYFIN_CLIENT.change_password(&new_password).await }).await
         {
             Ok(_) => {
+                imp.password_entry.set_text("");
+                imp.password_second_entry.set_text("");
                 self.toast(gettext(
                     "Password changed successfully! Please login again.",
                 ));
@@ -238,6 +260,7 @@ impl AccountSettings {
                 self.toast(format!("{}: {}", gettext("Failed to change password"), e));
             }
         };
+        imp.change_password_row.set_sensitive(true);
     }
 
     pub fn set_sidebar(&self) {
@@ -255,10 +278,12 @@ impl AccountSettings {
     }
 
     pub async fn cacheclear(&self) {
+        self.action_set_enabled("setting.clear", false);
         let path = jellyfin_cache_path().await;
         if path.exists() {
             let result = spawn_tokio_blocking(move || std::fs::remove_dir_all(path)).await;
             if let Err(error) = result {
+                self.action_set_enabled("setting.clear", true);
                 self.toast(format!("{}: {error}", gettext("Failed to clear cache")));
                 return;
             }
@@ -268,6 +293,7 @@ impl AccountSettings {
             gettext("Cache Size"),
             bytefmt::format(0)
         ));
+        self.action_set_enabled("setting.clear", true);
         self.toast(gettext("Cache Cleared"))
     }
 
@@ -350,9 +376,17 @@ impl AccountSettings {
         action_group.add_action_entries([action_vo]);
         self.insert_action_group("setting", Some(&action_group));
 
-        if JELLYFIN_CLIENT.session().account.user_id.is_empty() {
+        let session = JELLYFIN_CLIENT.session();
+        let connected = !session.account.user_id.is_empty();
+        imp.password_group.set_sensitive(connected);
+        imp.server_panel_row.set_sensitive(connected);
+        if !connected {
             return;
         }
+        imp.avatar.set_text(Some(&session.account.username));
+        imp.account_identity.set_title(&session.account.username);
+        imp.account_identity
+            .set_subtitle(&session.account.servername);
 
         spawn(glib::clone!(
             #[weak(rename_to = obj)]

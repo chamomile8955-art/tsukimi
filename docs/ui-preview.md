@@ -62,7 +62,23 @@ Remove the environment variable afterward if desired:
 Remove-Item Env:GTK_DEBUG
 ```
 
-## Inspecting and editing CSS
+## Startup Window Checks
+
+Normal and preview launches use the same 1152 x 720 logical-pixel size. On
+smaller displays, the window fits within the work area with a 24-pixel margin
+per edge. Saved maximized/fullscreen states do not change the next launch.
+The splash and main window use the same placement policy and monitor.
+
+On macOS and Windows, centering uses the native work area, excluding the Dock,
+menu bar, or taskbar. GTK owns DPI-aware sizing; native placement only moves
+the window. On Wayland, the compositor retains control of placement.
+
+For release UI checks, launch in both themes, resize, close, and launch again.
+Verify that the splash and main window start at the same size and position,
+that settings remain readable at 760 x 720 and 500 x 600, and that playback
+controls retain identical geometry after changing the application theme.
+
+## Inspecting and Editing CSS
 
 In GTK Inspector:
 

@@ -17,8 +17,10 @@
 	padding: 4px 10px 22px;
 }
 
+@define-color tsukimi_sidebar_bg #202022;
+
 .item-hero {
-	min-height: 1170px;
+	min-height: 0;
 }
 
 .media-info-source {
@@ -287,10 +289,10 @@ window.app-window > contents,
 	opacity: 0;
 }
 
-/* Floating panels */
+/* Continuous desktop shell */
 .app-window .window-frame {
 	border: none;
-	border-radius: 32px;
+	border-radius: 14px;
 	background-color: transparent;
 	background-image: none;
 	background-clip: padding-box;
@@ -371,8 +373,8 @@ window.app-window.fullscreen .window-stack > box {
 	background-color: @tsukimi_dark_panel;
 	background-image: none;
 	background-clip: padding-box;
-	border: 1px solid @tsukimi_dark_border;
-	border-radius: 32px;
+	border: none;
+	border-radius: 0;
 	box-shadow: none;
 	opacity: 1;
 }
@@ -388,9 +390,9 @@ window.app-window > contents,
 .app-window .source-header,
 .app-window .main-header,
 .app-window .window-titlebar {
-	min-height: 76px;
-	padding-top: 12px;
-	padding-bottom: 12px;
+	min-height: 52px;
+	padding-top: 6px;
+	padding-bottom: 6px;
 	padding-left: 16px;
 	padding-right: 16px;
 	background-color: @tsukimi_dark_panel;
@@ -408,7 +410,7 @@ window.app-window > contents,
 }
 
 .app-window .top-navigation {
-	min-height: 52px;
+	min-height: 40px;
 	margin: 0;
 	padding: 0;
 }
@@ -448,8 +450,8 @@ window.app-window > contents,
 
 .app-window.detail-hero-mode .main-header,
 .app-window.detail-hero-mode headerbar.main-header {
-	min-height: 76px;
-	background-color: rgba(18, 18, 22, 0.34);
+	min-height: 52px;
+	background-color: transparent;
 	background-image: linear-gradient(to bottom,
 			rgba(16, 16, 20, 0.62) 0%,
 			rgba(16, 16, 20, 0.36) 56%,
@@ -484,7 +486,7 @@ window.app-window > contents,
 }
 
 .app-window.detail-hero-mode .item-hero {
-	min-height: 1170px;
+	min-height: 0;
 	border-radius: 0;
 	box-shadow: none;
 }
@@ -496,7 +498,7 @@ window.app-window > contents,
 }
 
 .app-window .main-toolbar {
-	border-radius: 32px 32px 0 0;
+	border-radius: 0;
 }
 
 .app-window .main-content-pane,
@@ -612,12 +614,12 @@ window.app-window > contents,
 	box-shadow: none;
 }
 
-/* Normal app circular buttons: 52px only. Window controls are excluded. */
+/* Shared toolbar targets. Window controls keep their native compact size. */
 .app-window button.circular-icon-button,
 .app-window togglebutton.circular-icon-button,
 .app-window menubutton.circular-icon-button > button {
-	min-width: 52px;
-	min-height: 52px;
+	min-width: 40px;
+	min-height: 40px;
 	margin-top: 0;
 	margin-bottom: 0;
 	padding: 0;
@@ -630,7 +632,7 @@ window.app-window > contents,
 	outline: none;
 	text-shadow: none;
 	color: @window_fg_color;
-	-gtk-icon-size: 20px;
+	-gtk-icon-size: 18px;
 }
 
 .app-window button.glass-button.circular,
@@ -662,15 +664,15 @@ window.app-window > contents,
 .app-window button.circular-icon-button,
 .app-window togglebutton.circular-icon-button,
 .app-window menubutton.circular-icon-button > button {
-	min-width: 52px;
-	min-height: 52px;
+	min-width: 40px;
+	min-height: 40px;
 }
 
 .app-window button.glass-button.circular.circular-icon-button,
 .app-window togglebutton.glass-button.circular.circular-icon-button,
 .app-window menubutton.glass-button.circular.circular-icon-button > button {
-	min-width: 52px;
-	min-height: 52px;
+	min-width: 40px;
+	min-height: 40px;
 }
 
 .app-window button.carousel-arrow-button,
@@ -1277,9 +1279,9 @@ menubutton.glass-button > button:focus-visible {
 .app-window .source-bottom button.circular-icon-button,
 .app-window .source-actions button.circular-icon-button,
 .app-window .bottom-navigation button.circular-icon-button {
-	min-width: 52px;
-	min-height: 52px;
-	-gtk-icon-size: 20px;
+	min-width: 40px;
+	min-height: 40px;
+	-gtk-icon-size: 18px;
 }
 
 /* Apple-like traffic light window controls */
@@ -1287,7 +1289,7 @@ menubutton.glass-button > button:focus-visible {
 .app-window .macos-window-controls,
 window.floating-dialog windowcontrols,
 dialog.floating-dialog windowcontrols {
-	min-height: 52px;
+	min-height: 40px;
 	margin: 0;
 	padding: 0 8px;
 	border: none;
@@ -1300,9 +1302,9 @@ dialog.floating-dialog windowcontrols {
 .app-window .macos-window-controls button,
 window.floating-dialog windowcontrols button,
 dialog.floating-dialog windowcontrols button {
-	min-width: 18px;
-	min-height: 18px;
-	margin: 17px 5px;
+	min-width: 14px;
+	min-height: 14px;
+	margin: 12px 5px;
 	padding: 0;
 	border-radius: 999px;
 	border: 1px solid alpha(@window_fg_color, 0.10);
@@ -1604,22 +1606,22 @@ popover.glass-popover label {
 
 window.app-window.compact-1080 .source-panel,
 window.app-window.compact-1080 .main-surface {
-	border-radius: 24px;
+	border-radius: 0;
 }
 
 window.app-window.compact-1080 .window-frame {
-	border-radius: 24px;
+	border-radius: 14px;
 }
 
 window.app-window.compact-1080 .source-header,
 window.app-window.compact-1080 .main-header,
 window.app-window.compact-1080 .window-titlebar {
-	min-height: 64px;
-	padding: 8px 12px;
+	min-height: 52px;
+	padding: 6px 12px;
 }
 
 window.app-window.compact-1080 .main-toolbar {
-	border-radius: 24px 24px 0 0;
+	border-radius: 0;
 }
 
 window.app-window.compact-1080 .main-content-pane,
@@ -1635,7 +1637,7 @@ window.app-window.compact-1080 .top-navigation {
 
 window.app-window.compact-1080 .item-hero,
 window.app-window.compact-1080.detail-hero-mode .item-hero {
-	min-height: 1090px;
+	min-height: 0;
 }
 
 window.app-window.compact-1080 .media-library-content {
@@ -1658,8 +1660,8 @@ window.app-window.compact-1080 .source-bottom-bar button.circular-icon-button,
 window.app-window.compact-1080 .source-bottom button.circular-icon-button,
 window.app-window.compact-1080 .source-actions button.circular-icon-button,
 window.app-window.compact-1080 .bottom-navigation button.circular-icon-button {
-	min-width: 44px;
-	min-height: 44px;
+	min-width: 40px;
+	min-height: 40px;
 	-gtk-icon-size: 18px;
 }
 
@@ -1702,12 +1704,12 @@ window.app-window.compact-1080 .bottom-navigation {
 
 window.app-window.compact-1080 .mpv-player headerbar.mpv-top-bar,
 window.app-window.compact-1080 .mpv-player .mpv-top-bar {
-	min-height: 62px;
-	padding: 8px 18px;
+	min-height: 52px;
+	padding: 6px 20px;
 }
 
 window.app-window.compact-1080 .mpv-player .mpv-bottom-bar {
-	padding: 14px 24px 18px;
+	padding: 12px 24px 18px;
 }
 
 window.app-window.compact-1080 .mpv-player button.mpv-control-button,

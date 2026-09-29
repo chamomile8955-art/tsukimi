@@ -2,6 +2,8 @@
 <interface>
   <template class="AccountSettings" parent="AdwPreferencesWindow">
     <property name="title" translatable="yes">Settings</property>
+    <property name="default-width">760</property>
+    <property name="default-height">720</property>
     <property name="modal">True</property>
     <property name="search-enabled">True</property>
     <style>
@@ -14,7 +16,7 @@
       <object class="AdwPreferencesPage">
         <property name="title" translatable="yes">General</property>
         <property name="name">General</property>
-        <property name="icon-name">preferences-system-symbolic</property>
+        <property name="icon-name">settings-symbolic</property>
         <child>
           <object class="AdwPreferencesGroup">
             <property name="title" translatable="yes">Preferred Language</property>
@@ -24,7 +26,7 @@
                 <property name="title" translatable="yes">Preferred Audio Language</property>
                 <child type="prefix">
                   <object class="GtkImage">
-                    <property name="icon-name">audio-x-generic-symbolic</property>
+                    <property name="icon-name">sound-symbolic</property>
                   </object>
                 </child>
                 <property name="model">
@@ -50,7 +52,7 @@
                 <property name="title" translatable="yes">Preferred Subtitle Language</property>
                 <child type="prefix">
                   <object class="GtkImage">
-                    <property name="icon-name">media-view-subtitles-symbolic</property>
+                    <property name="icon-name">captions-symbolic</property>
                   </object>
                 </child>
                 <property name="model">
@@ -76,6 +78,17 @@
         <child>
           <object class="AdwPreferencesGroup">
             <property name="title" translatable="yes">Appearence</property>
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="yes">Theme</property>
+                <child type="suffix">
+                  <object class="ThemeSwitcher">
+                    <property name="hexpand">false</property>
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
             <child>
               <object class="AdwSwitchRow" id="sidebarcontrol">
                 <property name="title" translatable="yes">Hide Sidebar</property>
@@ -133,7 +146,7 @@
                 <property name="subtitle" translatable="yes">Calculating cache size…</property>
                 <property name="action-name">setting.clear</property>
                 <property name="activatable">True</property>
-                <child>
+                <child type="suffix">
                   <object class="GtkImage">
                     <property name="icon_name">user-trash-symbolic</property>
                     <property name="accessible-role">presentation</property>
@@ -161,12 +174,13 @@
       <object class="AdwPreferencesPage">
         <property name="name">Account</property>
         <property name="title" translatable="yes">Account</property>
-        <property name="icon-name">avatar-default-symbolic</property>
+        <property name="icon-name">user-round-symbolic</property>
         <child>
           <object class="AdwPreferencesGroup">
             <child>
               <object class="AdwAvatar" id="avatar">
-                <property name="size">100</property>
+                <property name="size">72</property>
+                <property name="show-initials">True</property>
               </object>
             </child>
           </object>
@@ -175,6 +189,12 @@
           <object class="AdwPreferencesGroup">
             <property name="title">服务器与账户</property>
             <child>
+              <object class="AdwActionRow" id="account_identity">
+                <property name="use-markup">False</property>
+                <property name="title" translatable="yes">No Server Selected</property>
+              </object>
+            </child>
+            <child>
               <object class="AdwButtonRow">
                 <property name="title">切换或管理服务器</property>
                 <property name="start-icon-name">network-server-symbolic</property>
@@ -182,7 +202,7 @@
               </object>
             </child>
             <child>
-              <object class="AdwButtonRow">
+              <object class="AdwButtonRow" id="server_panel_row">
                 <property name="title">服务器管理面板</property>
                 <property name="start-icon-name">applications-system-symbolic</property>
                 <signal name="activated" handler="on_open_server_panel" swapped="yes"/>
@@ -191,7 +211,7 @@
           </object>
         </child>
         <child>
-          <object class="AdwPreferencesGroup">
+          <object class="AdwPreferencesGroup" id="password_group">
             <property name="title" translatable="true">Change Password</property>
             <child>
               <object class="AdwPasswordEntryRow" id="password_entry">
@@ -203,12 +223,8 @@
                 <property name="title" translatable="yes">Confirm Password</property>
               </object>
             </child>
-          </object>
-        </child>
-        <child>
-          <object class="AdwPreferencesGroup">
             <child>
-              <object class="AdwButtonRow">
+              <object class="AdwButtonRow" id="change_password_row">
                 <property name="title" translatable="yes">Change Password</property>
                 <property name="start-icon-name">go-next-symbolic</property>
                 <signal name="activated" handler="on_change_password" swapped="yes"/>
@@ -225,7 +241,7 @@
       <object class="AdwPreferencesPage">
         <property name="title" translatable="yes">Media</property>
         <property name="name">media</property>
-        <property name="icon-name">audio-x-generic-symbolic</property>
+        <property name="icon-name">sound-symbolic</property>
         <child>
           <object class="AdwPreferencesGroup">
             <property name="title" translatable="yes">Music Player</property>
@@ -257,6 +273,9 @@
             <child>
               <object class="AdwActionRow">
                 <property name="title" translatable="yes">Config dir</property>
+                <binding name="sensitive">
+                  <lookup name="active">config_switchrow</lookup>
+                </binding>
                 <property name="activatable-widget">config_dir_button</property>
                 <child type="suffix">
                   <object class="GtkButton" id="config_dir_button">
@@ -283,9 +302,9 @@
     </child>
     <child>
       <object class="AdwPreferencesPage">
-        <property name="title" translatable="yes">Others</property>
+        <property name="title" translatable="yes">Advanced</property>
         <property name="name">Others</property>
-        <property name="icon-name">preferences-other-symbolic</property>
+        <property name="icon-name">playback-options-symbolic</property>
         <child>
           <object class="AdwPreferencesGroup">
             <property name="title" translatable="yes">Video Output</property>
@@ -378,7 +397,6 @@
         <child>
           <object class="AdwPreferencesGroup">
             <property name="title" translatable="yes">Playback</property>
-            <property name="description">播放器快捷键仍然可用，全屏功能没有被移除。</property>
             <child>
               <object class="AdwActionRow">
                 <property name="title" translatable="yes">Pause / Resume</property>
@@ -442,6 +460,7 @@
                       <object class="GtkButton">
                         <property name="valign">center</property>
                         <property name="icon-name">list-add-symbolic</property>
+                        <property name="tooltip-text" translatable="yes">Add a descriptor</property>
                         <signal name="clicked" handler="preferred_add_button_cb" swapped="yes"/>
                         <style>
                           <class name="flat" />
@@ -515,8 +534,8 @@
   </object>
   <object class="AdwDialog" id="add_version_preferences_dialog">
     <property name="title" translatable="yes">Add a descriptor</property>
-    <property name="follows-content-size">1</property>
-    <property name="width-request">360</property>
+    <property name="content-width">440</property>
+    <style><class name="settings-editor"/></style>
     <child>
       <object class="AdwToolbarView">
         <child type="top">
@@ -629,8 +648,8 @@
   </object>
   <object class="AdwDialog" id="edit_descriptor_dialog">
     <property name="title" translatable="yes">Edit descriptor</property>
-    <property name="follows-content-size">1</property>
-    <property name="width-request">360</property>
+    <property name="content-width">440</property>
+    <style><class name="settings-editor"/></style>
     <child>
       <object class="AdwToolbarView">
         <child type="top">

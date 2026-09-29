@@ -2,9 +2,8 @@ use adw::{prelude::*, subclass::prelude::*};
 use gtk::glib;
 
 mod imp {
-    use std::cell::{Cell, OnceCell};
-
-    use gtk::{CssProvider, gdk::Display};
+    use crate::window_placement;
+    use std::cell::Cell;
 
     use crate::ui::{
         SETTINGS,
@@ -15,7 +14,6 @@ mod imp {
 
     #[derive(Debug, Default)]
     pub struct TsukimiApplication {
-        startup_provider: OnceCell<CssProvider>,
         settings_initialized: Cell<bool>,
         startup_started: Cell<bool>,
     }
@@ -64,7 +62,10 @@ mod imp {
                 return;
             }
 
+            self.initialize_settings();
             let (splash, status) = self.create_splash();
+            window_placement::prepare(splash.upcast_ref(), None);
+            splash.set_opacity(0.0);
             splash.add_tick_callback(glib::clone!(
                 #[weak]
                 app,
@@ -75,7 +76,8 @@ mod imp {
                 #[upgrade_or]
                 glib::ControlFlow::Break,
                 move |splash_window, _| {
-                    center_window(splash_window.upcast_ref());
+                    window_placement::center(splash_window.upcast_ref(), None);
+                    splash_window.set_opacity(1.0);
                     crate::log_startup_timing("first frame shown");
                     crate::log_startup_timing("splash first frame shown");
                     app.imp().create_main_window(splash, status);
@@ -98,10 +100,13 @@ mod imp {
             let app = self.obj().clone();
             let window = crate::Window::new(&app);
             window.load_window_state();
+            window_placement::prepare(window.upcast_ref(), None);
+            window.set_opacity(0.0);
             window.recalculate_layout("UI preview window restored");
             window.start_ui_preview();
             window.add_tick_callback(|window, _| {
-                center_window(window.upcast_ref());
+                window_placement::center(window.upcast_ref(), None);
+                window.set_opacity(1.0);
                 window.recalculate_layout("UI preview first frame");
                 crate::log_startup_timing("UI preview ready");
                 glib::ControlFlow::Break
@@ -124,37 +129,6 @@ mod imp {
         }
 
         fn create_splash(&self) -> (adw::ApplicationWindow, gtk::Label) {
-            let display = Display::default().expect("Could not connect to a display.");
-            let provider = self.startup_provider.get_or_init(|| {
-                let provider = CssProvider::new();
-                provider.load_from_string(
-                    "
-                    .startup-splash {
-                        background-color: rgba(13, 16, 23, 0.97);
-                        color: white;
-                    }
-                    .startup-title {
-                        color: white;
-                        font-size: 28px;
-                        font-weight: 700;
-                    }
-                    .startup-message {
-                        color: rgba(255, 255, 255, 0.92);
-                        font-size: 16px;
-                    }
-                    .startup-status {
-                        color: rgba(255, 255, 255, 0.62);
-                    }
-                    ",
-                );
-                provider
-            });
-            gtk::style_context_add_provider_for_display(
-                &display,
-                provider,
-                gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
-            );
-
             let content = gtk::Box::builder()
                 .orientation(gtk::Orientation::Vertical)
                 .spacing(12)
@@ -172,7 +146,7 @@ mod imp {
             title.add_css_class("startup-title");
             content.append(&title);
 
-            let message = gtk::Label::new(Some("正在启动 Tsukimi..."));
+            let message = gtk::Label::new(Some("正在准备媒体库"));
             message.add_css_class("startup-message");
             content.append(&message);
 
@@ -183,27 +157,20 @@ mod imp {
 
             let status = gtk::Label::new(Some("正在加载配置..."));
             status.add_css_class("startup-status");
+            status.set_wrap(true);
+            status.set_max_width_chars(40);
+            status.set_justify(gtk::Justification::Center);
             content.append(&status);
 
-            let (width, height) = restored_window_size();
-            tracing::info!(width, height, "Startup splash using restored window size");
             let splash = adw::ApplicationWindow::builder()
                 .application(&*self.obj())
                 .content(&content)
-                .default_width(width)
-                .default_height(height)
+                .default_width(window_placement::DEFAULT_WIDTH)
+                .default_height(window_placement::DEFAULT_HEIGHT)
                 .decorated(false)
                 .title("Tsukimi")
                 .build();
             splash.add_css_class("startup-splash");
-            let is_maximized = SETTINGS.is_maximized();
-            if is_maximized {
-                splash.maximize();
-            }
-            let is_fullscreen = SETTINGS.is_fullscreen();
-            if is_fullscreen {
-                splash.fullscreen();
-            }
 
             (splash, status)
         }
@@ -229,6 +196,7 @@ mod imp {
                 );
                 crate::log_startup_timing("main window created");
                 window.load_window_state();
+                window_placement::prepare(window.upcast_ref(), Some(splash.upcast_ref()));
                 window.recalculate_layout("window restored");
 
                 status.set_text("正在连接服务器...");
@@ -244,7 +212,7 @@ mod imp {
                     #[upgrade_or]
                     glib::ControlFlow::Break,
                     move |window, _| {
-                        center_window(window.upcast_ref());
+                        window_placement::center(window.upcast_ref(), Some(splash.upcast_ref()));
                         crate::log_startup_timing("main window first frame shown");
                         window.recalculate_layout("app ready");
                         window.start_background_initialization();
@@ -257,6 +225,11 @@ mod imp {
         }
 
         fn reveal_main_window(window: &crate::Window, splash: &adw::ApplicationWindow) {
+            if !gtk::Settings::default().is_some_and(|settings| settings.is_gtk_enable_animations())
+            {
+                Self::finish_reveal(window, splash);
+                return;
+            }
             let started = std::time::Instant::now();
             window.add_tick_callback(glib::clone!(
                 #[weak]
@@ -269,13 +242,7 @@ mod imp {
                     window.set_opacity(eased);
 
                     if progress >= 1.0 {
-                        window.set_opacity(1.0);
-                        #[cfg(not(target_os = "windows"))]
-                        {
-                            window.set_modal(false);
-                            window.set_transient_for(gtk::Window::NONE);
-                        }
-                        splash.close();
+                        Self::finish_reveal(window, &splash);
                         glib::ControlFlow::Break
                     } else {
                         glib::ControlFlow::Continue
@@ -283,110 +250,16 @@ mod imp {
                 }
             ));
         }
-    }
 
-    fn restored_window_size() -> (i32, i32) {
-        (1152, 648)
-    }
-
-    fn fit_window_to_monitor(window: &gtk::Window) -> Option<(gtk::gdk::Rectangle, i32, i32)> {
-        let surface = window.surface()?;
-        let monitor = surface.display().monitor_at_surface(&surface)?;
-        let geometry = monitor.geometry();
-        let width = (geometry.width() as f64 * 0.60).round() as i32;
-        let height = (geometry.height() as f64 * 0.60).round() as i32;
-        window.set_default_size(width, height);
-        Some((geometry, width, height))
-    }
-
-    #[cfg(target_os = "macos")]
-    fn center_window(window: &gtk::Window) {
-        use std::ffi::{c_char, c_void};
-
-        use glib::translate::ToGlibPtr;
-
-        unsafe extern "C" {
-            fn gdk_macos_surface_get_native_window(
-                surface: *mut gtk::gdk::ffi::GdkSurface,
-            ) -> *mut c_void;
-        }
-        #[link(name = "objc")]
-        #[allow(clashing_extern_declarations)]
-        unsafe extern "C" {
-            fn sel_registerName(name: *const c_char) -> *mut c_void;
-            #[link_name = "objc_msgSend"]
-            fn objc_msg_send_id(receiver: *mut c_void, selector: *mut c_void) -> *mut c_void;
-            #[link_name = "objc_msgSend"]
-            fn objc_msg_send_void(receiver: *mut c_void, selector: *mut c_void);
-        }
-
-        let _ = fit_window_to_monitor(window);
-        let Some(surface) = window.surface() else {
-            return;
-        };
-        let native_view = unsafe { gdk_macos_surface_get_native_window(surface.to_glib_none().0) };
-        if native_view.is_null() {
-            return;
-        }
-
-        unsafe {
-            let window_selector = sel_registerName(c"window".as_ptr());
-            let native_window = objc_msg_send_id(native_view, window_selector);
-            if native_window.is_null() {
-                return;
+        fn finish_reveal(window: &crate::Window, splash: &adw::ApplicationWindow) {
+            window.set_opacity(1.0);
+            #[cfg(not(target_os = "windows"))]
+            {
+                window.set_modal(false);
+                window.set_transient_for(gtk::Window::NONE);
             }
-
-            let center_selector = sel_registerName(c"center".as_ptr());
-            objc_msg_send_void(native_window, center_selector);
+            splash.close();
         }
-    }
-
-    #[cfg(target_os = "windows")]
-    fn center_window(window: &gtk::Window) {
-        use std::ffi::c_void;
-
-        unsafe extern "C" {
-            fn gdk_win32_surface_get_handle(surface: *mut c_void) -> *mut c_void;
-        }
-        #[link(name = "user32")]
-        unsafe extern "system" {
-            fn SetWindowPos(
-                hwnd: *mut c_void, insert_after: *mut c_void, x: i32, y: i32, width: i32,
-                height: i32, flags: u32,
-            ) -> i32;
-        }
-
-        const SWP_NOZORDER: u32 = 0x0004;
-        const SWP_NOACTIVATE: u32 = 0x0010;
-
-        let Some((geometry, width, height)) = fit_window_to_monitor(window) else {
-            return;
-        };
-        let Some(surface) = window.surface() else {
-            return;
-        };
-        let hwnd = unsafe { gdk_win32_surface_get_handle(surface.as_ptr().cast::<c_void>()) };
-        if hwnd.is_null() {
-            return;
-        }
-        let x = geometry.x() + (geometry.width() - width) / 2;
-        let y = geometry.y() + (geometry.height() - height) / 2;
-        unsafe {
-            SetWindowPos(
-                hwnd,
-                std::ptr::null_mut(),
-                x,
-                y,
-                width,
-                height,
-                SWP_NOZORDER | SWP_NOACTIVATE,
-            );
-        }
-    }
-
-    #[cfg(not(any(target_os = "macos", target_os = "windows")))]
-    fn center_window(window: &gtk::Window) {
-        let _ = fit_window_to_monitor(window);
     }
 }
 
