@@ -11,9 +11,12 @@ use libmpv2::{
     mpv_node::MpvNode,
     render::RenderContext,
 };
-use tracing::{debug, warn};
+use tracing::{debug, info, warn};
 
 const MAX_VOLUME: i64 = 100;
+const CHANNEL_SWAP_LABEL: &str = "tsukimi-channel-swap";
+const CHANNEL_SWAP_FILTER: &str =
+    "@tsukimi-channel-swap:lavfi=[aformat=channel_layouts=stereo,pan=stereo|c0=c1|c1=c0]";
 
 #[derive(Clone, Debug)]
 pub struct MpvTrack {
@@ -140,6 +143,12 @@ impl Default for TsukimiMPV {
         })
         .expect("Failed to create mpv instance");
 
+        if SETTINGS.mpv_audio_channel() == 4
+            && let Err(error) = configure_audio_channels(&mpv, 4)
+        {
+            warn!(%error, "Failed to initialize audio channel swap");
+        }
+
         Self {
             mpv: Arc::new(mpv),
             ctx: RefCell::new(None),
@@ -249,6 +258,15 @@ impl TsukimiMPV {
 
     pub fn set_speed(&self, speed: f64) {
         self.set_property("speed", speed);
+    }
+
+    pub fn set_audio_channel(&self, selected: i32) {
+        let mpv = Arc::clone(&self.mpv);
+        spawn_tokio_blocking_without_await(move || {
+            if let Err(error) = configure_audio_channels(&mpv, selected) {
+                warn!(%error, selected, "Failed to configure audio channels");
+            }
+        });
     }
 
     pub fn set_aid(&self, aid: TrackSelection) {
@@ -467,6 +485,14 @@ impl TsukimiMPV {
                             Event::FileLoaded => {
                                 let _ = MPV_EVENT_CHANNEL.tx.send(ListenEvent::FileLoaded);
                             }
+                            Event::AudioReconfig => {
+                                info!(
+                                    output = ?mpv.get_property::<String>("audio-out-params"),
+                                    volume = ?mpv.get_property::<f64>("volume"),
+                                    speed = ?mpv.get_property::<f64>("speed"),
+                                    "MPV audio output reconfigured"
+                                );
+                            }
                             Event::Shutdown => {
                                 let _ = MPV_EVENT_CHANNEL.tx.send(ListenEvent::Shutdown);
                             }
@@ -496,6 +522,70 @@ impl TsukimiMPV {
 
 unsafe impl Send for TsukimiMPV {}
 unsafe impl Sync for TsukimiMPV {}
+
+fn audio_filter_has_label(mpv: &Mpv, label: &str) -> Result<bool, libmpv2::Error> {
+    let filters = mpv.get_property::<MpvNode>("af")?;
+    Ok(filters.array().is_some_and(|mut filters| {
+        filters.any(|filter| {
+            filter.map().is_some_and(|mut fields| {
+                fields.any(|(key, value)| key == "label" && value.str() == Some(label))
+            })
+        })
+    }))
+}
+
+fn configure_audio_channels(mpv: &Mpv, selected: i32) -> Result<(), libmpv2::Error> {
+    let channels = match_audio_channels(selected);
+    if mpv.get_property::<String>("audio-channels")? != channels {
+        mpv.set_property("audio-channels", channels)?;
+    }
+
+    // Preserve user filters and downmix surround dialogue before swapping L/R.
+    let has_swap = audio_filter_has_label(mpv, CHANNEL_SWAP_LABEL)?;
+    if selected == 4 && !has_swap {
+        mpv.command("af", &["add", CHANNEL_SWAP_FILTER])?;
+    } else if selected != 4 && has_swap {
+        mpv.command("af", &["remove", "@tsukimi-channel-swap"])?;
+    }
+    Ok(())
+}
+
+#[cfg(test)]
+mod audio_tests {
+    use super::*;
+
+    #[test]
+    fn channel_changes_preserve_user_filters_and_do_not_duplicate_swap() {
+        let mpv = Mpv::with_initializer(|init| {
+            init.set_property("config", false)?;
+            init.set_property("vo", "null")?;
+            init.set_property("ao", "null")?;
+            Ok(())
+        })
+        .unwrap();
+        mpv.command("af", &["add", "@user-volume:lavfi=[volume=0.75]"])
+            .unwrap();
+
+        configure_audio_channels(&mpv, 4).unwrap();
+        assert!(audio_filter_has_label(&mpv, "user-volume").unwrap());
+        assert!(audio_filter_has_label(&mpv, CHANNEL_SWAP_LABEL).unwrap());
+        assert_eq!(
+            mpv.get_property::<String>("audio-channels").unwrap(),
+            "stereo"
+        );
+        let filters = mpv.get_property::<String>("af").unwrap();
+        configure_audio_channels(&mpv, 4).unwrap();
+        assert_eq!(mpv.get_property::<String>("af").unwrap(), filters);
+
+        configure_audio_channels(&mpv, 1).unwrap();
+        assert!(audio_filter_has_label(&mpv, "user-volume").unwrap());
+        assert!(!audio_filter_has_label(&mpv, CHANNEL_SWAP_LABEL).unwrap());
+        assert_eq!(
+            mpv.get_property::<String>("audio-channels").unwrap(),
+            "auto-safe"
+        );
+    }
+}
 
 #[derive(Clone, Debug)]
 pub struct MpvTracks {

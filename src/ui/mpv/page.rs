@@ -217,6 +217,7 @@ mod imp {
         pub retrying_playback: Cell<bool>,
         pub allow_fallback: Cell<bool>,
         pub last_nonzero_volume: Cell<i64>,
+        pub updating_volume: Cell<bool>,
 
         #[property(get, set, default_value = true)]
         pub can_fade_cursor_set: Cell<bool>,
@@ -301,8 +302,14 @@ mod imp {
                 )
                 .build();
 
+            self.updating_volume.set(true);
+            self.volume_adj
+                .set_value(SETTINGS.mpv_default_volume() as f64);
+            self.updating_volume.set(false);
+            // Persist volume without feeding settings changes back into playback.
             SETTINGS
                 .bind("mpv-default-volume", &self.volume_adj.get(), "value")
+                .flags(gtk::gio::SettingsBindFlags::SET)
                 .build();
 
             self.video_scale.set_player(Some(&self.video.get()));
@@ -394,7 +401,7 @@ mod imp {
 
 fn normalize_window_control_buttons(widget: &gtk::Widget) {
     if let Some(button) = widget.downcast_ref::<gtk::Button>() {
-        button.set_size_request(18, 18);
+        button.set_size_request(-1, -1);
         button.set_hexpand(false);
         button.set_vexpand(false);
         button.set_halign(gtk::Align::Center);
@@ -1102,7 +1109,9 @@ impl MPVPage {
 
     fn volume_cb(&self, value: i64) {
         let imp = self.imp();
+        imp.updating_volume.set(true);
         imp.volume_adj.set_value(value as f64);
+        imp.updating_volume.set(false);
         imp.volume_bar.set_level(value as f64 / 100.0);
         if value > 0 {
             imp.last_nonzero_volume.set(value);
@@ -1128,7 +1137,9 @@ impl MPVPage {
     #[template_callback]
     fn on_volume_scale_value_changed(&self, btn: &gtk::Scale) {
         let imp = self.imp();
-        imp.video.set_volume(btn.value() as i64);
+        if !imp.updating_volume.get() {
+            imp.video.set_volume(btn.value().round() as i64);
+        }
     }
 
     #[template_callback]

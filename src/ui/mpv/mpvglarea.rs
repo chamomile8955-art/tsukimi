@@ -271,6 +271,10 @@ impl MPVGLArea {
         self.imp().mpv().set_volume(value)
     }
 
+    pub fn set_audio_channel(&self, value: i32) {
+        self.imp().mpv().set_audio_channel(value)
+    }
+
     pub fn display_stats_toggle(&self) {
         self.imp().mpv().display_stats_toggle()
     }

@@ -1,3 +1,26 @@
+/* Floating dialogs and list frames use the same outer geometry on every page.
+ * Bottom sheets and fullscreen dialogs retain their edge-aligned shape. */
+.app-window dialog floating-sheet > sheet,
+.account-settings dialog floating-sheet > sheet,
+.settings-editor floating-sheet > sheet,
+.app-window .boxed-list {
+  border-radius: var(--tsukimi-surface-radius);
+}
+
+.app-window .boxed-list row {
+  border-radius: 0;
+}
+
+.app-window .boxed-list > row:first-child {
+  border-top-left-radius: var(--tsukimi-surface-radius);
+  border-top-right-radius: var(--tsukimi-surface-radius);
+}
+
+.app-window .boxed-list > row:last-child {
+  border-bottom-left-radius: var(--tsukimi-surface-radius);
+  border-bottom-right-radius: var(--tsukimi-surface-radius);
+}
+
 /* Settings share native theme colors; geometry and states are theme-independent. */
 window.account-settings,
 window.account-settings > contents,
@@ -5,6 +28,8 @@ window.account-settings > contents,
 .account-settings navigationview,
 .account-settings toolbarview,
 .account-settings headerbar,
+.app-window .settings-surface,
+.app-window .settings-surface headerbar,
 .settings-editor sheet,
 .settings-editor toolbarview,
 .settings-editor headerbar {
@@ -19,60 +44,125 @@ window.account-settings {
 }
 
 .account-settings .boxed-list,
+.app-window .settings-surface .boxed-list,
 .settings-editor .boxed-list {
   border: 1px solid alpha(@window_fg_color, 0.10);
-  border-radius: 8px;
+  border-radius: var(--tsukimi-surface-radius);
   background-color: @card_bg_color;
   box-shadow: none;
 }
 
 .account-settings .boxed-list > row,
+.app-window .settings-surface .boxed-list > row,
 .settings-editor .boxed-list > row {
   min-height: 56px;
+  border-radius: 0;
+  background-color: transparent;
+  color: @window_fg_color;
+}
+
+.app-window .settings-surface row {
+  background-color: transparent;
+}
+
+.account-settings .boxed-list row,
+.app-window .settings-surface .boxed-list row,
+.settings-editor .boxed-list row {
   border-radius: 0;
 }
 
 .account-settings .boxed-list > row:first-child,
+.app-window .settings-surface .boxed-list > row:first-child,
 .settings-editor .boxed-list > row:first-child {
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
+  border-top-left-radius: var(--tsukimi-surface-radius);
+  border-top-right-radius: var(--tsukimi-surface-radius);
 }
 
 .account-settings .boxed-list > row:last-child,
+.app-window .settings-surface .boxed-list > row:last-child,
 .settings-editor .boxed-list > row:last-child {
-  border-bottom-left-radius: 8px;
-  border-bottom-right-radius: 8px;
+  border-bottom-left-radius: var(--tsukimi-surface-radius);
+  border-bottom-right-radius: var(--tsukimi-surface-radius);
 }
 
 .account-settings label,
 .account-settings image,
+.account-settings button label,
+.account-settings button image,
+.app-window .settings-surface label,
+.app-window .settings-surface image,
 .settings-editor label,
 .settings-editor image {
   color: @window_fg_color;
 }
 
 .account-settings .subtitle,
+.app-window .settings-surface .subtitle,
+.app-window .settings-surface .dimmed,
 .settings-editor .subtitle {
   color: alpha(@window_fg_color, 0.65);
+  opacity: 1;
+}
+
+.account-settings button,
+.account-settings togglebutton,
+.app-window .settings-surface button,
+.app-window .settings-surface togglebutton,
+.settings-editor button {
+  border-radius: var(--tsukimi-surface-radius);
+  color: @window_fg_color;
 }
 
 .account-settings button.flat,
+.app-window .settings-surface button.flat,
 .settings-editor button.flat {
-  min-width: 32px;
-  min-height: 32px;
+  min-width: 40px;
+  min-height: 40px;
   padding: 4px 8px;
   border: 1px solid transparent;
-  border-radius: 6px;
+  border-radius: var(--tsukimi-surface-radius);
   background-color: transparent;
   box-shadow: none;
 }
 
+.account-settings .boxed-list button.image-button,
+.app-window .settings-surface button.image-button,
+.app-window .settings-surface togglebutton,
+.settings-editor .boxed-list button.image-button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+}
+
+.account-settings box.linked,
+.app-window .settings-surface box.linked,
+.settings-editor box.linked {
+  padding: 0;
+  border: none;
+  border-radius: var(--tsukimi-surface-radius);
+  background-color: transparent;
+  background-image: none;
+  box-shadow: none;
+}
+
+.account-settings box.linked > button,
+.app-window .settings-surface box.linked > button,
+.app-window .settings-surface box.linked > togglebutton,
+.settings-editor box.linked > button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border-radius: var(--tsukimi-surface-radius);
+}
+
 .account-settings button.flat:hover,
+.app-window .settings-surface button.flat:hover,
 .settings-editor button.flat:hover {
   background-color: alpha(@window_fg_color, 0.08);
 }
 
 .account-settings button.flat:active,
+.app-window .settings-surface button.flat:active,
 .settings-editor button.flat:active {
   background-color: alpha(@window_fg_color, 0.14);
 }
@@ -98,6 +188,7 @@ window.account-settings {
 
 .account-settings row.suggested-action,
 .account-settings button.suggested-action,
+.app-window .settings-surface button.suggested-action,
 .settings-editor button.suggested-action {
   background-color: @accent_bg_color;
   border-color: transparent;
@@ -106,12 +197,14 @@ window.account-settings {
 
 .account-settings row.suggested-action:hover,
 .account-settings button.suggested-action:hover,
+.app-window .settings-surface button.suggested-action:hover,
 .settings-editor button.suggested-action:hover {
   background-color: shade(@accent_bg_color, 1.08);
 }
 
 .account-settings row.suggested-action:active,
 .account-settings button.suggested-action:active,
+.app-window .settings-surface button.suggested-action:active,
 .settings-editor button.suggested-action:active {
   background-color: shade(@accent_bg_color, 0.92);
 }
@@ -120,12 +213,15 @@ window.account-settings {
 .account-settings row.suggested-action image,
 .account-settings button.suggested-action label,
 .account-settings button.suggested-action image,
+.app-window .settings-surface button.suggested-action label,
+.app-window .settings-surface button.suggested-action image,
 .settings-editor button.suggested-action label,
 .settings-editor button.suggested-action image {
   color: @accent_fg_color;
 }
 
 .account-settings button:focus-visible,
+.app-window .settings-surface button:focus-visible,
 .settings-editor button:focus-visible {
   outline: 2px solid @accent_color;
   outline-offset: 2px;
@@ -133,6 +229,8 @@ window.account-settings {
 
 .account-settings button:disabled,
 .account-settings row:disabled,
+.app-window .settings-surface button:disabled,
+.app-window .settings-surface row:disabled,
 .settings-editor button:disabled {
   opacity: 0.45;
 }
@@ -140,4 +238,85 @@ window.account-settings {
 .account-settings .themeselector checkbutton {
   min-width: 36px;
   min-height: 36px;
+}
+
+/* Spin controls live inside a settings row, not inside a second capsule. */
+.app-window .settings-surface spinbutton,
+.app-window .settings-surface spinbutton text {
+  min-height: 40px;
+  background-color: transparent;
+  background-image: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  color: @window_fg_color;
+}
+
+.app-window .settings-surface spinbutton button {
+  min-width: 32px;
+  min-height: 40px;
+  padding: 0;
+  border: none;
+  background-color: transparent;
+}
+
+.app-window .settings-surface spinbutton button:hover,
+.account-settings .boxed-list > row.activatable:hover,
+.app-window .settings-surface row.activatable:hover {
+  background-color: alpha(@window_fg_color, 0.08);
+}
+
+.app-window .settings-surface button:checked,
+.app-window .settings-surface togglebutton:checked {
+  background-color: alpha(@window_fg_color, 0.10);
+}
+
+/* Main navigation and player utility tabs share one capsule and state palette. */
+.app-window .segmented-control.navigation-switcher {
+  min-height: 40px;
+}
+
+.app-window .segmented-control.navigation-switcher > button {
+  min-width: 0;
+  min-height: 44px;
+  margin: 0;
+  padding: 0 18px;
+  border: none;
+  border-radius: 999px;
+  background-color: transparent;
+  background-image: none;
+  box-shadow: none;
+  color: @window_fg_color;
+}
+
+window.app-window.compact-1080 .navigation-switcher > button {
+  padding-left: 14px;
+  padding-right: 14px;
+}
+
+.app-window .navigation-switcher > button:hover {
+  background-color: @navigation_hover;
+}
+
+.app-window .navigation-switcher > button:active,
+.app-window .navigation-switcher > button:checked,
+.app-window .navigation-switcher > button.active {
+  background-color: @navigation_selected;
+}
+
+.app-window .navigation-switcher > button:focus-visible {
+  outline: 2px solid @accent_color;
+  outline-offset: 2px;
+}
+
+.app-window .navigation-switcher > button:disabled {
+  opacity: 0.45;
+}
+
+.app-window .navigation-switcher > button label,
+.app-window .navigation-switcher > button image {
+  color: inherit;
+  font-weight: 600;
+  text-shadow: none;
+  -gtk-icon-shadow: none;
 }

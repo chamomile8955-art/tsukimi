@@ -41,8 +41,12 @@ const APP_RESOURCE_PATH: &str = "/moe/tsuna/tsukimi";
 const GRESOURCE_FILE: &str = "tsukimi.gresource";
 const WINDOW_UI_RESOURCE: &str = "/moe/tsuna/tsukimi/ui/window.ui";
 const STYLE_CSS_RESOURCE: &str = "/moe/tsuna/tsukimi/style.css";
+const DARK_STYLE_CSS_RESOURCE: &str = "/moe/tsuna/tsukimi/theme-dark.css";
+const SETTINGS_STYLE_CSS_RESOURCE: &str = "/moe/tsuna/tsukimi/style-settings.css";
 const BUILD_WINDOW_UI: &[u8] = include_bytes!("../resources/ui/window.ui");
 const BUILD_STYLE_CSS: &[u8] = include_bytes!("../resources/style.css");
+const BUILD_DARK_STYLE_CSS: &[u8] = include_bytes!("../resources/style-dark.css");
+const BUILD_SETTINGS_STYLE_CSS: &[u8] = include_bytes!("../resources/style-settings.css");
 static STARTUP_STARTED: OnceLock<Instant> = OnceLock::new();
 static UI_PREVIEW_MODE: OnceLock<bool> = OnceLock::new();
 
@@ -281,6 +285,8 @@ fn register_gio_resources() {
     let resources = gtk::gio::Resource::load(&path).expect("Failed to load resources.");
     log_resource_entry(&resources, WINDOW_UI_RESOURCE, BUILD_WINDOW_UI);
     log_resource_entry(&resources, STYLE_CSS_RESOURCE, BUILD_STYLE_CSS);
+    log_resource_entry(&resources, DARK_STYLE_CSS_RESOURCE, BUILD_DARK_STYLE_CSS);
+    log_resource_entry(&resources, SETTINGS_STYLE_CSS_RESOURCE, BUILD_SETTINGS_STYLE_CSS);
     gtk::gio::resources_register(&resources);
     tracing::info!(
         resource_base_path = APP_RESOURCE_PATH,

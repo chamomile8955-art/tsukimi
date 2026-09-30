@@ -1606,7 +1606,7 @@ impl Window {
             group.add(&Self::media_info_row(
                 "等待媒体加载",
                 Some("开始播放后会在这里显示媒体、音频和字幕信息"),
-                "info-symbolic",
+                "card-bulleted-symbolic",
             ));
             container.append(&group);
             return;
@@ -1672,7 +1672,7 @@ impl Window {
         let row = Self::media_info_row(
             "视频信息覆盖层",
             Some("显示或隐藏 mpv 播放统计"),
-            "info-symbolic",
+            "card-bulleted-symbolic",
         );
         let button = gtk::Button::builder()
             .label("切换")

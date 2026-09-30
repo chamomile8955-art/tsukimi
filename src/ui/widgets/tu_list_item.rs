@@ -23,7 +23,10 @@ pub mod imp {
 
     use crate::ui::{
         provider::tu_item::TuItem,
-        widgets::{hover_scale::HoverScale, picture_loader::PictureLoader, tu_item::TuItemAction},
+        widgets::{
+            hover_scale::HoverScale, picture_loader::PictureLoader,
+            theme_switcher::SURFACE_CORNER_RADIUS, tu_item::TuItemAction,
+        },
     };
 
     #[derive(Default, Hash, Eq, PartialEq, Clone, Copy, glib::Enum, Debug)]
@@ -182,11 +185,10 @@ pub mod imp {
             &self, paintable: &gdk::Paintable, pic_bounds: &graphene::Rect, widget_w: f32,
             widget_h: f32,
         ) -> Option<BackdropNodeCache> {
-            const CORNER_RADIUS: f32 = 10.0;
             const BLUR_RADIUS: f64 = 20.0;
 
             let pic_bottom = pic_bounds.y() + pic_bounds.height();
-            let backdrop_y = pic_bottom - CORNER_RADIUS;
+            let backdrop_y = pic_bottom - SURFACE_CORNER_RADIUS;
             let backdrop_h = widget_h - backdrop_y;
 
             if backdrop_h <= 0.0 {
@@ -198,8 +200,8 @@ pub mod imp {
                 backdrop_rect,
                 graphene::Size::new(0.0, 0.0),
                 graphene::Size::new(0.0, 0.0),
-                graphene::Size::new(CORNER_RADIUS, CORNER_RADIUS),
-                graphene::Size::new(CORNER_RADIUS, CORNER_RADIUS),
+                graphene::Size::new(SURFACE_CORNER_RADIUS, SURFACE_CORNER_RADIUS),
+                graphene::Size::new(SURFACE_CORNER_RADIUS, SURFACE_CORNER_RADIUS),
             );
 
             let sub = gtk::Snapshot::new();

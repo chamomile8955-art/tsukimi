@@ -18,6 +18,7 @@
                 <property name="stack">stack</property>
                 <style>
                   <class name="segmented-control"/>
+                  <class name="navigation-switcher"/>
                   <class name="library-tabs"/>
                 </style>
               </object>

@@ -2,10 +2,9 @@ use adw::{prelude::*, subclass::prelude::*};
 use gettextrs::gettext;
 use gtk::{CompositeTemplate, gio, glib, template_callbacks};
 use libmpv2::SetData;
+use std::cell::Cell;
 
-use super::options_matcher::{
-    match_audio_channels, match_hwdec_interop, match_sub_border_style, match_video_upscale,
-};
+use super::options_matcher::{match_hwdec_interop, match_sub_border_style, match_video_upscale};
 use crate::ui::{GlobalToast, models::SETTINGS};
 
 mod imp {
@@ -21,6 +20,7 @@ mod imp {
     pub struct MPVControlSidebar {
         #[property(get, set = Self::set_player, explicit_notify, nullable)]
         pub player: glib::WeakRef<MPVGLArea>,
+        pub updating_playback_speed: Cell<bool>,
 
         #[template_child]
         pub playback_speed_adj: TemplateChild<gtk::Adjustment>,
@@ -286,13 +286,17 @@ impl MPVControlSidebar {
     pub fn set_playback_speed(&self, value: f64) {
         let adj = &self.imp().playback_speed_adj;
         if (adj.value() - value).abs() > f64::EPSILON {
+            self.imp().updating_playback_speed.set(true);
             adj.set_value(value);
+            self.imp().updating_playback_speed.set(false);
         }
     }
 
     #[template_callback]
     pub fn on_playback_speed(&self, _param: glib::ParamSpec, spin: adw::SpinRow) {
-        if let Some(player) = self.player() {
+        if !self.imp().updating_playback_speed.get()
+            && let Some(player) = self.player()
+        {
             player.set_speed(spin.value());
         }
     }
@@ -486,7 +490,7 @@ impl MPVControlSidebar {
     fn on_sub_offset_clear(&self, _button: gtk::Button) {
         let imp = self.imp();
         imp.sub_offset_adj.set_value(0.0);
-        imp.sub_speed_adj.set_value(0.0);
+        imp.sub_speed_adj.set_value(1.0);
 
         self.toast(gettext("Subtitle offset settings cleared."));
     }
@@ -535,17 +539,9 @@ impl MPVControlSidebar {
 
     #[template_callback]
     fn on_audio_channel(&self, _param: glib::ParamSpec, combo: adw::ComboRow) {
-        let selected = combo.selected();
-
-        if selected == 4 {
-            self.set_mpv_property("af", "pan=[stereo|c0=c1|c1=c0]");
-            return;
+        if let Some(player) = self.player() {
+            player.set_audio_channel(combo.selected() as i32);
         }
-
-        let channel = match_audio_channels(selected as i32);
-
-        self.set_mpv_property("af", "");
-        self.set_mpv_property("audio-channels", channel);
     }
 
     #[template_callback]

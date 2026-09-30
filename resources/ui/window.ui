@@ -188,6 +188,7 @@
                                             <style>
                                               <class name="top-navigation"/>
                                               <class name="segmented-control"/>
+                                              <class name="navigation-switcher"/>
                                             </style>
                                             <child>
                                               <object class="GtkToggleButton" id="home_nav">
@@ -481,7 +482,7 @@
                             <property name="show-sidebar">False</property>
                             <property name="pin-sidebar">False</property>
                             <property name="sidebar-position">end</property>
-                            <property name="min-sidebar-width">420</property>
+                            <property name="min-sidebar-width">448</property>
                             <property name="max-sidebar-width">520</property>
                             <style>
                               <class name="mpv-overlay-menu"/>
@@ -494,8 +495,8 @@
                                 <property name="margin-bottom">18</property>
                                 <property name="margin-start">8</property>
                                 <style>
-                                  <class name="osd" />
                                   <class name="mpv-sidebar-panel"/>
+                                  <class name="settings-surface"/>
                                 </style>
                                 <property name="title" translatable="yes">Playlist</property>
                                 <property name="child">
@@ -543,11 +544,13 @@
                                                 <property name="title-widget">
                                                   <object class="GtkBox">
                                                     <property name="orientation">horizontal</property>
-                                                    <property name="spacing">6</property>
+                                                    <property name="spacing">0</property>
                                                     <property name="halign">center</property>
                                                     <property name="valign">center</property>
                                                     <style>
                                                       <class name="mpv-sidebar-switcher"/>
+                                                      <class name="segmented-control"/>
+                                                      <class name="navigation-switcher"/>
                                                     </style>
                                                     <child>
                                                       <object class="GtkButton" id="mpv_settings_tab">
@@ -561,6 +564,7 @@
                                                         <style>
                                                           <class name="flat"/>
                                                           <class name="mpv-sidebar-tab"/>
+                                                          <class name="segment-button"/>
                                                         </style>
                                                       </object>
                                                     </child>
@@ -576,6 +580,7 @@
                                                         <style>
                                                           <class name="flat"/>
                                                           <class name="mpv-sidebar-tab"/>
+                                                          <class name="segment-button"/>
                                                         </style>
                                                       </object>
                                                     </child>
@@ -584,13 +589,14 @@
                                                         <property name="action-name">win.mpv-media-info</property>
                                                         <property name="child">
                                                           <object class="AdwButtonContent">
-                                                            <property name="icon-name">info-symbolic</property>
+                                                            <property name="icon-name">card-bulleted-symbolic</property>
                                                             <property name="label" translatable="yes">媒体信息</property>
                                                           </object>
                                                         </property>
                                                         <style>
                                                           <class name="flat"/>
                                                           <class name="mpv-sidebar-tab"/>
+                                                          <class name="segment-button"/>
                                                         </style>
                                                       </object>
                                                     </child>
@@ -641,7 +647,7 @@
                                                 <child>
                                                   <object class="AdwViewStackPage">
                                                     <property name="name">media-info</property>
-                                                    <property name="icon-name">info-symbolic</property>
+                                                    <property name="icon-name">card-bulleted-symbolic</property>
                                                     <property name="title" translatable="yes">媒体信息</property>
                                                     <property name="child">
                                                       <object class="GtkScrolledWindow">
@@ -666,7 +672,6 @@
                                               </object>
                                             </property>
                                             <style>
-                                              <class name="osd" />
                                               <class name="mpv-settings-shell"/>
                                             </style>
                                           </object>

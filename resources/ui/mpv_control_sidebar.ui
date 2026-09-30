@@ -138,10 +138,11 @@
                   <object class="AdwExpanderRow">
                     <property name="title" translatable="yes">Subtitle Composing</property>
                     <child type="suffix">
-                      <object class="GtkToggleButton">
+                      <object class="GtkButton">
                         <property name="icon-name">large-brush-symbolic</property>
+                        <property name="tooltip-text" translatable="yes">Clear</property>
                         <property name="valign">3</property>
-                        <signal name="toggled" handler="on_sub_clear" swapped="yes" />
+                        <signal name="clicked" handler="on_sub_clear" swapped="yes" />
                         <style>
                           <class name="flat"/>
                         </style>
@@ -233,7 +234,7 @@
                         <signal name="notify::value" handler="on_sub_size" swapped="yes" />
                         <child type="prefix">
                           <object class="GtkImage">
-                            <property name="icon-name">media-view-subtitles-symbolic</property>
+                            <property name="icon-name">captions-symbolic</property>
                           </object>
                         </child>
                         <property name="adjustment">
@@ -254,7 +255,7 @@
                         <signal name="notify::value" handler="on_sub_scale" swapped="yes" />
                         <child type="prefix">
                           <object class="GtkImage">
-                            <property name="icon-name">media-view-subtitles-symbolic</property>
+                            <property name="icon-name">captions-symbolic</property>
                           </object>
                         </child>
                         <property name="digits">2</property>
@@ -275,11 +276,6 @@
                         <property name="title-lines">1</property>
                         <property name="tooltip-text" translatable="yes">Specify font to use for subtitles that do not themselves specify a particular font</property>
                         <property name="activatable-widget">sub_font_button</property>
-                        <child type="prefix">
-                          <object class="GtkImage">
-                            <property name="icon-name">preferences-desktop-font-symbolic</property>
-                          </object>
-                        </child>
                         <child type="suffix">
                           <object class="GtkFontDialogButton" id="sub_font_button">
                             <property name="level">0</property>
@@ -356,6 +352,7 @@
                       <object class="GtkButton">
                         <property name="icon-name">large-brush-symbolic</property>
                         <property name="valign">3</property>
+                        <property name="tooltip-text" translatable="yes">Clear</property>
                         <signal name="clicked" handler="on_sub_color_clear" swapped="yes" />
                         <style>
                           <class name="flat"/>
@@ -425,6 +422,7 @@
                       <object class="GtkButton">
                         <property name="icon-name">large-brush-symbolic</property>
                         <property name="valign">3</property>
+                        <property name="tooltip-text" translatable="yes">Clear</property>
                         <signal name="clicked" handler="on_sub_offset_clear" swapped="yes" />
                         <style>
                           <class name="flat"/>
@@ -477,6 +475,7 @@
                   <object class="GtkButton">
                     <property name="icon-name">large-brush-symbolic</property>
                     <property name="valign">3</property>
+                    <property name="tooltip-text" translatable="yes">Clear</property>
                     <signal name="clicked" handler="on_audio_clear" swapped="yes" />
                     <style>
                       <class name="flat"/>
@@ -545,6 +544,7 @@
                       <object class="GtkButton">
                         <property name="icon-name">large-brush-symbolic</property>
                         <property name="valign">3</property>
+                        <property name="tooltip-text" translatable="yes">Clear</property>
                         <signal name="clicked" handler="on_video_filter_clear" swapped="yes" />
                         <style>
                           <class name="flat"/>
@@ -636,6 +636,7 @@
                       <object class="GtkButton">
                         <property name="icon-name">large-brush-symbolic</property>
                         <property name="valign">3</property>
+                        <property name="tooltip-text" translatable="yes">Clear</property>
                         <signal name="clicked" handler="on_video_deband_clear" swapped="yes" />
                         <style>
                           <class name="flat"/>

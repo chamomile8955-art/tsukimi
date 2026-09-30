@@ -16,7 +16,7 @@ pub fn match_audio_channels<'a>(matcher: i32) -> &'a str {
     match matcher {
         1 => "auto-safe",
         2 => "mono",
-        3 => "stereo",
+        3 | 4 => "stereo",
         _ => "auto",
     }
 }
