@@ -1,6 +1,6 @@
 use gettextrs::gettext;
 use glib::Object;
-use gtk::{gio, glib, subclass::prelude::*};
+use gtk::{gio, glib, prelude::*, subclass::prelude::*};
 
 use super::{
     hortu_scrolled::UnifySize,
@@ -10,6 +10,10 @@ use crate::{
     client::jellyfin_client::JELLYFIN_CLIENT,
     ui::provider::tu_item::{PreferPoster, TuItem},
 };
+
+pub(super) const LIBRARY_TAB_CLASSES: [&str; 3] =
+    ["segmented-control", "navigation-switcher", "library-tabs"];
+
 mod imp {
 
     use std::cell::OnceCell;
@@ -28,6 +32,7 @@ mod imp {
         pub item: OnceCell<TuItem>,
         #[template_child]
         pub stack: TemplateChild<gtk::Stack>,
+        pub tabs: OnceCell<gtk::ScrolledWindow>,
     }
 
     #[glib::object_subclass]
@@ -50,6 +55,29 @@ mod imp {
         fn constructed(&self) {
             self.parent_constructed();
             let obj = self.obj();
+            let switcher = gtk::StackSwitcher::builder()
+                .stack(&self.stack)
+                .halign(gtk::Align::Center)
+                .css_classes(super::LIBRARY_TAB_CLASSES)
+                .build();
+            self.tabs
+                .set(
+                    gtk::ScrolledWindow::builder()
+                        .hscrollbar_policy(gtk::PolicyType::External)
+                        .vscrollbar_policy(gtk::PolicyType::Never)
+                        .propagate_natural_width(true)
+                        .valign(gtk::Align::Center)
+                        .margin_start(8)
+                        .margin_end(8)
+                        .child(&switcher)
+                        .build(),
+                )
+                .expect("Library tabs initialized once");
+            self.stack.connect_visible_child_notify(glib::clone!(
+                #[weak]
+                obj,
+                move |_| obj.sync_toolbar_navigation()
+            ));
             spawn_g_timeout(glib::clone!(
                 #[weak]
                 obj,
@@ -57,6 +85,18 @@ mod imp {
                     obj.set_pages().await;
                 }
             ));
+        }
+
+        fn dispose(&self) {
+            if let Some(tabs) = self.tabs.get() {
+                // The switcher lives inside a stack page; release its stack reference first.
+                if let Some(switcher) = tabs.child().and_downcast::<gtk::StackSwitcher>() {
+                    switcher.set_stack(None::<&gtk::Stack>);
+                }
+                if let Some(toolbar) = tabs.parent().and_downcast::<gtk::CenterBox>() {
+                    toolbar.set_center_widget(None::<&gtk::Widget>);
+                }
+            }
         }
     }
 
@@ -79,6 +119,19 @@ glib::wrapper! {
 impl ListPage {
     pub fn new(item: TuItem) -> Self {
         Object::builder().property("item", item).build()
+    }
+
+    fn sync_toolbar_navigation(&self) {
+        let imp = self.imp();
+        let Some(tabs) = imp.tabs.get() else {
+            return;
+        };
+        if let Some(toolbar) = tabs.parent().and_downcast::<gtk::CenterBox>() {
+            toolbar.set_center_widget(None::<&gtk::Widget>);
+        }
+        if let Some(page) = imp.stack.visible_child().and_downcast::<SingleGrid>() {
+            page.set_toolbar_navigation(tabs);
+        }
     }
 
     pub async fn set_pages(&self) {

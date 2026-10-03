@@ -58,29 +58,33 @@ mod imp {
             klass.bind_template();
             klass.bind_template_instance_callbacks();
 
-            if IS_ADMIN.load(std::sync::atomic::Ordering::Relaxed) {
-                klass.install_action(
-                    "image.edit",
-                    None,
-                    move |image_info_card, _action, _parameter| {
+            klass.install_action(
+                "image.edit",
+                None,
+                move |image_info_card, _action, _parameter| {
+                    if IS_ADMIN.load(std::sync::atomic::Ordering::Relaxed) {
                         image_info_card.on_edit();
-                    },
-                );
-                klass.install_action_async(
-                    "image.delete",
-                    None,
-                    |image_info_card, _action, _parameter| async move {
+                    }
+                },
+            );
+            klass.install_action_async(
+                "image.delete",
+                None,
+                |image_info_card, _action, _parameter| async move {
+                    if IS_ADMIN.load(std::sync::atomic::Ordering::Relaxed) {
                         image_info_card.on_delete().await;
-                    },
-                );
-                klass.install_action(
-                    "image.search",
-                    None,
-                    move |image_info_card, _action, _parameter| {
+                    }
+                },
+            );
+            klass.install_action(
+                "image.search",
+                None,
+                move |image_info_card, _action, _parameter| {
+                    if IS_ADMIN.load(std::sync::atomic::Ordering::Relaxed) {
                         image_info_card.on_search();
-                    },
-                );
-            }
+                    }
+                },
+            );
         }
 
         fn instance_init(obj: &InitializingObject<Self>) {
@@ -95,10 +99,13 @@ mod imp {
 
             self.label1.set_text(&gettext(self.obj().imgtype()));
 
-            self.obj()
-                .action_set_enabled("image.search", self.obj().searchable());
-            self.obj()
-                .action_set_enabled("image.edit", self.obj().searchable());
+            let is_admin = IS_ADMIN.load(std::sync::atomic::Ordering::Relaxed);
+            self.edit_menu_button.set_visible(is_admin);
+            self.obj().action_set_enabled("image.delete", is_admin);
+            for action in ["image.search", "image.edit"] {
+                self.obj()
+                    .action_set_enabled(action, is_admin && self.obj().searchable());
+            }
         }
     }
 

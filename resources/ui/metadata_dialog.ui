@@ -102,7 +102,7 @@
                                               <object class="GtkMenuButton">
                                                 <property name="valign">center</property>
                                                 <property name="direction">down</property>
-                                                <property name="icon-name">x-office-calendar</property>
+                                                <property name="icon-name">month-symbolic</property>
                                                 <property name="tooltip-text" translatable="yes">Pick Date</property>
                                                 <property name="popover">
                                                   <object class="GtkPopover">

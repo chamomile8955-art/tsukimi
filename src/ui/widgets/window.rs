@@ -1618,7 +1618,7 @@ impl Window {
             group.add(&Self::media_info_row(
                 &item.fmt_title(),
                 (!subtitle.is_empty()).then_some(subtitle.as_str()),
-                "video-x-generic-symbolic",
+                "video-reel-symbolic",
             ));
 
             if item.run_time_ticks() > 0 {

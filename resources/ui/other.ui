@@ -41,7 +41,6 @@
                             <child>
                               <object class="GtkBox">
                                 <property name="orientation">horizontal</property>
-                                <property name="spacing">6</property>
                                 <property name="margin-end">32</property>
                                 <property name="margin-start">18</property>
                                 <property name="spacing">32</property>
@@ -56,8 +55,8 @@
                                     <property name="margin-top">12</property>
                                     <property name="halign">fill</property>
                                     <property name="valign">start</property>
-                                    <property name="height-request">328</property>
-                                    <property name="width-request">218</property>
+                                    <property name="height-request">264</property>
+                                    <property name="width-request">176</property>
                                   </object>
                                 </child>
                                 <child>
@@ -89,8 +88,8 @@
                                         <property name="margin-top">6</property>
                                         <child>
                                           <object class="GtkButton" id="play_button">
-                                            <property name="width-request">44</property>
-                                            <property name="height-request">44</property>
+                                            <property name="width-request">40</property>
+                                            <property name="height-request">40</property>
                                             <property name="icon-name">media-playback-start-symbolic</property>
                                             <property name="tooltip-text" translatable="yes">Play</property>
                                             <property name="valign">center</property>
@@ -98,6 +97,7 @@
                                             <style>
                                               <class name="circular"/>
                                               <class name="suggested-action"/>
+                                              <class name="media-card-play-button"/>
                                             </style>
                                           </object>
                                         </child>

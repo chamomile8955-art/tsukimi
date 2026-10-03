@@ -177,8 +177,6 @@
                                               <object class="GtkButton" id="playbutton">
                                                 <property name="halign">start</property>
                                                 <property name="valign">center</property>
-                                                <property name="width-request">280</property>
-                                                <property name="height-request">52</property>
                                                 <property name="sensitive">false</property>
                                                 <signal name="clicked" handler="play_cb" swapped="yes"/>
                                                 <property name="child">
@@ -344,7 +342,7 @@
                         </child>
                         <child>
                           <object class="GtkButton">
-                            <property name="icon-name">view-more-horizontal-symbolic</property>
+                            <property name="icon-name">view-more-symbolic</property>
                             <property name="halign">start</property>
                             <signal name="clicked" handler="on_season_view_more_clicked" swapped="yes"/>
                             <property name="tooltip-text" translatable="yes">View this season</property>
@@ -425,8 +423,8 @@
                                       <object class="GtkButton" id="right_button">
                                         <property name="halign">end</property>
                                         <property name="valign">center</property>
-                                        <property name="height-request">48</property>
-                                        <property name="width-request">48</property>
+                                        <property name="height-request">40</property>
+                                        <property name="width-request">40</property>
                                         <property name="margin-end">6</property>
                                         <property name="icon-name">go-next-symbolic</property>
                                         <property name="opacity">0</property>
@@ -442,8 +440,8 @@
                                       <object class="GtkButton" id="left_button">
                                         <property name="halign">start</property>
                                         <property name="valign">center</property>
-                                        <property name="height-request">48</property>
-                                        <property name="width-request">48</property>
+                                        <property name="height-request">40</property>
+                                        <property name="width-request">40</property>
                                         <property name="margin-start">6</property>
                                         <property name="icon-name">go-previous-symbolic</property>
                                         <property name="opacity">0</property>

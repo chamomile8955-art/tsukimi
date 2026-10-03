@@ -218,6 +218,7 @@
                             <child>
                               <object class="GtkButton" id="_previous_button">
                                 <property name="icon-name">media-skip-backward-symbolic</property>
+                                <property name="tooltip-text" translatable="yes">Previous</property>
                                 <property name="action-name">mpv.previous-video</property>
                                 <property name="valign">center</property>
                                 <style>
@@ -236,7 +237,7 @@
                                 <child>
                                   <object class="GtkImage" id="play_pause_image">
                                     <property name="icon_name">media-playback-pause-symbolic</property>
-                                    <property name="pixel-size">36</property>
+                                    <property name="pixel-size">22</property>
                                     <property name="halign">center</property>
                                     <property name="valign">center</property>
                                   </object>
@@ -252,6 +253,7 @@
                             <child>
                               <object class="GtkButton" id="_next_button">
                                 <property name="icon-name">media-skip-forward-symbolic</property>
+                                <property name="tooltip-text" translatable="yes">Next</property>
                                 <property name="action-name">mpv.next-video</property>
                                 <property name="valign">center</property>
                                 <style>
@@ -333,6 +335,7 @@
                                 <child>
                                   <object class="GtkButton">
                                     <property name="icon-name">view-dual-symbolic</property>
+                                    <property name="tooltip-text" translatable="yes">Playlist</property>
                                     <property name="action-name">mpv.show-playlist</property>
                                     <property name="valign">center</property>
                                     <style>

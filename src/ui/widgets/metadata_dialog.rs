@@ -93,6 +93,13 @@ mod imp {
         fn constructed(&self) {
             self.parent_constructed();
             self.init();
+            if let Some(entry) = self
+                .title_entry
+                .delegate()
+                .and_then(|entry| entry.dynamic_cast::<gtk::Widget>().ok())
+            {
+                AdwDialogExt::set_focus(&*self.obj(), Some(&entry));
+            }
         }
     }
 

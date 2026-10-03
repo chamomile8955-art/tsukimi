@@ -1,4 +1,6 @@
-Icons: panel-left, user-round, captions
+Icons: panel-left, user-round, captions, star (outline and filled),
+arrow-up-narrow-wide, arrow-down-wide-narrow, image-off, file-pen-line, power,
+skip-back, skip-forward, list-video
 Source: https://github.com/lucide-icons/lucide
 
 ISC License

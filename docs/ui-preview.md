@@ -92,3 +92,51 @@ In GTK Inspector:
    `just preview` so the updated resource bundle is rebuilt.
 
 GTK Inspector availability depends on the GTK runtime included with the build.
+
+## Native UI Regression Audit
+
+Desktop control targets share CSS variables: navigation tabs are 36 pixels,
+tool buttons are 40 pixels, the primary playback control is 48 pixels, and
+traffic lights are 16 pixels. Frame radii remain unchanged. Player utility
+panels always use a dark palette, independent of the application theme.
+
+Base media sizes are 176 x 264 for posters, 256 x 144 for backdrops,
+176 x 176 for square covers, 352 x 66 for banners, and 120 x 120 for people.
+Compact layouts retain the existing 0.86 scale. Ellipsized labels and intrinsic
+image sizes do not enlarge cards; album details retain a 176-pixel square cover.
+
+With a desktop session and the normal native build dependencies installed:
+
+```sh
+just ui-audit 3  # Dark theme
+just ui-audit 2  # Light theme
+```
+
+The audit builds fresh resources and a development executable, then exercises
+the real application in isolated preview mode. A loopback-only mock server
+supplies media fixtures; accounts use in-memory settings and fixture caches
+remain under `target/ui-audit/`. No saved accounts or real servers are used.
+
+Coverage includes all five settings categories and their lower content, narrow
+settings, version preferences and their editor, home/favorites/recommend/search,
+populated and empty search results, the four library tabs, filters and their
+selection page, the unified library toolbar at normal and narrow sizes with
+grid/list and sort-order changes, movie/series/album/person details, metadata/image/refresh/identify/
+missing-episode dialogs, image editing and search, add-server and server
+management, and all three player utility panels at normal and narrow sizes,
+including the lower player settings. It also switches themes while a player
+panel is open.
+
+Assertions check live frame radii, dialog bounds, painted button sizes (including
+CSS padding and borders), navigation height and label fit,
+filter-title fit, poster and disabled-action text colors, action hover backgrounds,
+single-row library toolbar alignment, group spacing and unclipped navigation,
+window-control size, media-card dimensions, square album covers, available icons,
+active player tabs, fixed dark player surfaces and their text contrast,
+and that the loaded styles and main-window template match their build sources.
+PNG snapshots are saved alongside the fixture cache for visual inspection. The
+audit exits automatically; assertion failures return a nonzero exit status.
+
+This is a UI smoke test, not a substitute for real-server integration tests,
+video/audio playback, or verification on each supported operating system.
+Optional `TSUKIMI_UI_AUDIT_TRACE=1` prints native focus/layout diagnostics.

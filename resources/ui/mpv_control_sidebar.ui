@@ -278,7 +278,6 @@
                         <property name="activatable-widget">sub_font_button</property>
                         <child type="suffix">
                           <object class="GtkFontDialogButton" id="sub_font_button">
-                            <property name="level">0</property>
                             <property name="valign">3</property>
                             <property name="level">family</property>
                             <signal name="notify::font-desc" handler="on_sub_font" swapped="yes" />

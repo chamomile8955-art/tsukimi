@@ -190,6 +190,12 @@ pub mod imp {
     #[properties(wrapper_type = super::SingleGrid)]
     pub struct SingleGrid {
         #[template_child]
+        pub toolbar: TemplateChild<gtk::CenterBox>,
+        #[template_child]
+        pub toolbar_summary: TemplateChild<gtk::Box>,
+        #[template_child]
+        pub toolbar_actions: TemplateChild<gtk::Box>,
+        #[template_child]
         pub count: TemplateChild<gtk::Label>,
         #[template_child]
         pub dropdown: TemplateChild<gtk::DropDown>,
@@ -364,6 +370,17 @@ impl Default for SingleGrid {
 impl SingleGrid {
     pub fn new() -> Self {
         Object::new()
+    }
+
+    pub(super) fn set_toolbar_navigation(&self, navigation: &gtk::ScrolledWindow) {
+        let imp = self.imp();
+        imp.toolbar.set_center_widget(Some(navigation));
+        imp.toolbar.add_css_class("library-toolbar");
+        imp.toolbar.set_margin_top(8);
+        imp.toolbar.set_margin_start(20);
+        imp.toolbar.set_margin_end(20);
+        imp.toolbar_summary.set_margin_start(0);
+        imp.toolbar_actions.set_margin_end(0);
     }
 
     fn sync_toolbar_button_states(&self) {

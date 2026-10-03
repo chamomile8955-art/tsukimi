@@ -15,13 +15,18 @@ pub async fn set_logo(id: String, image_type: &str, tag: Option<u8>) -> Revealer
     let image = gtk::Picture::new();
     image.set_halign(gtk::Align::Fill);
     image.set_content_fit(gtk::ContentFit::Contain);
+    let clamp = adw::Clamp::builder()
+        .orientation(gtk::Orientation::Vertical)
+        .maximum_size(150)
+        .tightening_threshold(150)
+        .child(&image)
+        .build();
     let revealer = gtk::Revealer::builder()
         .transition_type(gtk::RevealerTransitionType::None)
         .transition_duration(0)
-        .child(&image)
+        .child(&clamp)
         .reveal_child(false)
         .vexpand(true)
-        .transition_duration(400)
         .build();
 
     let cache_path = jellyfin_cache_path().await;

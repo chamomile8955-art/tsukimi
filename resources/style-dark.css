@@ -172,7 +172,7 @@
 }
 
 .person-card {
-	min-width: 156px;
+	min-width: 0;
 }
 
 .person-card .person-card-image,
@@ -392,7 +392,7 @@ window.app-window > contents,
 .app-window .source-header,
 .app-window .main-header,
 .app-window .window-titlebar {
-	min-height: 52px;
+	min-height: var(--tsukimi-tool-size);
 	padding-top: 6px;
 	padding-bottom: 6px;
 	padding-left: 16px;
@@ -452,7 +452,7 @@ window.app-window > contents,
 
 .app-window.detail-hero-mode .main-header,
 .app-window.detail-hero-mode headerbar.main-header {
-	min-height: 52px;
+	min-height: var(--tsukimi-tool-size);
 	background-color: transparent;
 	background-image: linear-gradient(to bottom,
 			rgba(16, 16, 20, 0.62) 0%,
@@ -523,7 +523,7 @@ window.app-window > contents,
 .app-window button,
 .app-window togglebutton,
 .app-window menubutton > button {
-	min-height: 44px;
+	min-height: var(--tsukimi-control-size);
 	padding: 0 12px;
 	border: 1px solid @tsukimi_dark_border;
 	border-radius: 999px;
@@ -620,8 +620,8 @@ window.app-window > contents,
 .app-window button.circular-icon-button,
 .app-window togglebutton.circular-icon-button,
 .app-window menubutton.circular-icon-button > button {
-	min-width: 52px;
-	min-height: 52px;
+	min-width: calc(var(--tsukimi-tool-size) - 2px);
+	min-height: calc(var(--tsukimi-tool-size) - 2px);
 	margin-top: 0;
 	margin-bottom: 0;
 	padding: 0;
@@ -634,7 +634,7 @@ window.app-window > contents,
 	outline: none;
 	text-shadow: none;
 	color: @window_fg_color;
-	-gtk-icon-size: 22px;
+	-gtk-icon-size: 18px;
 }
 
 .app-window button.glass-button.circular,
@@ -666,22 +666,22 @@ window.app-window > contents,
 .app-window button.circular-icon-button,
 .app-window togglebutton.circular-icon-button,
 .app-window menubutton.circular-icon-button > button {
-	min-width: 52px;
-	min-height: 52px;
+	min-width: calc(var(--tsukimi-tool-size) - 2px);
+	min-height: calc(var(--tsukimi-tool-size) - 2px);
 }
 
 .app-window button.glass-button.circular.circular-icon-button,
 .app-window togglebutton.glass-button.circular.circular-icon-button,
 .app-window menubutton.glass-button.circular.circular-icon-button > button {
-	min-width: 52px;
-	min-height: 52px;
+	min-width: calc(var(--tsukimi-tool-size) - 2px);
+	min-height: calc(var(--tsukimi-tool-size) - 2px);
 }
 
 .app-window button.carousel-arrow-button,
 .app-window button.glass-button.carousel-arrow-button,
 .app-window button.osd.carousel-arrow-button {
-	min-width: 48px;
-	min-height: 48px;
+	min-width: calc(var(--tsukimi-tool-size) - 2px);
+	min-height: calc(var(--tsukimi-tool-size) - 2px);
 	padding: 0;
 	border-radius: 999px;
 	border: 1px solid rgba(255, 255, 255, 0.38);
@@ -690,7 +690,7 @@ window.app-window > contents,
 	color: #201f27;
 	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.42);
 	text-shadow: none;
-	-gtk-icon-size: 24px;
+	-gtk-icon-size: 20px;
 }
 
 .app-window button.carousel-arrow-button:hover,
@@ -721,7 +721,7 @@ window.app-window > contents,
 /* Text glass buttons keep their natural width and padding. */
 .app-window button.add-server-button {
 	min-width: 132px;
-	min-height: 44px;
+	min-height: var(--tsukimi-control-size);
 	padding: 0 24px;
 	border-radius: 999px;
 	font-size: 1em;
@@ -782,7 +782,7 @@ menubutton.glass-button > button:focus-visible {
 /* Center navigation */
 .app-window button.segment-button,
 .app-window togglebutton.segment-button {
-	min-height: 44px;
+	min-height: var(--tsukimi-control-size);
 	margin-top: 0;
 	margin-bottom: 0;
 	padding-top: 0;
@@ -817,7 +817,7 @@ menubutton.glass-button > button:focus-visible {
 .app-window box.linked > button,
 .app-window box.linked > togglebutton,
 .app-window box.linked > menubutton > button {
-	min-height: 42px;
+	min-height: var(--tsukimi-control-size);
 	margin: 0;
 	padding-left: 18px;
 	padding-right: 18px;
@@ -950,7 +950,7 @@ menubutton.glass-button > button:focus-visible {
 
 .app-window menubutton.media-poster-menu > button,
 .app-window button.media-filter-button {
-	min-height: 44px;
+	min-height: var(--tsukimi-control-size);
 	border: 1px solid rgba(255, 255, 255, 0.18);
 	border-radius: 999px;
 	background-color: rgba(45, 45, 51, 0.92);
@@ -963,7 +963,7 @@ menubutton.glass-button > button:focus-visible {
 }
 
 .app-window button.media-filter-button {
-	min-width: 44px;
+	min-width: var(--tsukimi-control-size);
 	padding: 0;
 	-gtk-icon-size: 18px;
 }
@@ -982,11 +982,11 @@ menubutton.glass-button > button:focus-visible {
 .app-window .control-group > menubutton,
 .app-window box.linked > button,
 .app-window box.linked > menubutton {
-	min-width: 42px;
+	min-width: var(--tsukimi-control-size);
 }
 
 .app-window box.linked > entry {
-	min-height: 42px;
+	min-height: var(--tsukimi-control-size);
 	border: none;
 	border-radius: 999px;
 	background-color: transparent;
@@ -1121,7 +1121,7 @@ menubutton.glass-button > button:focus-visible {
 }
 
 .app-window .poster-info-overlay button.hero-play-button {
-	min-height: 52px;
+	min-height: calc(var(--tsukimi-tool-size) - 2px);
 	padding-left: 28px;
 	padding-right: 28px;
 	border: 1px solid rgba(255, 255, 255, 0.42);
@@ -1152,7 +1152,7 @@ menubutton.glass-button > button:focus-visible {
 }
 
 .app-window .poster-info-overlay .hero-action-group.control-group {
-	min-height: 52px;
+	min-height: var(--tsukimi-tool-size);
 	padding: 0;
 	border: none;
 	border-radius: 0;
@@ -1161,10 +1161,10 @@ menubutton.glass-button > button:focus-visible {
 	box-shadow: none;
 }
 
-.app-window .poster-info-overlay .hero-action-group > togglebutton.hero-favorite-button,
+.app-window .poster-info-overlay .hero-action-group > button.hero-favorite-button,
 .app-window .poster-info-overlay .hero-action-group > menubutton.hero-more-button > button {
-	min-width: 52px;
-	min-height: 52px;
+	min-width: calc(var(--tsukimi-tool-size) - 2px);
+	min-height: calc(var(--tsukimi-tool-size) - 2px);
 	padding: 0;
 	border: 1px solid rgba(255, 255, 255, 0.42);
 	border-radius: 999px;
@@ -1175,13 +1175,13 @@ menubutton.glass-button > button:focus-visible {
 	transition: background-color 90ms ease-out, border-color 90ms ease-out, box-shadow 90ms ease-out, color 90ms ease-out;
 }
 
-.app-window .poster-info-overlay .hero-action-group > togglebutton.hero-favorite-button:hover,
+.app-window .poster-info-overlay .hero-action-group > button.hero-favorite-button:hover,
 .app-window .poster-info-overlay .hero-action-group > menubutton.hero-more-button > button:hover {
 	background-color: #ffffff;
 	border-color: rgba(255, 255, 255, 0.62);
 }
 
-.app-window .poster-info-overlay .hero-action-group > togglebutton.hero-favorite-button:active,
+.app-window .poster-info-overlay .hero-action-group > button.hero-favorite-button:active,
 .app-window .poster-info-overlay .hero-action-group > menubutton.hero-more-button > button:active,
 .app-window .poster-info-overlay .hero-action-group > menubutton.hero-more-button > button:checked {
 	background-color: rgba(190, 186, 204, 0.98);
@@ -1190,20 +1190,20 @@ menubutton.glass-button > button:focus-visible {
 	color: #111015;
 }
 
-.app-window .poster-info-overlay .hero-action-group > togglebutton.hero-favorite-button:checked {
+.app-window .poster-info-overlay .hero-action-group > button.hero-favorite-button:checked {
 	background-color: #6c5cff;
 	border-color: rgba(255, 255, 255, 0.52);
 	color: #ffffff;
 	box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.20), 0 8px 22px rgba(108, 92, 255, 0.32);
 }
 
-.app-window .poster-info-overlay .hero-action-group > togglebutton.hero-favorite-button:checked:active {
+.app-window .poster-info-overlay .hero-action-group > button.hero-favorite-button:checked:active {
 	background-color: #5848e8;
 	border-color: rgba(255, 255, 255, 0.44);
 	box-shadow: inset 0 2px 8px rgba(20, 16, 88, 0.38), 0 2px 8px rgba(0, 0, 0, 0.22);
 }
 
-.app-window .poster-info-overlay .hero-action-group > togglebutton.hero-favorite-button image,
+.app-window .poster-info-overlay .hero-action-group > button.hero-favorite-button image,
 .app-window .poster-info-overlay .hero-action-group > menubutton.hero-more-button > button image {
 	color: inherit;
 	text-shadow: none;
@@ -1211,11 +1211,11 @@ menubutton.glass-button > button:focus-visible {
 }
 
 .app-window .poster-info-overlay .media-choice-row {
-	min-height: 44px;
+	min-height: var(--tsukimi-control-size);
 }
 
 .app-window .poster-info-overlay .media-choice-label {
-	min-height: 44px;
+	min-height: var(--tsukimi-control-size);
 	margin-right: 2px;
 	padding-top: 0;
 	padding-bottom: 0;
@@ -1227,7 +1227,7 @@ menubutton.glass-button > button:focus-visible {
 }
 
 .app-window .poster-info-overlay dropdown.media-choice-dropdown > button {
-	min-height: 44px;
+	min-height: var(--tsukimi-control-size);
 	padding-left: 18px;
 	padding-right: 16px;
 	border: 1px solid rgba(255, 255, 255, 0.22);
@@ -1281,9 +1281,9 @@ menubutton.glass-button > button:focus-visible {
 .app-window .source-bottom button.circular-icon-button,
 .app-window .source-actions button.circular-icon-button,
 .app-window .bottom-navigation button.circular-icon-button {
-	min-width: 52px;
-	min-height: 52px;
-	-gtk-icon-size: 22px;
+	min-width: calc(var(--tsukimi-tool-size) - 2px);
+	min-height: calc(var(--tsukimi-tool-size) - 2px);
+	-gtk-icon-size: 18px;
 }
 
 /* Apple-like traffic light window controls */
@@ -1291,7 +1291,7 @@ menubutton.glass-button > button:focus-visible {
 .app-window .macos-window-controls,
 window.floating-dialog windowcontrols,
 dialog.floating-dialog windowcontrols {
-	min-height: 40px;
+	min-height: 32px;
 	margin: 0;
 	padding: 0 8px;
 	border: none;
@@ -1304,9 +1304,9 @@ dialog.floating-dialog windowcontrols {
 .app-window .macos-window-controls button,
 window.floating-dialog windowcontrols button,
 dialog.floating-dialog windowcontrols button {
-	min-width: 22px;
-	min-height: 22px;
-	margin: 8px 6px;
+	min-width: calc(var(--tsukimi-window-control-size) - 2px);
+	min-height: calc(var(--tsukimi-window-control-size) - 2px);
+	margin: 8px 5px;
 	padding: 0;
 	border-radius: 999px;
 	border: 1px solid alpha(@window_fg_color, 0.10);
@@ -1618,7 +1618,7 @@ window.app-window.compact-1080 .window-frame {
 window.app-window.compact-1080 .source-header,
 window.app-window.compact-1080 .main-header,
 window.app-window.compact-1080 .window-titlebar {
-	min-height: 52px;
+	min-height: var(--tsukimi-tool-size);
 	padding: 6px 12px;
 }
 
@@ -1634,7 +1634,7 @@ window.app-window.compact-1080 .content-stack {
 }
 
 window.app-window.compact-1080 .top-navigation {
-	min-height: 44px;
+	min-height: var(--tsukimi-control-size);
 }
 
 window.app-window.compact-1080 .item-hero,
@@ -1662,9 +1662,9 @@ window.app-window.compact-1080 .source-bottom-bar button.circular-icon-button,
 window.app-window.compact-1080 .source-bottom button.circular-icon-button,
 window.app-window.compact-1080 .source-actions button.circular-icon-button,
 window.app-window.compact-1080 .bottom-navigation button.circular-icon-button {
-	min-width: 52px;
-	min-height: 52px;
-	-gtk-icon-size: 22px;
+	min-width: calc(var(--tsukimi-tool-size) - 2px);
+	min-height: calc(var(--tsukimi-tool-size) - 2px);
+	-gtk-icon-size: 18px;
 }
 
 window.app-window.compact-1080 .segmented-control,
@@ -1683,14 +1683,14 @@ window.app-window.compact-1080 .control-group > menubutton > button,
 window.app-window.compact-1080 box.linked > button,
 window.app-window.compact-1080 box.linked > togglebutton,
 window.app-window.compact-1080 box.linked > menubutton > button {
-	min-height: 44px;
+	min-height: var(--tsukimi-control-size);
 	padding-left: 14px;
 	padding-right: 14px;
 }
 
 window.app-window.compact-1080 button.add-server-button {
 	min-width: 112px;
-	min-height: 44px;
+	min-height: var(--tsukimi-control-size);
 	padding: 0 18px;
 }
 
@@ -1706,7 +1706,7 @@ window.app-window.compact-1080 .bottom-navigation {
 
 window.app-window.compact-1080 .mpv-player headerbar.mpv-top-bar,
 window.app-window.compact-1080 .mpv-player .mpv-top-bar {
-	min-height: 52px;
+	min-height: var(--tsukimi-tool-size);
 	padding: 6px 20px;
 }
 
@@ -1717,14 +1717,14 @@ window.app-window.compact-1080 .mpv-player .mpv-bottom-bar {
 window.app-window.compact-1080 .mpv-player button.mpv-control-button,
 window.app-window.compact-1080 .mpv-player togglebutton.mpv-control-button,
 window.app-window.compact-1080 .mpv-player menubutton.mpv-control-button > button {
-	min-width: 52px;
-	min-height: 52px;
-	-gtk-icon-size: 22px;
+	min-width: calc(var(--tsukimi-tool-size) - 2px);
+	min-height: calc(var(--tsukimi-tool-size) - 2px);
+	-gtk-icon-size: 18px;
 }
 
 window.app-window.compact-1080 .mpv-player button.mpv-play-button {
-	min-width: 68px;
-	min-height: 68px;
+	min-width: calc(var(--tsukimi-play-size) - 2px);
+	min-height: calc(var(--tsukimi-play-size) - 2px);
 }
 
 /* Final dark-mode readability guard for floating surfaces.  The light

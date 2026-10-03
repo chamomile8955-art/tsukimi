@@ -26,9 +26,24 @@
                         <property name="spacing">32</property>
                         <property name="margin-bottom">48</property>
                         <child>
-                          <object class="GtkPicture" id="cover_image">
-                            <property name="halign">center</property>
+                          <object class="AdwClamp">
+                            <property name="orientation">vertical</property>
+                            <property name="maximum-size">176</property>
+                            <property name="tightening-threshold">176</property>
                             <property name="valign">center</property>
+                            <child>
+                              <object class="GtkPicture" id="cover_image">
+                                <property name="width-request">176</property>
+                                <property name="height-request">176</property>
+                                <property name="can-shrink">True</property>
+                                <property name="content-fit">cover</property>
+                                <property name="halign">center</property>
+                                <property name="valign">center</property>
+                                <style>
+                                  <class name="album-cover"/>
+                                </style>
+                              </object>
+                            </child>
                           </object>
                         </child>
                         <child>
@@ -88,8 +103,8 @@
                                 <property name="margin-top">6</property>
                                 <child>
                                   <object class="GtkButton" id="_play_button">
-                                    <property name="width-request">44</property>
-                                    <property name="height-request">44</property>
+                                    <property name="width-request">40</property>
+                                    <property name="height-request">40</property>
                                     <property name="icon-name">media-playback-start-symbolic</property>
                                     <property name="tooltip-text" translatable="yes">Play</property>
                                     <property name="valign">center</property>
@@ -97,6 +112,7 @@
                                     <style>
                                       <class name="circular"/>
                                       <class name="suggested-action"/>
+                                      <class name="media-card-play-button"/>
                                     </style>
                                   </object>
                                 </child>

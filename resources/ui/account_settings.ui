@@ -204,7 +204,7 @@
             <child>
               <object class="AdwButtonRow" id="server_panel_row">
                 <property name="title">服务器管理面板</property>
-                <property name="start-icon-name">applications-system-symbolic</property>
+                <property name="start-icon-name">settings-symbolic</property>
                 <signal name="activated" handler="on_open_server_panel" swapped="yes"/>
               </object>
             </child>

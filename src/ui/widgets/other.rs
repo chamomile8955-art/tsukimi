@@ -1,5 +1,8 @@
 use super::{
-    horbu_scrolled::HorbuScrolled, item::dt, picture_loader::PictureLoader, utils::GlobalToast,
+    horbu_scrolled::HorbuScrolled,
+    item::dt,
+    picture_loader::PictureLoader,
+    utils::{GlobalToast, TU_ITEM_POST_SIZE},
 };
 use crate::{
     client::{error::UserFacingError, jellyfin_client::JELLYFIN_CLIENT, structs::*},
@@ -162,7 +165,7 @@ impl OtherPage {
         let imp = self.imp();
         let id = self.item().id();
         let pic = PictureLoader::new(&id, "Primary", None);
-        pic.set_size_request(218, 328);
+        pic.set_size_request(TU_ITEM_POST_SIZE.0, TU_ITEM_POST_SIZE.1);
         pic.set_halign(gtk::Align::Fill);
         pic.set_valign(gtk::Align::Start);
         imp.picbox.append(&pic);

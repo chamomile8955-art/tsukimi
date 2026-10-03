@@ -8,10 +8,10 @@
         <property name="orientation">vertical</property>
         <property name="spacing">6</property>
         <child>
-          <object class="GtkCenterBox">
+          <object class="GtkCenterBox" id="toolbar">
             <property name="margin-top">20</property>
             <child type="start">
-              <object class="GtkBox">
+              <object class="GtkBox" id="toolbar_summary">
                 <property name="orientation">horizontal</property>
                 <property name="margin-start">45</property>
                 <property name="spacing">8</property>
@@ -47,7 +47,7 @@
               </object>
             </child>
             <child type="end">
-              <object class="GtkBox">
+              <object class="GtkBox" id="toolbar_actions">
                 <property name="orientation">horizontal</property>
                 <property name="spacing">8</property>
                 <property name="margin-end">55</property>

@@ -29,7 +29,9 @@ mod tests {
             for declaration in declarations.captures_iter(css) {
                 let value = declaration[1].replace("var(--tsukimi-surface-radius)", "0");
                 assert!(
-                    value.split_whitespace().all(|part| matches!(part, "0" | "999px")),
+                    value
+                        .split_whitespace()
+                        .all(|part| matches!(part, "0" | "999px")),
                     "Independent radius: {}",
                     &declaration[0]
                 );
@@ -38,16 +40,15 @@ mod tests {
     }
 
     #[test]
-    fn navigation_templates_share_the_same_control_style() {
+    fn navigation_controls_share_the_same_style() {
         let navigation = regex::Regex::new(r#"<class\s+name="navigation-switcher"\s*/>"#).unwrap();
         let segmented = regex::Regex::new(r#"<class\s+name="segmented-control"\s*/>"#).unwrap();
-        for template in [
-            include_str!("../../../../resources/ui/window.ui"),
-            include_str!("../../../../resources/ui/mpv_control_sidebar.ui"),
-            include_str!("../../../../resources/ui/list.ui"),
-        ] {
-            assert!(navigation.is_match(template));
-            assert!(segmented.is_match(template));
-        }
+        // Both the main tabs and the player utility tabs live in window.ui.
+        let template = include_str!("../../../../resources/ui/window.ui");
+        assert_eq!(navigation.find_iter(template).count(), 2);
+        assert!(segmented.find_iter(template).count() >= 2);
+        let library_classes = crate::ui::widgets::list::LIBRARY_TAB_CLASSES;
+        assert!(library_classes.contains(&"navigation-switcher"));
+        assert!(library_classes.contains(&"segmented-control"));
     }
 }

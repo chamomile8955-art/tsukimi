@@ -4,6 +4,16 @@
     <file alias="tsukimi">icons/moe.tsuna.tsukimi.svg</file>
     <file alias="moe.tsuna.tsukimi.svg">icons/moe.tsuna.tsukimi.svg</file>
     <file preprocess="xml-stripblanks" alias="settings-symbolic.svg">icons/scalable/actions/settings-symbolic.svg</file>
+    <file preprocess="xml-stripblanks" alias="starred-symbolic.svg">icons/scalable/actions/star-filled-symbolic.svg</file>
+    <file preprocess="xml-stripblanks" alias="non-starred-symbolic.svg">icons/scalable/actions/star-outline-symbolic.svg</file>
+    <file preprocess="xml-stripblanks" alias="view-sort-ascending-symbolic.svg">icons/scalable/actions/sort-ascending-symbolic.svg</file>
+    <file preprocess="xml-stripblanks" alias="view-sort-descending-symbolic.svg">icons/scalable/actions/sort-descending-symbolic.svg</file>
+    <file preprocess="xml-stripblanks" alias="image-missing-symbolic.svg">icons/scalable/actions/image-off-symbolic.svg</file>
+    <file preprocess="xml-stripblanks" alias="document-edit-symbolic.svg">icons/scalable/actions/file-pen-line-symbolic.svg</file>
+    <file preprocess="xml-stripblanks" alias="system-shutdown-symbolic.svg">icons/scalable/actions/power-symbolic.svg</file>
+    <file preprocess="xml-stripblanks" alias="media-skip-backward-symbolic.svg">icons/scalable/actions/skip-back-symbolic.svg</file>
+    <file preprocess="xml-stripblanks" alias="media-skip-forward-symbolic.svg">icons/scalable/actions/skip-forward-symbolic.svg</file>
+    <file preprocess="xml-stripblanks" alias="view-dual-symbolic.svg">icons/scalable/actions/list-video-symbolic.svg</file>
     <file preprocess="xml-stripblanks" alias="panel-left-symbolic.svg">icons/scalable/actions/panel-left-symbolic.svg</file>
     <file preprocess="xml-stripblanks" alias="user-round-symbolic.svg">icons/scalable/actions/user-round-symbolic.svg</file>
     <file preprocess="xml-stripblanks" alias="captions-symbolic.svg">icons/scalable/actions/captions-symbolic.svg</file>

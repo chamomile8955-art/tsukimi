@@ -11,7 +11,7 @@ use super::tu_item::{
 };
 use crate::ui::{
     provider::tu_item::{ACTOR, DIRECTOR, GUEST_STAR, PERSON, PRODUCER, TuItem, WRITER},
-    widgets::utils::{TU_ITEM_BANNER_SIZE, TU_ITEM_VIDEO_SIZE, compact_size},
+    widgets::utils::{TU_ITEM_BANNER_SIZE, TU_ITEM_PERSON_SIZE, TU_ITEM_VIDEO_SIZE, compact_size},
 };
 
 pub mod imp {
@@ -112,6 +112,8 @@ pub mod imp {
             self.parent_constructed();
 
             let obj = self.obj();
+            // Fixed-format cards own measurement instead of AdwBin's intrinsic-image layout.
+            obj.set_layout_manager(None::<gtk::LayoutManager>);
             obj.set_overflow(gtk::Overflow::Visible);
 
             obj.add_controller(obj.gesture_click());
@@ -124,7 +126,36 @@ pub mod imp {
         }
     }
 
-    impl WidgetImpl for TuListItem {}
+    impl WidgetImpl for TuListItem {
+        fn root(&self) {
+            self.parent_root();
+            let (width, height) = self.obj().size_hint();
+            self.overlay.set_size_request(width, height);
+        }
+
+        fn measure(&self, orientation: gtk::Orientation, for_size: i32) -> (i32, i32, i32, i32) {
+            if orientation == gtk::Orientation::Horizontal {
+                // Ellipsized titles must not widen the poster or distort its aspect ratio.
+                let width = self.overlay.width_request().max(1);
+                (width, width, -1, -1)
+            } else {
+                // Intrinsic image dimensions must not stretch a fixed-format card.
+                self.obj()
+                    .child()
+                    .map(|child| {
+                        let (minimum, _, min_baseline, _) = child.measure(orientation, for_size);
+                        (minimum, minimum, min_baseline, min_baseline)
+                    })
+                    .unwrap_or((0, 0, -1, -1))
+            }
+        }
+
+        fn size_allocate(&self, width: i32, height: i32, baseline: i32) {
+            if let Some(child) = self.obj().child() {
+                child.allocate(width, height, baseline, None);
+            }
+        }
+    }
 
     #[allow(dead_code)]
     impl TuListItem {
@@ -471,7 +502,7 @@ impl TuListItem {
 
     fn size_hint(&self) -> (i32, i32) {
         if Self::is_person_item(&self.item()) {
-            return compact_size((156, 156), self);
+            return compact_size(TU_ITEM_PERSON_SIZE, self);
         }
 
         let size = match self.poster_type() {

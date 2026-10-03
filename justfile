@@ -45,5 +45,19 @@ test *ARGS:
         GSETTINGS_SCHEMA_DIR="$PWD/target/test-schemas" \
         cargo test {{ ARGS }}
 
+# Native desktop required; uses fixture accounts, images and a loopback server.
+ui-audit theme="3":
+    mkdir -p target/ui-audit
+    glib-compile-resources resources/resources.gresource.xml --sourcedir=resources --target=target/ui-audit/tsukimi.gresource
+    glib-compile-schemas --strict --targetdir target/ui-audit resources
+    env TSUKIMI_PKGDATADIR="$PWD/target/ui-audit" cargo build --locked --bin tsukimi --example ui_audit
+    env \
+        GSETTINGS_BACKEND=memory \
+        GSETTINGS_SCHEMA_DIR="$PWD/target/ui-audit" \
+        TSUKIMI_UI_AUDIT_DIR="$PWD/target/ui-audit" \
+        DYLD_FALLBACK_LIBRARY_PATH="${DYLD_FALLBACK_LIBRARY_PATH:-$(pkg-config --variable=libdir epoxy)}" \
+        AUDIT_THEME="{{ theme }}" \
+        ./target/debug/examples/ui_audit --ui-preview --log-level warn
+
 update-i18n:
     meson compile -C {{ builddir }} tsukimi-pot

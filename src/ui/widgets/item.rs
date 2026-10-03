@@ -1101,6 +1101,7 @@ impl ItemPage {
             let mediabox = gtk::Box::builder()
                 .orientation(gtk::Orientation::Horizontal)
                 .halign(gtk::Align::Start)
+                .homogeneous(true)
                 .spacing(18)
                 .build();
             mediabox.add_css_class("media-info-streams");
@@ -1123,7 +1124,6 @@ impl ItemPage {
         let card = gtk::Box::builder()
             .orientation(gtk::Orientation::Vertical)
             .spacing(14)
-            .width_request(360)
             .build();
         card.add_css_class("media-info-card");
 
@@ -1346,8 +1346,8 @@ impl ItemPage {
 
     fn media_stream_icon(stream_type: &str) -> &'static str {
         match stream_type {
-            "Video" => "video-x-generic-symbolic",
-            "Audio" => "audio-x-generic-symbolic",
+            "Video" => "video-reel-symbolic",
+            "Audio" => "music-note-single-outline-symbolic",
             "Subtitle" => "media-view-subtitles-symbolic",
             _ => "text-x-generic-symbolic",
         }
