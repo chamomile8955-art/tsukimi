@@ -1606,123 +1606,123 @@ popover.glass-popover label {
 	color: @window_fg_color;
 }
 
-window.app-window.compact-1080 .source-panel,
-window.app-window.compact-1080 .main-surface {
+window.app-window.desktop-density .source-panel,
+window.app-window.desktop-density .main-surface {
 	border-radius: 0;
 }
 
-window.app-window.compact-1080 .window-frame {
+window.app-window.desktop-density .window-frame {
 	border-radius: var(--tsukimi-surface-radius);
 }
 
-window.app-window.compact-1080 .source-header,
-window.app-window.compact-1080 .main-header,
-window.app-window.compact-1080 .window-titlebar {
+window.app-window.desktop-density .source-header,
+window.app-window.desktop-density .main-header,
+window.app-window.desktop-density .window-titlebar {
 	min-height: var(--tsukimi-tool-size);
 	padding: 6px 12px;
 }
 
-window.app-window.compact-1080 .main-toolbar {
+window.app-window.desktop-density .main-toolbar {
 	border-radius: 0;
 }
 
-window.app-window.compact-1080 .main-content-pane,
-window.app-window.compact-1080 .main-navigation,
-window.app-window.compact-1080 .main-page,
-window.app-window.compact-1080 .content-stack {
+window.app-window.desktop-density .main-content-pane,
+window.app-window.desktop-density .main-navigation,
+window.app-window.desktop-density .main-page,
+window.app-window.desktop-density .content-stack {
 	border-radius: 0 0 var(--tsukimi-surface-radius) var(--tsukimi-surface-radius);
 }
 
-window.app-window.compact-1080 .top-navigation {
+window.app-window.desktop-density .top-navigation {
 	min-height: var(--tsukimi-control-size);
 }
 
-window.app-window.compact-1080 .item-hero,
-window.app-window.compact-1080.detail-hero-mode .item-hero {
+window.app-window.desktop-density .item-hero,
+window.app-window.desktop-density.detail-hero-mode .item-hero {
 	min-height: 0;
 }
 
-window.app-window.compact-1080 .media-library-content {
+window.app-window.desktop-density .media-library-content {
 	padding-top: 4px;
 	padding-bottom: 22px;
 }
 
-window.app-window.compact-1080 .media-section {
+window.app-window.desktop-density .media-section {
 	margin-top: 12px;
 	margin-bottom: 12px;
 	margin-left: 24px;
 	margin-right: 24px;
 }
 
-window.app-window.compact-1080 button.circular-icon-button,
-window.app-window.compact-1080 togglebutton.circular-icon-button,
-window.app-window.compact-1080 menubutton.circular-icon-button > button,
-window.app-window.compact-1080 .source-footer button.circular-icon-button,
-window.app-window.compact-1080 .source-bottom-bar button.circular-icon-button,
-window.app-window.compact-1080 .source-bottom button.circular-icon-button,
-window.app-window.compact-1080 .source-actions button.circular-icon-button,
-window.app-window.compact-1080 .bottom-navigation button.circular-icon-button {
+window.app-window.desktop-density button.circular-icon-button,
+window.app-window.desktop-density togglebutton.circular-icon-button,
+window.app-window.desktop-density menubutton.circular-icon-button > button,
+window.app-window.desktop-density .source-footer button.circular-icon-button,
+window.app-window.desktop-density .source-bottom-bar button.circular-icon-button,
+window.app-window.desktop-density .source-bottom button.circular-icon-button,
+window.app-window.desktop-density .source-actions button.circular-icon-button,
+window.app-window.desktop-density .bottom-navigation button.circular-icon-button {
 	min-width: calc(var(--tsukimi-tool-size) - 2px);
 	min-height: calc(var(--tsukimi-tool-size) - 2px);
 	-gtk-icon-size: 18px;
 }
 
-window.app-window.compact-1080 .segmented-control,
-window.app-window.compact-1080 .control-group,
-window.app-window.compact-1080 box.linked {
+window.app-window.desktop-density .segmented-control,
+window.app-window.desktop-density .control-group,
+window.app-window.desktop-density box.linked {
 	padding: 4px;
 }
 
-window.app-window.compact-1080 button.segment-button,
-window.app-window.compact-1080 togglebutton.segment-button,
-window.app-window.compact-1080 .segmented-control > button,
-window.app-window.compact-1080 stackswitcher.segmented-control > button,
-window.app-window.compact-1080 .control-group > button,
-window.app-window.compact-1080 .control-group > togglebutton,
-window.app-window.compact-1080 .control-group > menubutton > button,
-window.app-window.compact-1080 box.linked > button,
-window.app-window.compact-1080 box.linked > togglebutton,
-window.app-window.compact-1080 box.linked > menubutton > button {
+window.app-window.desktop-density button.segment-button,
+window.app-window.desktop-density togglebutton.segment-button,
+window.app-window.desktop-density .segmented-control > button,
+window.app-window.desktop-density stackswitcher.segmented-control > button,
+window.app-window.desktop-density .control-group > button,
+window.app-window.desktop-density .control-group > togglebutton,
+window.app-window.desktop-density .control-group > menubutton > button,
+window.app-window.desktop-density box.linked > button,
+window.app-window.desktop-density box.linked > togglebutton,
+window.app-window.desktop-density box.linked > menubutton > button {
 	min-height: var(--tsukimi-control-size);
 	padding-left: 14px;
 	padding-right: 14px;
 }
 
-window.app-window.compact-1080 button.add-server-button {
+window.app-window.desktop-density button.add-server-button {
 	min-width: 112px;
 	min-height: var(--tsukimi-control-size);
 	padding: 0 18px;
 }
 
-window.app-window.compact-1080 .source-footer,
-window.app-window.compact-1080 .source-bottom-bar,
-window.app-window.compact-1080 .source-bottom,
-window.app-window.compact-1080 .source-actions,
-window.app-window.compact-1080 .bottom-navigation {
+window.app-window.desktop-density .source-footer,
+window.app-window.desktop-density .source-bottom-bar,
+window.app-window.desktop-density .source-bottom,
+window.app-window.desktop-density .source-actions,
+window.app-window.desktop-density .bottom-navigation {
 	padding-left: 12px;
 	padding-right: 12px;
 	padding-bottom: 12px;
 }
 
-window.app-window.compact-1080 .mpv-player headerbar.mpv-top-bar,
-window.app-window.compact-1080 .mpv-player .mpv-top-bar {
+window.app-window.desktop-density .mpv-player headerbar.mpv-top-bar,
+window.app-window.desktop-density .mpv-player .mpv-top-bar {
 	min-height: var(--tsukimi-tool-size);
 	padding: 6px 20px;
 }
 
-window.app-window.compact-1080 .mpv-player .mpv-bottom-bar {
+window.app-window.desktop-density .mpv-player .mpv-bottom-bar {
 	padding: 12px 24px 18px;
 }
 
-window.app-window.compact-1080 .mpv-player button.mpv-control-button,
-window.app-window.compact-1080 .mpv-player togglebutton.mpv-control-button,
-window.app-window.compact-1080 .mpv-player menubutton.mpv-control-button > button {
+window.app-window.desktop-density .mpv-player button.mpv-control-button,
+window.app-window.desktop-density .mpv-player togglebutton.mpv-control-button,
+window.app-window.desktop-density .mpv-player menubutton.mpv-control-button > button {
 	min-width: calc(var(--tsukimi-tool-size) - 2px);
 	min-height: calc(var(--tsukimi-tool-size) - 2px);
 	-gtk-icon-size: 18px;
 }
 
-window.app-window.compact-1080 .mpv-player button.mpv-play-button {
+window.app-window.desktop-density .mpv-player button.mpv-play-button {
 	min-width: calc(var(--tsukimi-play-size) - 2px);
 	min-height: calc(var(--tsukimi-play-size) - 2px);
 }

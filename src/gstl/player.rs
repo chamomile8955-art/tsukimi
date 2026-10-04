@@ -102,15 +102,17 @@ pub mod imp {
 
             // Initialize the mpris server
             #[cfg(target_os = "linux")]
-            glib::spawn_future_local(glib::clone!(
-                #[weak(rename_to = imp)]
-                self,
-                async move {
-                    if let Err(e) = imp.obj().initialize_mpris().await {
-                        warn!("Failed to initialize mpris server: {}", e);
+            if !crate::local_player_mode() {
+                glib::spawn_future_local(glib::clone!(
+                    #[weak(rename_to = imp)]
+                    self,
+                    async move {
+                        if let Err(e) = imp.obj().initialize_mpris().await {
+                            warn!("Failed to initialize mpris server: {}", e);
+                        }
                     }
-                }
-            ));
+                ));
+            }
 
             // Start playing
             let bus = pipeline.bus().unwrap();

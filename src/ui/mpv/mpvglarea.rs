@@ -65,6 +65,10 @@ mod imp {
         fn dispose(&self) {
             if let Some(mpv) = self.mpv.get() {
                 mpv.shutdown_event_thread();
+                if self.obj().is_realized() {
+                    self.obj().make_current();
+                    mpv.ctx.borrow_mut().take();
+                }
             }
         }
     }
@@ -99,6 +103,10 @@ mod imp {
         }
 
         fn unrealize(&self) {
+            self.obj().make_current();
+            if let Some(mpv) = self.mpv.get() {
+                mpv.ctx.borrow_mut().take();
+            }
             self.parent_unrealize();
         }
     }
@@ -193,6 +201,14 @@ impl Default for MPVGLArea {
 }
 
 impl MPVGLArea {
+    pub fn play_local(&self, uri: &str, title: &str) {
+        let mpv = self.imp().mpv();
+        mpv.event_thread_alive
+            .store(ACTIVE, std::sync::atomic::Ordering::SeqCst);
+        atomic_wait::wake_all(&*mpv.event_thread_alive);
+        mpv.load_local_video(uri, title);
+    }
+
     pub fn new() -> Self {
         Object::builder().build()
     }

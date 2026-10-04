@@ -250,6 +250,9 @@ jobs:
           cp LICENSE "$dist/"
           cp tools/windows/clean-tsukimi-data.ps1 "$dist/tools/windows/"
           cp tools/windows/clean-tsukimi-data.bat "$dist/tools/windows/"
+          cp tools/windows/register-local-player.ps1 "$dist/tools/windows/"
+          cp tools/windows/register-local-player.bat "$dist/tools/windows/"
+          cp resources/video-extensions.json "$dist/tools/windows/"
 
           # Tsukimi loads its GResource and GSettings schema at runtime.
           mkdir -p "$dist/share/tsukimi"
@@ -546,6 +549,33 @@ jobs:
             ldd "$dist/tsukimi.exe"
             exit 1
           fi
+
+      - name: Verify local player file registration
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $helper = Join-Path $PWD 'dist/Tsukimi/tools/windows/register-local-player.ps1'
+          $key = 'Registry::HKEY_CURRENT_USER\Software\Classes\Tsukimi.LocalVideo'
+          try {
+            & $helper
+            $command = (Get-Item "$key\shell\open\command").GetValue('')
+            $exe = [IO.Path]::GetFullPath((Join-Path $PWD 'dist/Tsukimi/tsukimi.exe'))
+            $expected = '"{0}" --local-player -- "%1"' -f $exe
+            if ($command -ne $expected) { throw 'Invalid quoted local player command' }
+            if ((Get-Item $key).GetValueNames() -notcontains 'NoRecentDocs') {
+              throw 'Local player file class must disable shell recent-document tracking'
+            }
+            $extensions = Get-Content 'dist/Tsukimi/tools/windows/video-extensions.json' -Raw | ConvertFrom-Json
+            foreach ($extension in $extensions) {
+              $path = "Registry::HKEY_CURRENT_USER\Software\Classes\.$extension\OpenWithProgids"
+              if ((Get-Item $path).GetValueNames() -notcontains 'Tsukimi.LocalVideo') {
+                throw "Missing file association: $extension"
+              }
+            }
+          } finally {
+            if (Test-Path $key) { & $helper -Unregister }
+          }
+          if (Test-Path $key) { throw 'Local player unregister left its ProgID behind' }
 
       - name: Create ZIP
         shell: pwsh

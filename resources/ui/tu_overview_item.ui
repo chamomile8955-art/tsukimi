@@ -16,38 +16,53 @@
             <property name="spacing">8</property>
             <property name="valign">fill</property>
             <child>
-              <object class="GtkOverlay" id="overlay">
-                <property name="valign">fill</property>
-                <property name="width-request">250</property>
-                <property name="height-request">141</property>
-                <property name="halign">center</property>
-                <property name="overflow">hidden</property>
-                <style>
-                  <class name="media-card-image"/>
-                  <class name="episode-card-image"/>
-                </style>
-                <child type="overlay">
-                  <object class="GtkBox" id="overlay_button_box">
-                    <property name="orientation">horizontal</property>
-                    <property name="spacing">12</property>
-                    <property name="halign">end</property>
-                    <property name="valign">start</property>
-                    <property name="margin-end">8</property>
-                    <property name="margin-top">8</property>
-                  </object>
-                </child>
-                <child type="overlay">
-                  <object class="GtkProgressBar" id="progress_bar">
-                    <property name="visible">false</property>
-                    <property name="valign">end</property>
-                    <property name="margin-start">8</property>
-                    <property name="margin-end">8</property>
-                    <property name="margin-bottom">8</property>
-                    <style>
-                      <class name="accent"/>
-                      <class name="media-card-progress"/>
-                      <class name="episode-card-progress"/>
-                    </style>
+              <object class="AdwClamp" id="image_width">
+                <property name="maximum-size">320</property>
+                <property name="tightening-threshold">320</property>
+                <property name="halign">start</property>
+                <property name="valign">center</property>
+                <child>
+                  <object class="AdwClamp" id="image_height">
+                    <property name="orientation">vertical</property>
+                    <property name="maximum-size">180</property>
+                    <property name="tightening-threshold">180</property>
+                    <child>
+                      <object class="GtkOverlay" id="overlay">
+                        <property name="valign">fill</property>
+                        <property name="width-request">250</property>
+                        <property name="height-request">141</property>
+                        <property name="halign">center</property>
+                        <property name="overflow">hidden</property>
+                        <style>
+                          <class name="media-card-image"/>
+                          <class name="episode-card-image"/>
+                        </style>
+                        <child type="overlay">
+                          <object class="GtkBox" id="overlay_button_box">
+                            <property name="orientation">horizontal</property>
+                            <property name="spacing">12</property>
+                            <property name="halign">end</property>
+                            <property name="valign">start</property>
+                            <property name="margin-end">8</property>
+                            <property name="margin-top">8</property>
+                          </object>
+                        </child>
+                        <child type="overlay">
+                          <object class="GtkProgressBar" id="progress_bar">
+                            <property name="visible">false</property>
+                            <property name="valign">end</property>
+                            <property name="margin-start">8</property>
+                            <property name="margin-end">8</property>
+                            <property name="margin-bottom">8</property>
+                            <style>
+                              <class name="accent"/>
+                              <class name="media-card-progress"/>
+                              <class name="episode-card-progress"/>
+                            </style>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
                   </object>
                 </child>
               </object>

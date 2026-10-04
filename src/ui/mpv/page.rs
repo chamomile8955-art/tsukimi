@@ -166,6 +166,8 @@ mod imp {
         #[template_child]
         pub mpv_window_controls: TemplateChild<gtk::WindowControls>,
         #[template_child]
+        pub local_file_button: TemplateChild<gtk::Button>,
+        #[template_child]
         pub title_label1: TemplateChild<gtk::Label>,
         #[template_child]
         pub title_label2: TemplateChild<gtk::Label>,
@@ -293,6 +295,8 @@ mod imp {
         fn constructed(&self) {
             self.parent_constructed();
             self.can_fade_cursor_set.set(true);
+            self.local_file_button
+                .set_visible(crate::local_player_mode());
 
             SETTINGS
                 .bind(
@@ -337,16 +341,18 @@ mod imp {
 
             // Initialize MPRIS server
             #[cfg(target_os = "linux")]
-            glib::spawn_future_local(glib::clone!(
-                #[weak(rename_to = imp)]
-                self,
-                async move {
-                    let app_id = format!("{}.{}", APP_ID, "mpv");
-                    if let Err(e) = imp.obj().initialize_mpris(&app_id).await {
-                        tracing::warn!("Failed to initialize mpris server: {}", e);
+            if !crate::local_player_mode() {
+                glib::spawn_future_local(glib::clone!(
+                    #[weak(rename_to = imp)]
+                    self,
+                    async move {
+                        let app_id = format!("{}.{}", APP_ID, "mpv");
+                        if let Err(e) = imp.obj().initialize_mpris(&app_id).await {
+                            tracing::warn!("Failed to initialize mpris server: {}", e);
+                        }
                     }
-                }
-            ));
+                ));
+            }
         }
     }
 
@@ -500,6 +506,9 @@ impl MPVPage {
         &self, selected: Option<SelectedVideoSubInfo>, item: TuItem, episode_list: Vec<TuItem>,
         video_matcher: Option<String>, start_seconds: f64,
     ) {
+        if crate::local_player_mode() {
+            return;
+        }
         let (title1, title2) = if let Some(series_name) = item.series_name() {
             let episode_info = format!(
                 "S{}E{}: {}",
@@ -937,7 +946,40 @@ impl MPVPage {
         }
     }
 
+    pub fn play_local(&self, path: &std::path::Path) {
+        self.remove_timeout();
+        self.imp().back.take();
+        self.set_current_video(None::<TuItem>);
+        self.imp().current_episode_list.borrow_mut().clear();
+        self.imp().suburl.take();
+        self.imp().fallback_context.take();
+        self.imp().allow_fallback.set(false);
+        self.reset_skippable_segments();
+        let title = path.file_name().unwrap_or_default().to_string_lossy();
+        self.imp().title_label1.set_text(&title);
+        self.imp().title_label2.set_visible(false);
+        self.imp().video_scale.reset_scale();
+        self.imp().last_playback_position.set(0.0);
+        self.imp().network_speed_label_2.set_visible(false);
+        if let Some(window) = self.root().and_downcast_ref::<Window>() {
+            window.reset_mpv_media_info();
+        }
+        self.update_seeking(true);
+        self.set_reveal_overlay(true);
+        self.reset_fade_timeout();
+        let uri = gio::File::for_path(path).uri();
+        self.imp().url.replace(Some(uri.to_string()));
+        self.imp().video.play_local(&uri, &title);
+    }
+
     async fn load_video(&self, offset: isize) {
+        if crate::local_player_mode() {
+            if let Some(window) = self.root().and_downcast_ref::<Window>()
+                && !window.step_local_video(offset) {
+                    self.toast(gettext("No more video found"));
+                }
+            return;
+        }
         if self.paused() {
             self.imp().video.pause();
         }
@@ -1205,6 +1247,21 @@ impl MPVPage {
             self,
             async move {
                 if value == 0 {
+                    if crate::local_player_mode() {
+                        if let Some(window) = obj.root().and_downcast_ref::<Window>() {
+                            let advanced = match SETTINGS.mpv_action_after_video_end() {
+                                1 => window.step_local_video(0),
+                                2 => false,
+                                _ => window.step_local_video(1),
+                            };
+                            if !advanced {
+                                window.allow_suspend();
+                                obj.mpv().pause(true);
+                                obj.set_reveal_overlay(true);
+                            }
+                        }
+                        return;
+                    }
                     match SETTINGS.mpv_action_after_video_end() {
                         0 => obj.on_next_video().await,
                         2 => obj.on_stop_clicked(),
@@ -1413,6 +1470,12 @@ impl MPVPage {
 
     #[template_callback]
     pub fn on_stop_clicked(&self) {
+        if crate::local_player_mode() {
+            if let Some(window) = self.root().and_downcast_ref::<Window>() {
+                window.close();
+            }
+            return;
+        }
         self.handle_callback(BackType::Stop);
         self.remove_timeout();
         self.reset_skippable_segments();
@@ -1452,6 +1515,9 @@ impl MPVPage {
     }
 
     fn handle_callback(&self, backtype: BackType) {
+        if crate::local_player_mode() {
+            return;
+        }
         let position = self.imp().last_playback_position.get();
         let back = self.imp().back.borrow();
 
@@ -1467,6 +1533,9 @@ impl MPVPage {
 
     pub fn update_timeout(&self) {
         self.remove_timeout();
+        if crate::local_player_mode() {
+            return;
+        }
         let closure = glib::clone!(
             #[weak(rename_to = obj)]
             self,
@@ -1522,7 +1591,49 @@ impl MPVPage {
         let Some(view) = binding.and_downcast_ref::<adw::OverlaySplitView>() else {
             return;
         };
-
+        if view.shows_sidebar() && key != 65307 {
+            return;
+        }
+        if crate::local_player_mode() {
+            use glib::translate::IntoGlib;
+            use gtk::gdk::Key;
+            if key == Key::q.into_glib() || key == Key::Q.into_glib() {
+                self.on_stop_clicked();
+                return;
+            }
+            if key == Key::f.into_glib() {
+                if let Some(window) = self.root().and_downcast_ref::<Window>() {
+                    let _ = gtk::prelude::WidgetExt::activate_action(
+                        window,
+                        "win.toggle-fullscreen",
+                        None,
+                    );
+                }
+                return;
+            }
+            if key == Key::Escape.into_glib() {
+                if let Some(window) = self.root().and_downcast_ref::<Window>() {
+                    if window.is_fullscreen() {
+                        window.unfullscreen();
+                    } else if window.imp().mpv_view.shows_sidebar() {
+                        window.imp().mpv_view.set_show_sidebar(false);
+                    } else {
+                        window.close();
+                    }
+                }
+                return;
+            }
+            if key == Key::greater.into_glib() || key == Key::less.into_glib() {
+                if let Some(window) = self.root().and_downcast_ref::<Window>() {
+                    window.step_local_video(if key == Key::greater.into_glib() {
+                        1
+                    } else {
+                        -1
+                    });
+                }
+                return;
+            }
+        }
         if view.shows_sidebar() {
             return;
         }

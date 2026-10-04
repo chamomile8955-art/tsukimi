@@ -29,12 +29,20 @@ mod imp {
         fn constructed(&self) {
             self.parent_constructed();
             let obj = self.obj();
-            obj.set_application_id(Some(if crate::ui_preview_mode() {
+            obj.set_application_id(Some(if crate::local_player_mode() {
+                crate::LOCAL_PLAYER_APP_ID
+            } else if crate::ui_preview_mode() {
                 crate::UI_PREVIEW_APP_ID
             } else {
                 crate::APP_ID
             }));
             obj.set_resource_base_path(Some(crate::APP_RESOURCE_PATH));
+            if crate::local_player_mode() {
+                obj.set_flags(
+                    gtk::gio::ApplicationFlags::HANDLES_OPEN
+                        | gtk::gio::ApplicationFlags::NON_UNIQUE,
+                );
+            }
 
             obj.set_accels_for_action("win.about", &["<Ctrl>N"]);
             obj.set_accels_for_action("win.search", &["<Ctrl>F"]);
@@ -42,6 +50,7 @@ mod imp {
             obj.set_accels_for_action("win.toggle-fullscreen", &["F11"]);
             obj.set_accels_for_action("win.settings", &["<Ctrl>comma"]);
             obj.set_accels_for_action("win.next-server", &["<Ctrl>Page_Down"]);
+            obj.set_accels_for_action("win.open-local", &["<Ctrl>O"]);
         }
     }
 
@@ -50,6 +59,15 @@ mod imp {
             self.parent_activate();
 
             let app = self.obj();
+            if crate::local_player_mode() {
+                let window = self.local_window();
+                window.present();
+                if window.local_playlist().is_none() {
+                    let _ =
+                        gtk::prelude::WidgetExt::activate_action(&window, "win.open-local", None);
+                }
+                return;
+            }
             if self.startup_started.replace(true) {
                 if let Some(window) = app.active_window() {
                     window.present();
@@ -86,6 +104,19 @@ mod imp {
             ));
             splash.present();
         }
+
+        fn open(&self, files: &[gtk::gio::File], _hint: &str) {
+            if !crate::local_player_mode() {
+                return;
+            }
+            let window = self.local_window();
+            window.present();
+            if let Some(path) = files.first().and_then(|file| file.path()) {
+                window.open_local_file(path);
+            } else {
+                window.add_toast(adw::Toast::new("只能打开本地视频文件"));
+            }
+        }
     }
 
     impl GtkApplicationImpl for TsukimiApplication {}
@@ -93,6 +124,23 @@ mod imp {
     impl AdwApplicationImpl for TsukimiApplication {}
 
     impl TsukimiApplication {
+        fn local_window(&self) -> crate::Window {
+            let app = self.obj();
+            if let Some(window) = app.active_window().and_downcast::<crate::Window>() {
+                return window;
+            }
+            self.initialize_settings();
+            crate::ui::widgets::init();
+            let window = crate::Window::new(&app);
+            window.start_local_player();
+            window_placement::prepare(window.upcast_ref(), None);
+            window.add_tick_callback(|window, _| {
+                window_placement::center(window.upcast_ref(), None);
+                glib::ControlFlow::Break
+            });
+            window
+        }
+
         fn create_preview_window(&self) {
             self.initialize_settings();
             crate::ui::widgets::init();

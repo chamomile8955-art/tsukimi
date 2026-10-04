@@ -28,13 +28,13 @@
                         <child>
                           <object class="AdwClamp">
                             <property name="orientation">vertical</property>
-                            <property name="maximum-size">176</property>
-                            <property name="tightening-threshold">176</property>
+                            <property name="maximum-size">232</property>
+                            <property name="tightening-threshold">232</property>
                             <property name="valign">center</property>
                             <child>
                               <object class="GtkPicture" id="cover_image">
-                                <property name="width-request">176</property>
-                                <property name="height-request">176</property>
+                                <property name="width-request">232</property>
+                                <property name="height-request">232</property>
                                 <property name="can-shrink">True</property>
                                 <property name="content-fit">cover</property>
                                 <property name="halign">center</property>

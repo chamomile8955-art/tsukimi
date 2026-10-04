@@ -9,6 +9,7 @@ mod app;
 mod arg;
 mod config;
 mod gstl;
+pub mod local_player;
 mod macros;
 #[cfg(target_os = "linux")]
 mod mpris_common;
@@ -36,6 +37,7 @@ pub static USER_AGENT: LazyLock<String> =
 
 pub const APP_ID: &str = "moe.tsuna.tsukimi";
 pub const UI_PREVIEW_APP_ID: &str = "moe.tsuna.tsukimi.UiPreview";
+pub const LOCAL_PLAYER_APP_ID: &str = "moe.tsuna.tsukimi.LocalPlayer";
 pub const CLIENT_ID: &str = "Tsukimi";
 const APP_RESOURCE_PATH: &str = "/moe/tsuna/tsukimi";
 const GRESOURCE_FILE: &str = "tsukimi.gresource";
@@ -49,6 +51,11 @@ const BUILD_DARK_STYLE_CSS: &[u8] = include_bytes!("../resources/style-dark.css"
 const BUILD_SETTINGS_STYLE_CSS: &[u8] = include_bytes!("../resources/style-settings.css");
 static STARTUP_STARTED: OnceLock<Instant> = OnceLock::new();
 static UI_PREVIEW_MODE: OnceLock<bool> = OnceLock::new();
+static LOCAL_PLAYER_MODE: OnceLock<bool> = OnceLock::new();
+
+pub fn local_player_mode() -> bool {
+    LOCAL_PLAYER_MODE.get().copied().unwrap_or(false)
+}
 
 pub(crate) fn ui_preview_mode() -> bool {
     UI_PREVIEW_MODE.get().copied().unwrap_or(false)
@@ -111,7 +118,7 @@ fn installation_path(path: &str) -> std::path::PathBuf {
 }
 
 #[cfg(target_os = "windows")]
-fn configure_windows_runtime() {
+fn configure_windows_runtime(private_root: Option<&Path>) {
     let Some(directory) = std::env::current_exe()
         .ok()
         .and_then(|executable| executable.parent().map(std::path::Path::to_path_buf))
@@ -119,13 +126,14 @@ fn configure_windows_runtime() {
         panic!("Failed to determine the directory containing tsukimi.exe");
     };
 
+    let root = private_root.unwrap_or(&directory);
     let portable_paths = WindowsPortablePaths {
-        data: directory.join("data"),
-        cache: directory.join("cache"),
-        config: directory.join("config"),
-        logs: directory.join("logs"),
-        temp: directory.join("cache/temp"),
-        root: directory.clone(),
+        data: root.join("data"),
+        cache: root.join("cache"),
+        config: root.join("config"),
+        logs: root.join("logs"),
+        temp: root.join("cache/temp"),
+        root: root.to_path_buf(),
     };
     let runtime_dir = portable_paths.cache.join("runtime");
     let gstreamer_dir = portable_paths.cache.join("gstreamer-1.0");
@@ -208,21 +216,31 @@ fn configure_windows_runtime() {
 
 pub fn run() -> gtk::glib::ExitCode {
     STARTUP_STARTED.get_or_init(Instant::now);
+    let args = Args::parse();
+    LOCAL_PLAYER_MODE
+        .set(args.local_player())
+        .expect("Local player mode was initialized twice");
+    let private_runtime = args.local_player().then(|| {
+        local_player::PrivateRuntime::new().expect("Failed to create private playback runtime")
+    });
 
     #[cfg(target_os = "windows")]
     let portable_paths_ready = {
-        configure_windows_runtime();
+        configure_windows_runtime(private_runtime.as_ref().map(|session| session.root()));
         STARTUP_STARTED.get().expect("startup clock").elapsed()
     };
 
-    let args = Args::parse();
-    let ui_preview = args.ui_preview()
-        || env::var("TSUKIMI_UI_PREVIEW").ok().is_some_and(|value| {
-            matches!(
-                value.to_ascii_lowercase().as_str(),
-                "1" | "true" | "yes" | "on"
-            )
-        });
+    if let Some(session) = &private_runtime {
+        session.configure();
+    }
+    let ui_preview = !args.local_player()
+        && (args.ui_preview()
+            || env::var("TSUKIMI_UI_PREVIEW").ok().is_some_and(|value| {
+                matches!(
+                    value.to_ascii_lowercase().as_str(),
+                    "1" | "true" | "yes" | "on"
+                )
+            }));
     UI_PREVIEW_MODE
         .set(ui_preview)
         .expect("UI preview mode was initialized twice");
@@ -255,7 +273,21 @@ pub fn run() -> gtk::glib::ExitCode {
     // Initialize the GTK application
     gtk::glib::set_application_name(CLIENT_ID);
 
-    Application::new().run_with_args::<&str>(&[])
+    let application = Application::new();
+    let result = if args.local_player() {
+        let mut files = vec![CLIENT_ID.to_string()];
+        files.extend(
+            args.videos()
+                .iter()
+                .map(|path| gtk::gio::File::for_commandline_arg(path).uri().to_string()),
+        );
+        application.run_with_args(&files)
+    } else {
+        application.run_with_args::<&str>(&[])
+    };
+    drop(application);
+    drop(private_runtime);
+    result
 }
 
 fn register_gio_resources() {

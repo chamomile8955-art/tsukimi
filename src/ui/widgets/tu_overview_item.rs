@@ -12,7 +12,7 @@ use super::{
         TuItemProgressbarAnimation, TuItemProgressbarAnimationPrelude,
     },
     tu_list_item::imp::PosterType,
-    utils::{TU_ITEM_POST_SIZE, TU_ITEM_VIDEO_SIZE, compact_size, run_time_ticks_to_label},
+    utils::{TU_ITEM_POST_SIZE, TU_ITEM_VIDEO_SIZE, run_time_ticks_to_label},
 };
 use crate::ui::provider::tu_item::TuItem;
 
@@ -59,6 +59,10 @@ pub mod imp {
         pub progress_bar: TemplateChild<gtk::ProgressBar>,
         #[template_child]
         pub overlay: TemplateChild<gtk::Overlay>,
+        #[template_child]
+        pub image_width: TemplateChild<adw::Clamp>,
+        #[template_child]
+        pub image_height: TemplateChild<adw::Clamp>,
         #[template_child]
         pub time_label: TemplateChild<gtk::Label>,
         #[template_child]
@@ -167,6 +171,15 @@ impl TuOverviewItem {
         Object::new()
     }
 
+    fn set_image_size(&self, (width, height): (i32, i32)) {
+        let imp = self.imp();
+        imp.image_width.set_maximum_size(width);
+        imp.image_width.set_tightening_threshold(width);
+        imp.image_height.set_maximum_size(height);
+        imp.image_height.set_tightening_threshold(height);
+        imp.overlay.set_size_request(width, height);
+    }
+
     pub fn set_up(&self) {
         let imp = self.imp();
         let item = self.item();
@@ -183,8 +196,7 @@ impl TuOverviewItem {
                 } else {
                     imp.listlabel.set_text(&item.name());
                 }
-                let (w, h) = compact_size(TU_ITEM_VIDEO_SIZE, self);
-                imp.overlay.set_size_request(w, h);
+                self.set_image_size(TU_ITEM_VIDEO_SIZE);
                 if let Some(premiere_date) = item.premiere_date() {
                     imp.time_label.set_visible(true);
                     imp.time_label
@@ -222,12 +234,10 @@ impl TuOverviewItem {
                         item.index_number(),
                         item.name()
                     ));
-                    let (w, h) = compact_size(TU_ITEM_VIDEO_SIZE, self);
-                    imp.overlay.set_size_request(w, h);
+                    self.set_image_size(TU_ITEM_VIDEO_SIZE);
                 } else {
                     imp.listlabel.set_text(&item.name());
-                    let (w, h) = compact_size(TU_ITEM_POST_SIZE, self);
-                    imp.overlay.set_size_request(w, h);
+                    self.set_image_size(TU_ITEM_POST_SIZE);
                 }
                 let year = if item.production_year() != 0 {
                     item.production_year().to_string()

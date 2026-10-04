@@ -3,6 +3,14 @@ use gtk::prelude::*;
 pub const DEFAULT_WIDTH: i32 = 1152;
 pub const DEFAULT_HEIGHT: i32 = 720;
 
+#[cfg(any(target_os = "windows", test))]
+fn logical_work_area(width: i32, height: i32, scale: f64) -> (i32, i32) {
+    (
+        (width as f64 / scale).floor() as i32,
+        (height as f64 / scale).floor() as i32,
+    )
+}
+
 fn startup_size(width: i32, height: i32) -> (i32, i32) {
     (
         DEFAULT_WIDTH.min((width - 48).max(1)),
@@ -204,9 +212,10 @@ mod platform {
     pub fn work_area_size(window: &gtk::Window) -> Option<(i32, i32)> {
         let area = work_area(window)?;
         let scale = window.surface()?.scale();
-        Some((
-            ((area.right - area.left) as f64 / scale) as i32,
-            ((area.bottom - area.top) as f64 / scale) as i32,
+        Some(super::logical_work_area(
+            area.right - area.left,
+            area.bottom - area.top,
+            scale,
         ))
     }
 
@@ -264,8 +273,37 @@ mod tests {
     #[test]
     fn startup_size_is_stable_on_large_displays_and_fits_small_ones() {
         assert_eq!(startup_size(1920, 1040), (1152, 720));
+        assert_eq!(startup_size(2560, 1400), (1152, 720));
         assert_eq!(startup_size(3840, 2120), (1152, 720));
         assert_eq!(startup_size(1024, 680), (976, 632));
+    }
+
+    #[test]
+    fn startup_size_uses_logical_pixels_across_resolutions_and_dpi() {
+        for (width, height, scale) in [
+            (1920, 1080, 1.0),
+            (1920, 1080, 1.25),
+            (2560, 1440, 1.0),
+            (2560, 1440, 1.25),
+            (2560, 1440, 1.5),
+            (2560, 1600, 1.5),
+            (3840, 2160, 1.0),
+            (3840, 2160, 1.5),
+            (3840, 2160, 1.75),
+            (3840, 2160, 2.0),
+        ] {
+            let taskbar = (40.0 * scale) as i32;
+            let (width, height) = logical_work_area(width, height - taskbar, scale);
+            assert_eq!(startup_size(width, height), (DEFAULT_WIDTH, DEFAULT_HEIGHT));
+        }
+    }
+
+    #[test]
+    fn work_area_conversion_preserves_fractional_scale_and_small_desktops() {
+        assert_eq!(logical_work_area(2560, 1390, 1.25), (2048, 1112));
+        assert_eq!(logical_work_area(2560, 1380, 1.5), (1706, 920));
+        let (width, height) = logical_work_area(1920, 1020, 1.5);
+        assert_eq!(startup_size(width, height), (1152, 632));
     }
 
     #[test]

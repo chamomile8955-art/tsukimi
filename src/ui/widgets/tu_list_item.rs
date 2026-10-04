@@ -11,7 +11,7 @@ use super::tu_item::{
 };
 use crate::ui::{
     provider::tu_item::{ACTOR, DIRECTOR, GUEST_STAR, PERSON, PRODUCER, TuItem, WRITER},
-    widgets::utils::{TU_ITEM_BANNER_SIZE, TU_ITEM_PERSON_SIZE, TU_ITEM_VIDEO_SIZE, compact_size},
+    widgets::utils::{TU_ITEM_BANNER_SIZE, TU_ITEM_PERSON_SIZE, TU_ITEM_VIDEO_SIZE},
 };
 
 pub mod imp {
@@ -502,15 +502,14 @@ impl TuListItem {
 
     fn size_hint(&self) -> (i32, i32) {
         if Self::is_person_item(&self.item()) {
-            return compact_size(TU_ITEM_PERSON_SIZE, self);
+            return TU_ITEM_PERSON_SIZE;
         }
 
-        let size = match self.poster_type() {
+        match self.poster_type() {
             PosterType::Banner => TU_ITEM_BANNER_SIZE,
             PosterType::Backdrop => TU_ITEM_VIDEO_SIZE,
             _ => self.item().size_hint(),
-        };
-        compact_size(size, self)
+        }
     }
 
     fn is_person_item(item: &TuItem) -> bool {

@@ -14,6 +14,24 @@ use libmpv2::{
 use tracing::{debug, info, warn};
 
 const MAX_VOLUME: i64 = 100;
+fn configure_local_mpv(
+    init: &libmpv2::MpvInitializer, watch_dir: &str,
+) -> Result<(), libmpv2::Error> {
+    for option in [
+        "config",
+        "load-scripts",
+        "save-position-on-quit",
+        "resume-playback",
+        "cache-on-disk",
+        "input-default-bindings",
+    ] {
+        init.set_property(option, false)?;
+    }
+    init.set_property("watch-later-directory", watch_dir)?;
+    // Older libmpv versions do not have the watch history feature.
+    let _ = init.set_property("save-watch-history", false);
+    Ok(())
+}
 const CHANNEL_SWAP_LABEL: &str = "tsukimi-channel-swap";
 const CHANNEL_SWAP_FILTER: &str =
     "@tsukimi-channel-swap:lavfi=[aformat=channel_layouts=stereo,pan=stereo|c0=c1|c1=c0]";
@@ -27,8 +45,9 @@ pub struct MpvTrack {
 }
 
 pub struct TsukimiMPV {
-    pub mpv: Arc<Mpv>,
+    // Rust drops fields in declaration order; free rendering before its mpv owner.
     pub ctx: RefCell<Option<RenderContext>>,
+    pub mpv: Arc<Mpv>,
     pub event_thread_alive: Arc<AtomicU32>,
     pub event_handle: RefCell<Option<JoinHandle<()>>>,
 }
@@ -79,12 +98,15 @@ impl Default for TsukimiMPV {
         });
 
         let mpv = Mpv::with_initializer(|init| {
-            if SETTINGS.mpv_config() {
+            let local = crate::local_player_mode();
+            if local {
+                configure_local_mpv(&init, &std::env::var("MPV_HOME").unwrap_or_default())?;
+            } else if SETTINGS.mpv_config() {
                 init.set_property("config", true)?;
                 init.set_property("config-dir", SETTINGS.mpv_config_dir())?;
             }
             init.set_property("input-vo-keyboard", true)?;
-            init.set_property("input-default-bindings", true)?;
+            init.set_property("input-default-bindings", !local)?;
             init.set_property("user-agent", crate::USER_AGENT.as_str())?;
             init.set_property("video-timing-offset", 0)?;
             init.set_property("video-sync", "audio")?;
@@ -121,7 +143,7 @@ impl Default for TsukimiMPV {
                 "audio-channels",
                 match_audio_channels(SETTINGS.mpv_audio_channel()),
             )?;
-            if let Some(uri) = crate::client::proxy::get_proxy_settings() {
+            if !local && let Some(uri) = crate::client::proxy::get_proxy_settings() {
                 let url =
                     Url::parse(&uri).map_or_else(|_| format!("http://{uri}"), |_| uri.to_string());
                 init.set_property("http-proxy", url)?;
@@ -237,6 +259,20 @@ impl TsukimiMPV {
         self.command("loadfile", &[url, "replace"]);
     }
 
+    pub fn load_local_video(&self, url: &str, title: &str) {
+        // Keep load/start/pause ordered, including fast successive playlist selections.
+        // Decoding runs on mpv's own worker threads.
+        let result = (|| {
+            self.mpv.set_property("force-media-title", title)?;
+            self.mpv.set_property("start", "0")?;
+            self.mpv.command("loadfile", &[url, "replace"])?;
+            self.mpv.set_property("pause", false)
+        })();
+        if let Err(error) = result {
+            warn!(%error, "Failed to load local video");
+        }
+    }
+
     pub fn configure_cache(&self, size_mib: i32) {
         let size_mib = size_mib.max(1);
         self.set_property("cache", true);
@@ -288,12 +324,45 @@ impl TsukimiMPV {
     pub fn press_key(&self, key: u32, state: gtk::gdk::ModifierType) {
         let keystr = get_full_keystr(key, state);
         if let Some(keystr) = keystr {
+            if crate::local_player_mode() {
+                match keystr.as_str() {
+                    "SPACE" | "p" => self.command_pause(),
+                    "LEFT" => self.seek_backward(5),
+                    "RIGHT" => self.seek_forward(5),
+                    "UP" => self.seek_forward(60),
+                    "DOWN" => self.seek_backward(60),
+                    "0" | "VOLUME_UP" => self.volume_scroll(2),
+                    "9" | "VOLUME_LOWER" => self.volume_scroll(-2),
+                    "m" | "MUTE" => self.command("cycle", &["mute"]),
+                    "PGUP" => self.command("add", &["chapter", "-1"]),
+                    "PGDWN" => self.command("add", &["chapter", "1"]),
+                    "j" => self.command("cycle", &["sid"]),
+                    "Shift+J" => self.command("cycle", &["sid", "down"]),
+                    "k" => self.command("cycle", &["aid"]),
+                    "v" => self.command("cycle", &["sub-visibility"]),
+                    "z" => self.command("add", &["sub-delay", "-0.1"]),
+                    "x" => self.command("add", &["sub-delay", "0.1"]),
+                    "i" | "Shift+I" => self.display_stats_toggle(),
+                    "." => self.command("frame-step", &[]),
+                    "," => self.command("frame-back-step", &[]),
+                    "[" => self.command("multiply", &["speed", "0.9090909"]),
+                    "]" => self.command("multiply", &["speed", "1.1"]),
+                    "Shift+{" => self.command("multiply", &["speed", "0.5"]),
+                    "Shift+}" => self.command("multiply", &["speed", "2"]),
+                    "BS" => self.set_speed(1.0),
+                    _ => {}
+                }
+                return;
+            }
             debug!("MPV Catch Key pressed: {}", keystr);
             self.command("keypress", &[&keystr]);
         }
     }
 
     pub fn release_key(&self, key: u32, state: gtk::gdk::ModifierType) {
+        if crate::local_player_mode() {
+            return;
+        }
         let keystr = get_full_keystr(key, state);
         if let Some(keystr) = keystr {
             debug!("MPV Catch Key released: {}", keystr);
@@ -354,6 +423,9 @@ impl TsukimiMPV {
     }
 
     pub fn process_events(&self) {
+        if self.event_handle.borrow().is_some() {
+            return;
+        }
         let mpv = Arc::clone(&self.mpv);
         let mut event_context = EventContext::new(mpv.ctx);
         event_context
@@ -397,11 +469,14 @@ impl TsukimiMPV {
                     let state = event_thread_alive.load(std::sync::atomic::Ordering::SeqCst);
                     match state {
                         SHUTDOWN => break,
-                        PAUSED => atomic_wait::wait(&event_thread_alive, PAUSED),
+                        PAUSED => {
+                            atomic_wait::wait(&event_thread_alive, PAUSED);
+                            continue;
+                        }
                         _ => (),
                     }
 
-                    match event_context.wait_event(1000.0) {
+                    match event_context.wait_event(0.5) {
                         Some(Ok(event)) => match event {
                             Event::PropertyChange { name, change, .. } => match name {
                                 "duration" => {
@@ -514,6 +589,7 @@ impl TsukimiMPV {
     pub fn shutdown_event_thread(&self) {
         self.event_thread_alive
             .store(SHUTDOWN, std::sync::atomic::Ordering::SeqCst);
+        atomic_wait::wake_all(&*self.event_thread_alive);
         if let Some(handle) = self.event_handle.borrow_mut().take() {
             let _ = handle.join();
         }
@@ -553,6 +629,67 @@ fn configure_audio_channels(mpv: &Mpv, selected: i32) -> Result<(), libmpv2::Err
 #[cfg(test)]
 mod audio_tests {
     use super::*;
+
+    #[test]
+    fn shutdown_unblocks_paused_and_idle_event_threads() {
+        for state in [PAUSED, ACTIVE] {
+            let (tx, rx) = std::sync::mpsc::channel();
+            let worker = std::thread::spawn(move || {
+                let mpv = Mpv::with_initializer(|init| {
+                    init.set_property("config", false)?;
+                    init.set_property("vo", "null")?;
+                    init.set_property("ao", "null")?;
+                    Ok(())
+                })
+                .unwrap();
+                let player = TsukimiMPV {
+                    mpv: Arc::new(mpv),
+                    ctx: RefCell::new(None),
+                    event_thread_alive: Arc::new(AtomicU32::new(state)),
+                    event_handle: RefCell::new(None),
+                };
+                player.process_events();
+                std::thread::sleep(std::time::Duration::from_millis(100));
+                player.shutdown_event_thread();
+                tx.send(()).unwrap();
+            });
+            rx.recv_timeout(std::time::Duration::from_secs(3))
+                .expect("Player shutdown stalled");
+            worker.join().unwrap();
+        }
+    }
+
+    #[test]
+    fn local_player_disables_persistent_playback_options() {
+        let runtime = crate::local_player::PrivateRuntime::new().unwrap();
+        let directory = runtime.root().to_string_lossy();
+        let mpv = Mpv::with_initializer(|init| {
+            configure_local_mpv(&init, &directory)?;
+            init.set_property("vo", "null")?;
+            init.set_property("ao", "null")?;
+            Ok(())
+        })
+        .unwrap();
+        for option in [
+            "config",
+            "load-scripts",
+            "save-position-on-quit",
+            "resume-playback",
+            "cache-on-disk",
+            "input-default-bindings",
+        ] {
+            assert!(
+                !mpv.get_property::<bool>(&format!("options/{option}"))
+                    .unwrap(),
+                "{option}"
+            );
+        }
+        assert_eq!(
+            mpv.get_property::<String>("options/watch-later-directory")
+                .unwrap(),
+            directory
+        );
+    }
 
     #[test]
     fn channel_changes_preserve_user_filters_and_do_not_duplicate_swap() {

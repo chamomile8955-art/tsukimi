@@ -13,6 +13,14 @@ const DEFAULT_RENDERER: &str = "gl";
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 pub struct Args {
+    /// Open an isolated local player without accounts, logs, or playback history.
+    #[clap(long, conflicts_with = "ui_preview")]
+    local_player: bool,
+
+    /// Local videos to open. The first video selects its folder playlist.
+    #[clap(value_name = "VIDEO", conflicts_with = "ui_preview")]
+    videos: Vec<std::path::PathBuf>,
+
     /// Open the real main-window template without restoring servers or
     /// loading persistent application data.
     #[clap(long)]
@@ -36,7 +44,40 @@ pub struct Args {
     xdg_cache_home: Option<String>,
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn files_select_local_mode_and_do_not_conflict_with_logging_options() {
+        let args = Args::try_parse_from([
+            "tsukimi",
+            "--log-file",
+            "ignored.log",
+            "--",
+            "电影 空格.MKV",
+        ])
+        .unwrap();
+        assert!(args.local_player());
+        assert_eq!(args.videos(), [std::path::PathBuf::from("电影 空格.MKV")]);
+        assert!(
+            Args::try_parse_from(["tsukimi", "--local-player"])
+                .unwrap()
+                .local_player()
+        );
+        assert!(!Args::try_parse_from(["tsukimi"]).unwrap().local_player());
+        assert!(Args::try_parse_from(["tsukimi", "--ui-preview", "movie.mp4"]).is_err());
+        assert!(Args::try_parse_from(["tsukimi", "--ui-preview", "--local-player"]).is_err());
+    }
+}
+
 impl Args {
+    pub fn local_player(&self) -> bool {
+        self.local_player || !self.videos.is_empty()
+    }
+    pub fn videos(&self) -> &[std::path::PathBuf] {
+        &self.videos
+    }
+
     pub fn ui_preview(&self) -> bool {
         self.ui_preview
     }
@@ -49,6 +90,10 @@ impl Args {
     /// Panics if the log file cannot be opened.
     fn init_tracing_subscriber(&self) {
         let builder = tracing_subscriber::fmt().with_timer(ChronoLocal::rfc_3339());
+        if self.local_player() {
+            builder.with_writer(io::sink).init();
+            return;
+        }
 
         let builder = match self.log_level.as_deref() {
             Some("error") => builder.with_max_level(LevelFilter::ERROR),

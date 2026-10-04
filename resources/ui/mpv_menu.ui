@@ -3,6 +3,13 @@
   <menu id="mpv-menu">
     <section>
       <item>
+        <attribute name="label" translatable="yes">Open Local Video</attribute>
+        <attribute name="action">win.open-local</attribute>
+        <attribute name="accel">&lt;Control&gt;O</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
         <attribute name="custom">menu-actions</attribute>
       </item>
     </section>

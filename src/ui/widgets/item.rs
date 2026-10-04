@@ -245,7 +245,7 @@ pub(crate) mod imp {
                         let width = imp.detail_scrolled.hadjustment().page_size() as i32;
                         let height = imp.detail_scrolled.vadjustment().page_size() as i32;
                         if width > 0 && height > 0 {
-                            let requested = hero_height(width, height);
+                            let requested = hero_height(height);
                             if imp.hero.height_request() != requested {
                                 imp.hero.set_height_request(requested);
                             }
@@ -272,8 +272,8 @@ pub(crate) mod imp {
     impl adw::subclass::navigation_page::NavigationPageImpl for ItemPage {}
 }
 
-fn hero_height(width: i32, height: i32) -> i32 {
-    ((width as f64 * 9.0 / 16.0).min(height as f64 * 0.82) as i32).clamp(300, 720)
+fn hero_height(viewport_height: i32) -> i32 {
+    viewport_height.max(1)
 }
 
 #[cfg(test)]
@@ -281,14 +281,12 @@ mod layout_tests {
     use super::hero_height;
 
     #[test]
-    fn hero_leaves_room_for_details_at_supported_viewports() {
-        for (width, height) in [(500, 600), (1280, 720), (1920, 1080), (3840, 2160)] {
-            let hero = hero_height(width, height);
-            assert!(hero >= 300);
-            assert!(hero <= 720);
-            assert!(hero < height);
+    fn hero_fills_the_first_viewport_at_supported_sizes() {
+        for height in [450, 600, 720, 1080, 2160] {
+            assert_eq!(hero_height(height), height);
         }
-        assert!(hero_height(1280, 720) < hero_height(1920, 1080));
+        assert_eq!(hero_height(0), 1);
+        assert_eq!(hero_height(-1), 1);
     }
 }
 
@@ -1456,12 +1454,7 @@ impl ItemPage {
 
         let video_dl: std::cell::Ref<DropdownList> = video_object.borrow();
         let (sub_index, sub_lang) = sub_dl
-            .map(|sub_dl| {
-                (
-                    sub_dl.index,
-                    sub_dl.sub_lang.to_owned(),
-                )
-            })
+            .map(|sub_dl| (sub_dl.index, sub_dl.sub_lang.to_owned()))
             .unwrap_or_default();
 
         let info = SelectedVideoSubInfo {

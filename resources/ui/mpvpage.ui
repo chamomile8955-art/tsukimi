@@ -156,6 +156,20 @@
                             </object>
                         </child>
                         <child>
+                          <object class="GtkButton" id="local_file_button">
+                            <property name="visible">false</property>
+                            <property name="valign">center</property>
+                            <property name="icon-name">folder-visiting-symbolic</property>
+                            <property name="tooltip-text" translatable="yes">Open Local Video</property>
+                            <property name="action-name">win.open-local</property>
+                            <style>
+                              <class name="flat" />
+                              <class name="circular" />
+                              <class name="mpv-control-button" />
+                            </style>
+                          </object>
+                        </child>
+                        <child>
                           <object class="GtkButton" id="player_settings_menu_button">
                             <property name="valign">center</property>
                             <property name="icon-name">settings-symbolic</property>

@@ -7,6 +7,7 @@
     <property name="icon-name">moe.tsuna.tsukimi</property>
     <style>
       <class name="app-window"/>
+      <class name="desktop-density"/>
     </style>
     <child>
       <object class="GtkEventControllerKey">

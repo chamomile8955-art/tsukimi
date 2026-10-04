@@ -73,6 +73,20 @@ On macOS and Windows, centering uses the native work area, excluding the Dock,
 menu bar, or taskbar. GTK owns DPI-aware sizing; native placement only moves
 the window. On Wayland, the compositor retains control of placement.
 
+All resolutions use the same logical-pixel geometry and desktop density.
+Resizing or maximizing does not switch between compact and enlarged controls.
+Windows embeds a PerMonitorV2 DPI manifest (with a PerMonitor fallback), so GTK
+can redraw for each monitor's scaling without application-level scaling.
+Native work areas are converted using the surface's fractional scale exactly
+once. System font and accessibility settings remain respected. The physical
+size and fraction of the display occupied still depend on display dimensions
+and the user's OS scaling; resolution alone cannot determine either.
+
+The placement tests cover 1080p, 1440p, 1600p and 4K work areas at 100%, 125%,
+150%, 175% and 200% scaling. On Windows, also move an open window between
+monitors with different DPI settings and check the main UI, settings, and
+player popovers. This mixed-monitor test requires actual Windows hardware.
+
 For release UI checks, launch in both themes, resize, close, and launch again.
 Verify that the splash and main window start at the same size and position,
 that settings remain readable at 760 x 720 and 500 x 600, and that playback
@@ -100,10 +114,16 @@ tool buttons are 40 pixels, the primary playback control is 48 pixels, and
 traffic lights are 16 pixels. Frame radii remain unchanged. Player utility
 panels always use a dark palette, independent of the application theme.
 
-Base media sizes are 176 x 264 for posters, 256 x 144 for backdrops,
-176 x 176 for square covers, 352 x 66 for banners, and 120 x 120 for people.
-Compact layouts retain the existing 0.86 scale. Ellipsized labels and intrinsic
-image sizes do not enlarge cards; album details retain a 176-pixel square cover.
+Media sizes are restored to 220 x 330 for posters, 320 x 180 for backdrops,
+232 x 232 for square covers, 440 x 82 for banners, and 156 x 156 for people.
+Media cards and list/episode thumbnails retain these dimensions at all window
+sizes, before and after binding/rebinding. Ellipsized
+labels and intrinsic image sizes do not enlarge cards; album details retain
+a 232-pixel square cover.
+
+Movie and series detail backdrops fill the first content viewport, including
+after resizing. The title and playback actions remain over the backdrop;
+recommendations and other details begin below it and remain scrollable.
 
 With a desktop session and the normal native build dependencies installed:
 
@@ -132,6 +152,8 @@ CSS padding and borders), navigation height and label fit,
 filter-title fit, poster and disabled-action text colors, action hover backgrounds,
 single-row library toolbar alignment, group spacing and unclipped navigation,
 window-control size, media-card dimensions, square album covers, available icons,
+full-viewport detail backdrops and visible first-screen playback actions,
+unchanged control geometry across 1152 x 720, 1280 x 800 and 1440 x 900 windows,
 active player tabs, fixed dark player surfaces and their text contrast,
 and that the loaded styles and main-window template match their build sources.
 PNG snapshots are saved alongside the fixture cache for visual inspection. The
@@ -140,3 +162,25 @@ audit exits automatically; assertion failures return a nonzero exit status.
 This is a UI smoke test, not a substitute for real-server integration tests,
 video/audio playback, or verification on each supported operating system.
 Optional `TSUKIMI_UI_AUDIT_TRACE=1` prints native focus/layout diagnostics.
+
+## Local Player Playback Audit
+
+```sh
+just local-player-audit
+```
+
+Requires a native desktop, ffmpeg and the regular build dependencies. Generates
+silent video/audio fixtures under `target/local-player-audit`, then launches the
+real local player through the same filename/GApplication-open path used by file
+associations. It checks clicked-file selection, sibling filtering and natural
+ordering, previous/next, Unicode/space-containing paths, playlist activation,
+automatic next-video, final EOF, invalid files, reopening from zero, and closing
+an empty player without a stalled event thread. Screenshots
+and red/green pixel checks verify actual libmpv rendering plus the playlist,
+settings and media-info panels. It asserts that the Jellyfin client was never
+initialized, ignores an explicitly requested disk log, and checks temporary
+runtime cleanup after exit. Normal settings are never read or changed.
+
+The Windows workflow additionally tests per-user association registration and
+unregistration. Explorer/default-app selection and real audio output still
+require Windows hardware; the silent fixture is not an audible quality test.

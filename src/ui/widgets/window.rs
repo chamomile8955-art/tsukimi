@@ -6,7 +6,7 @@ use adw::prelude::*;
 use gettextrs::gettext;
 use gtk::{Widget, subclass::prelude::*};
 mod imp {
-    use std::cell::{OnceCell, RefCell};
+    use std::cell::{Cell, OnceCell, RefCell};
 
     use adw::subclass::application_window::AdwApplicationWindowImpl;
     use glib::subclass::InitializingObject;
@@ -115,6 +115,8 @@ mod imp {
         pub context_server: RefCell<Option<Account>>,
 
         pub mpv_playlist_selection: gtk::SingleSelection,
+        pub local_playlist: RefCell<Option<crate::local_player::LocalPlaylist>>,
+        pub local_open_generation: Cell<u64>,
 
         pub suspend_cookie: RefCell<Option<u32>>,
         pub mpv_tracks: RefCell<Option<MpvTracks>>,
@@ -157,6 +159,9 @@ mod imp {
             );
             klass.install_action("win.settings", None, |window, _, _| {
                 window.account_settings();
+            });
+            klass.install_action("win.open-local", None, |window, _, _| {
+                window.choose_local_file();
             });
             klass.install_action("win.toggle-fullscreen", None, |obj, _, _| {
                 if obj.is_fullscreen() {
@@ -223,16 +228,6 @@ mod imp {
             self.parent_constructed();
 
             let obj = self.obj();
-            obj.connect_realize(|window| {
-                window.sync_display_density_class();
-                if let Some(surface) = window.surface() {
-                    surface.connect_layout(glib::clone!(
-                        #[weak]
-                        window,
-                        move |_, _, _| window.sync_display_density_class()
-                    ));
-                }
-            });
             #[cfg(target_os = "windows")]
             {
                 obj.set_decorated(false);
@@ -296,6 +291,16 @@ mod imp {
     impl WindowImpl for Window {
         // Save window state right before the window will be closed
         fn close_request(&self) -> glib::Propagation {
+            if crate::local_player_mode() {
+                self.local_open_generation
+                    .set(self.local_open_generation.get().wrapping_add(1));
+                self.mpvnav.remove_timeout();
+                self.local_playlist.take();
+                self.mpvnav.mpv().stop();
+                self.mpvnav.mpv().shutdown_event_thread();
+                self.obj().allow_suspend();
+                return glib::Propagation::Proceed;
+            }
             // Save window size
             if let Err(error) = self.obj().save_window_state() {
                 tracing::warn!(%error, "Failed to save window state");
@@ -351,18 +356,190 @@ static STARTUP_SERVER_RESTORE_RECORDED: std::sync::atomic::AtomicBool =
 
 #[template_callbacks]
 impl Window {
-    fn sync_display_density_class(&self) {
-        let (width, height) = self
-            .surface()
-            .map(|surface| (surface.width(), surface.height()))
-            .filter(|(width, height)| *width > 0 && *height > 0)
-            .unwrap_or_else(|| self.default_size());
-        let compact = width <= 1280 || height <= 800;
-        if compact {
-            self.add_css_class("compact-1080");
-        } else {
-            self.remove_css_class("compact-1080");
+    pub fn start_local_player(&self) {
+        let imp = self.imp();
+        imp.stack.set_visible_child_name("mpv");
+        self.set_title("Tsukimi Player");
+        self.set_shortcuts();
+        for action in [
+            "win.sidebar",
+            "win.show-sidebar",
+            "win.home",
+            "win.search",
+            "win.recommend",
+            "win.favorites",
+            "win.add-server",
+            "win.next-server",
+            "win.server-panel",
+            "win.server-switch",
+            "win.server-default",
+            "win.server-edit",
+            "win.server-delete",
+        ] {
+            self.action_set_enabled(action, false);
         }
+        let factory = gtk::SignalListItemFactory::new();
+        factory.connect_setup(|_, item| {
+            let item = item.downcast_ref::<gtk::ListItem>().unwrap();
+            let row = gtk::Box::builder()
+                .spacing(12)
+                .margin_top(12)
+                .margin_bottom(12)
+                .margin_start(14)
+                .margin_end(14)
+                .build();
+            row.append(&gtk::Image::from_icon_name("video-reel-symbolic"));
+            let label = gtk::Label::builder()
+                .xalign(0.0)
+                .hexpand(true)
+                .ellipsize(gtk::pango::EllipsizeMode::Middle)
+                .build();
+            row.append(&label);
+            item.set_child(Some(&row));
+        });
+        factory.connect_bind(|_, item| {
+            let item = item.downcast_ref::<gtk::ListItem>().unwrap();
+            let text = item.item().and_downcast::<gtk::StringObject>().unwrap();
+            let row = item.child().and_downcast::<gtk::Box>().unwrap();
+            let label = row.last_child().and_downcast::<gtk::Label>().unwrap();
+            label.set_text(&text.string());
+            row.set_tooltip_text(Some(&text.string()));
+        });
+        imp.mpv_playlist.set_factory(Some(&factory));
+        imp.mpv_playlist.add_css_class("local-video-playlist");
+        imp.mpv_playlist_selection
+            .set_model(Some(&gtk::StringList::new(&[])));
+        let drop = gtk::DropTarget::new(gio::File::static_type(), gtk::gdk::DragAction::COPY);
+        drop.connect_drop(glib::clone!(
+            #[weak(rename_to = window)]
+            self,
+            #[upgrade_or]
+            false,
+            move |_, value, _, _| {
+                let Some(path) = value.get::<gio::File>().ok().and_then(|file| file.path()) else {
+                    return false;
+                };
+                window.open_local_file(path);
+                true
+            }
+        ));
+        self.add_controller(drop);
+    }
+
+    pub fn open_local_file(&self, path: std::path::PathBuf) {
+        if !crate::local_player_mode() {
+            return;
+        }
+        let generation = self.imp().local_open_generation.get().wrapping_add(1);
+        self.imp().local_open_generation.set(generation);
+        spawn(glib::clone!(
+            #[weak(rename_to = window)]
+            self,
+            async move {
+                let result = crate::utils::spawn_tokio_blocking(move || {
+                    crate::local_player::LocalPlaylist::from_file(&path)
+                })
+                .await;
+                if generation != window.imp().local_open_generation.get() {
+                    return;
+                }
+                match result {
+                    Ok(playlist) => {
+                        let names: Vec<_> = playlist
+                            .files()
+                            .iter()
+                            .map(|path| {
+                                path.file_name()
+                                    .unwrap_or_default()
+                                    .to_string_lossy()
+                                    .into_owned()
+                            })
+                            .collect();
+                        let names: Vec<_> = names.iter().map(String::as_str).collect();
+                        window
+                            .imp()
+                            .mpv_playlist_selection
+                            .set_model(Some(&gtk::StringList::new(&names)));
+                        let index = playlist.current_index();
+                        window.imp().local_playlist.replace(Some(playlist));
+                        window.play_local_index(index);
+                    }
+                    Err(error) => window.add_toast(adw::Toast::new(&error.to_string())),
+                }
+            }
+        ));
+    }
+
+    pub fn local_playlist(&self) -> Option<crate::local_player::LocalPlaylist> {
+        self.imp().local_playlist.borrow().clone()
+    }
+
+    pub fn play_local_index(&self, index: usize) -> bool {
+        let file = self
+            .imp()
+            .local_playlist
+            .borrow_mut()
+            .as_mut()
+            .and_then(|playlist| playlist.select(index));
+        let Some(file) = file else {
+            return false;
+        };
+        self.imp().mpv_playlist_selection.set_selected(index as u32);
+        self.imp().stack.set_visible_child_name("mpv");
+        self.prevent_suspend();
+        self.imp().mpvnav.play_local(&file);
+        true
+    }
+
+    pub fn step_local_video(&self, offset: isize) -> bool {
+        let next = self
+            .imp()
+            .local_playlist
+            .borrow()
+            .as_ref()
+            .and_then(|playlist| playlist.current_index().checked_add_signed(offset));
+        next.is_some_and(|index| self.play_local_index(index))
+    }
+
+    fn choose_local_file(&self) {
+        let filter = gtk::FileFilter::new();
+        filter.set_name(Some("视频"));
+        for extension in crate::local_player::VIDEO_EXTENSIONS.iter() {
+            filter.add_suffix(extension);
+        }
+        let filters = gio::ListStore::new::<gtk::FileFilter>();
+        filters.append(&filter);
+        let dialog = gtk::FileDialog::builder()
+            .title("打开本地视频")
+            .filters(&filters)
+            .build();
+        dialog.open(
+            Some(self),
+            gio::Cancellable::NONE,
+            glib::clone!(
+                #[weak(rename_to = window)]
+                self,
+                move |result| {
+                    let Ok(file) = result else {
+                        return;
+                    };
+                    let Some(path) = file.path() else {
+                        return;
+                    };
+                    if crate::local_player_mode() {
+                        window.open_local_file(path);
+                    } else if let Ok(executable) = std::env::current_exe()
+                        && let Err(error) = std::process::Command::new(executable)
+                            .arg("--local-player")
+                            .arg("--")
+                            .arg(path)
+                            .spawn()
+                        {
+                            window.add_toast(adw::Toast::new(&error.to_string()));
+                        }
+                }
+            ),
+        );
     }
 
     #[cfg(target_os = "windows")]
@@ -591,6 +768,9 @@ impl Window {
     }
 
     pub fn start_background_initialization(&self) {
+        if crate::local_player_mode() {
+            return;
+        }
         self.set_shortcuts();
 
         spawn(glib::clone!(
@@ -655,6 +835,11 @@ impl Window {
 
     fn rebuild_main_menu(&self) {
         let menu = gio::Menu::new();
+        menu.append(Some("打开本地视频"), Some("win.open-local"));
+        if crate::local_player_mode() {
+            self.imp().main_menu_button.set_menu_model(Some(&menu));
+            return;
+        }
         let theme_item = gio::MenuItem::new(None, None);
         theme_item.set_attribute_value("custom", Some(&"theme-switcher".to_variant()));
         menu.append_item(&theme_item);
@@ -1165,6 +1350,10 @@ impl Window {
     }
 
     pub fn account_settings(&self) {
+        if crate::local_player_mode() {
+            self.view_control_sidebar();
+            return;
+        }
         let window_clone = self.clone();
         let ac = crate::ui::widgets::account_settings::AccountSettings::new(window_clone);
         ac.set_transient_for(Some(self));
@@ -1466,6 +1655,15 @@ impl Window {
 
     #[template_callback]
     fn key_pressed_cb(&self, key: u32, _code: u32, state: gtk::gdk::ModifierType) -> bool {
+        if crate::local_player_mode()
+            && state.intersects(
+                gtk::gdk::ModifierType::CONTROL_MASK
+                    | gtk::gdk::ModifierType::ALT_MASK
+                    | gtk::gdk::ModifierType::SUPER_MASK,
+            )
+        {
+            return false;
+        }
         if self.is_on_mpv_stack() {
             self.imp().mpvnav.key_pressed_cb(key, state);
             if self.imp().mpv_view.shows_sidebar() {
@@ -1601,7 +1799,12 @@ impl Window {
         let current_video = imp.mpvnav.current_video();
         let tracks = imp.mpv_tracks.borrow();
 
-        if current_video.is_none() && tracks.is_none() {
+        let local_file = imp
+            .local_playlist
+            .borrow()
+            .as_ref()
+            .map(|playlist| playlist.current_file().to_path_buf());
+        if current_video.is_none() && tracks.is_none() && local_file.is_none() {
             let group = Self::media_info_group("媒体信息");
             group.add(&Self::media_info_row(
                 "等待媒体加载",
@@ -1610,6 +1813,16 @@ impl Window {
             ));
             container.append(&group);
             return;
+        }
+
+        if let Some(path) = local_file {
+            let group = Self::media_info_group("当前媒体");
+            group.add(&Self::media_info_row(
+                &path.file_name().unwrap_or_default().to_string_lossy(),
+                Some(&path.to_string_lossy()),
+                "video-reel-symbolic",
+            ));
+            container.append(&group);
         }
 
         if let Some(item) = current_video {
@@ -1878,6 +2091,10 @@ impl Window {
 
     #[template_callback]
     async fn on_playlist_item_activated(&self, position: u32, view: &gtk::ListView) {
+        if crate::local_player_mode() {
+            self.play_local_index(position as usize);
+            return;
+        }
         let Some(model) = view.model() else {
             return;
         };
@@ -1890,6 +2107,9 @@ impl Window {
     }
 
     fn prevent_suspend(&self) {
+        if self.imp().suspend_cookie.borrow().is_some() {
+            return;
+        }
         let app = self.application().expect("No application found");
         let cookie = app.inhibit(
             Some(self),

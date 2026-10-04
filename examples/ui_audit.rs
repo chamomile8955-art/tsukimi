@@ -257,7 +257,34 @@ fn check_widgets(root: &gtk::Widget) {
             let color = widget.style_context().color();
             assert_eq!(color.red() > 0.5, is_dark, "Poster title contrast: {color}");
         }
-        if widget.type_().name() == "TuListItem" {
+        if widget.has_css_class("item-hero") {
+            let scroll = widget
+                .ancestor(gtk::ScrolledWindow::static_type())
+                .unwrap()
+                .downcast::<gtk::ScrolledWindow>()
+                .unwrap();
+            let viewport_height = scroll.vadjustment().page_size().round() as i32;
+            let bounds = widget.compute_bounds(&widget).unwrap();
+            assert_eq!(
+                bounds.height().round() as i32,
+                viewport_height,
+                "Detail poster must fill the first viewport"
+            );
+            if scroll.vadjustment().value() <= scroll.vadjustment().lower() + 1.0 {
+                for button in descendants(&widget)
+                    .into_iter()
+                    .filter(|child| child.has_css_class("hero-play-button") && child.is_mapped())
+                {
+                    let bounds = button.compute_bounds(&scroll).unwrap();
+                    assert!(
+                        bounds.y() >= 0.0
+                            && bounds.y() + bounds.height() <= viewport_height as f32 + 1.0,
+                        "Detail play button must remain visible on the first screen"
+                    );
+                }
+            }
+        }
+        if matches!(widget.type_().name(), "TuListItem" | "TuOverviewItem") {
             let image = find(&widget, |child| child.has_css_class("media-card-image"));
             let bounds = image.compute_bounds(&image).expect("Poster bounds");
             let expected = (image.width_request(), image.height_request());
@@ -270,14 +297,17 @@ fn check_widgets(root: &gtk::Widget) {
                 "Poster enlarged by its content"
             );
             assert!(
-                expected.0 <= 352 && expected.1 <= 264,
-                "Oversized poster: {expected:?}"
+                matches!(
+                    expected,
+                    (220, 330) | (320, 180) | (232, 232) | (440, 82) | (156, 156)
+                ),
+                "Poster must retain its original dimensions: {expected:?}"
             );
         }
         if widget.has_css_class("album-cover") {
             assert_eq!(
                 (widget.width(), widget.height()),
-                (176, 176),
+                (232, 232),
                 "Album cover size"
             );
         }
@@ -440,6 +470,20 @@ fn check_widgets(root: &gtk::Widget) {
             }
         }
     }
+}
+
+fn density_geometry(root: &gtk::Widget) -> Vec<(i32, i32)> {
+    ["main-header", "top-navigation", "circular-icon-button"]
+        .into_iter()
+        .map(|class| {
+            let widget = find(root, |w| w.has_css_class(class) && w.is_mapped());
+            if class == "main-header" {
+                (0, widget.height())
+            } else {
+                (widget.width(), widget.height())
+            }
+        })
+        .collect()
 }
 
 fn fixtures() -> Vec<Value> {
@@ -840,6 +884,9 @@ fn main() {
     let ticks = Cell::new(0);
     let poster_actions_visible = Cell::new(false);
     let library_toolbar_stage = Cell::new(0);
+    let movie_scrolled = Cell::new(false);
+    let density_stage = Cell::new(0);
+    let baseline_geometry = RefCell::new(Vec::new());
     let main_navigation = RefCell::new(None::<Surface>);
     glib::timeout_add_local(Duration::from_millis(900), move || {
         ticks.set(ticks.get() + 1);
@@ -913,7 +960,40 @@ fn main() {
                 main.homepage();
             }
             7 => {
-                screenshot(main.upcast_ref(), "home");
+                match density_stage.get() {
+                    0 => {
+                        screenshot(main.upcast_ref(), "home");
+                        *baseline_geometry.borrow_mut() = density_geometry(root);
+                        main.set_default_size(1280, 800);
+                    }
+                    1 => {
+                        screenshot(main.upcast_ref(), "home-1280x800");
+                        assert_eq!(density_geometry(root), *baseline_geometry.borrow());
+                        main.set_default_size(1440, 900);
+                    }
+                    2 => {
+                        screenshot(main.upcast_ref(), "home-1440x900");
+                        assert!(
+                            root.width() > 1280 && root.height() > 800,
+                            "Audit must cross the old density breakpoint"
+                        );
+                        assert_eq!(
+                            density_geometry(root),
+                            *baseline_geometry.borrow(),
+                            "UI controls must not grow with the window"
+                        );
+                        main.set_default_size(1152, 720);
+                    }
+                    3 => {
+                        screenshot(main.upcast_ref(), "home-restored");
+                        assert_eq!(density_geometry(root), *baseline_geometry.borrow());
+                    }
+                    _ => unreachable!(),
+                }
+                density_stage.set(density_stage.get() + 1);
+                if density_stage.get() <= 3 {
+                    return glib::ControlFlow::Continue;
+                }
                 let nav = find(root, |w| w.has_css_class("top-navigation"));
                 *main_navigation.borrow_mut() = Some(surface(&nav));
                 main.likedpage();
@@ -1051,7 +1131,33 @@ fn main() {
                 click_card(root, "Movie");
             }
             21 => {
-                screenshot(main.upcast_ref(), "movie");
+                let hero = find(root, |w| w.has_css_class("item-hero") && w.is_mapped());
+                let scroll = hero
+                    .ancestor(gtk::ScrolledWindow::static_type())
+                    .unwrap()
+                    .downcast::<gtk::ScrolledWindow>()
+                    .unwrap();
+                let adjustment = scroll.vadjustment();
+                if !movie_scrolled.replace(true) {
+                    screenshot(main.upcast_ref(), "movie");
+                    let bottom = adjustment.upper() - adjustment.page_size();
+                    assert!(bottom > adjustment.lower(), "Detail content must scroll");
+                    adjustment.set_value((adjustment.lower() + adjustment.page_size()).min(bottom));
+                    return glib::ControlFlow::Continue;
+                }
+                screenshot(main.upcast_ref(), "movie-scrolled");
+                let recommendations = find(root, |w| {
+                    w.type_().name() == "HortuScrolled"
+                        && w.is_mapped()
+                        && w.property::<String>("title").contains("Recommend")
+                });
+                let bounds = recommendations.compute_bounds(&scroll).unwrap();
+                assert!(
+                    bounds.y() < adjustment.page_size() as f32
+                        && bounds.y() + bounds.height() > 0.0,
+                    "Detail recommendations must remain accessible by scrolling"
+                );
+                adjustment.set_value(adjustment.lower());
                 main.set_default_size(900, 600);
             }
             22 => {
