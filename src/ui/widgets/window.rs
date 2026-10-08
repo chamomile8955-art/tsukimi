@@ -8,7 +8,10 @@ use gtk::{Widget, subclass::prelude::*};
 mod imp {
     use std::cell::{Cell, OnceCell, RefCell};
 
-    use adw::subclass::application_window::AdwApplicationWindowImpl;
+    use adw::{
+        prelude::AdwApplicationWindowExt,
+        subclass::application_window::AdwApplicationWindowImpl,
+    };
     use glib::subclass::InitializingObject;
     use gtk::{CompositeTemplate, glib, prelude::*, subclass::prelude::*};
 
@@ -120,9 +123,6 @@ mod imp {
 
         pub suspend_cookie: RefCell<Option<u32>>,
         pub mpv_tracks: RefCell<Option<MpvTracks>>,
-
-        #[template_child]
-        pub sidebar_breakpoint: TemplateChild<adw::Breakpoint>,
     }
 
     #[glib::object_subclass]
@@ -249,22 +249,9 @@ mod imp {
                 .set_player(Some(&self.mpvnav.imp().video.get()));
             obj.setup_mpv_shortcuts_panel();
 
-            self.sidebar_breakpoint.connect_apply(glib::clone!(
-                #[weak]
-                obj,
-                move |_breakpoint| {
-                    obj.imp().split_view.set_collapsed(true);
-                }
-            ));
-            self.sidebar_breakpoint.connect_unapply(glib::clone!(
-                #[weak]
-                obj,
-                move |_breakpoint| {
-                    if !SETTINGS.is_overlay() {
-                        obj.imp().split_view.set_collapsed(false);
-                    }
-                }
-            ));
+            obj.connect_current_breakpoint_notify(|window| {
+                window.overlay_sidebar(SETTINGS.is_overlay());
+            });
 
             obj.bind_about_action();
             obj.setup_server_context_menu();
@@ -717,6 +704,15 @@ impl Window {
     }
 
     pub fn log_ui_runtime_diagnostics(&self) {
+        tracing::info!(
+            baseline = crate::ui_density::BASELINE_REVISION,
+            enlargement = crate::ui_density::SCALE,
+            navigation = crate::ui_density::CONTROL_SIZE,
+            tools = crate::ui_density::TOOL_SIZE,
+            playback = crate::ui_density::PLAY_SIZE,
+            window_controls = crate::ui_density::WINDOW_CONTROL_SIZE,
+            "UI size baseline"
+        );
         fn visit(widget: &gtk::Widget, circular_count: &mut usize) {
             let is_button = widget.is::<gtk::Button>() || widget.is::<gtk::MenuButton>();
             let is_circular = widget.has_css_class("circular-icon-button");
@@ -1470,7 +1466,9 @@ impl Window {
     }
 
     pub fn overlay_sidebar(&self, overlay: bool) {
-        self.imp().split_view.set_collapsed(overlay);
+        self.imp()
+            .split_view
+            .set_collapsed(overlay || self.current_breakpoint().is_some());
     }
 
     pub fn add_toast(&self, toast: adw::Toast) {

@@ -14,6 +14,10 @@ use std::{
 use tsukimi::client::{
     Account, ServerRoute, account::ServerType, jellyfin_client::JELLYFIN_CLIENT,
 };
+use tsukimi::ui_density::{
+    CONTROL_SIZE, PLAY_ICON_SIZE, PLAY_SIZE, THEME_SWATCH_SIZE, TOOL_SIZE, TRANSPORT_SIZE,
+    WINDOW_CONTROL_SIZE,
+};
 
 thread_local! {
     static MISSING_ICONS: RefCell<std::collections::BTreeSet<String>> = RefCell::default();
@@ -125,9 +129,13 @@ fn collect_surface(node: &gsk::RenderNode, surface: &mut Surface) {
 }
 
 fn surface(widget: &gtk::Widget) -> Surface {
+    surface_at_size(widget, 400.0, 100.0)
+}
+
+fn surface_at_size(widget: &gtk::Widget, width: f64, height: f64) -> Surface {
     let snapshot = gtk::Snapshot::new();
-    snapshot.render_background(&widget.style_context(), 0.0, 0.0, 400.0, 100.0);
-    snapshot.render_frame(&widget.style_context(), 0.0, 0.0, 400.0, 100.0);
+    snapshot.render_background(&widget.style_context(), 0.0, 0.0, width, height);
+    snapshot.render_frame(&widget.style_context(), 0.0, 0.0, width, height);
     let mut result = Surface::default();
     if let Some(node) = snapshot.to_node() {
         collect_surface(&node, &mut result);
@@ -210,7 +218,7 @@ fn check_widgets(root: &gtk::Widget) {
             for button in buttons {
                 assert_eq!(
                     button.compute_bounds(&button).unwrap().height().round() as i32,
-                    36,
+                    CONTROL_SIZE,
                     "Shared navigation tab height"
                 );
                 for label in descendants(&button)
@@ -299,15 +307,15 @@ fn check_widgets(root: &gtk::Widget) {
             assert!(
                 matches!(
                     expected,
-                    (220, 330) | (320, 180) | (232, 232) | (440, 82) | (156, 156)
+                    (276, 414) | (400, 225) | (290, 290) | (550, 103) | (195, 195)
                 ),
-                "Poster must retain its original dimensions: {expected:?}"
+                "Poster must retain its readable desktop dimensions: {expected:?}"
             );
         }
         if widget.has_css_class("album-cover") {
             assert_eq!(
                 (widget.width(), widget.height()),
-                (232, 232),
+                (290, 290),
                 "Album cover size"
             );
         }
@@ -350,9 +358,13 @@ fn check_widgets(root: &gtk::Widget) {
             if tool {
                 let bounds = widget.compute_bounds(&widget).expect("Tool bounds");
                 let size = if widget.has_css_class("mpv-play-button") {
-                    48
+                    PLAY_SIZE
+                } else if widget.parent().is_some_and(|parent| {
+                    parent.has_css_class("mpv-transport-controls")
+                }) {
+                    TRANSPORT_SIZE
                 } else {
-                    40
+                    TOOL_SIZE
                 };
                 assert_eq!(
                     (
@@ -360,14 +372,20 @@ fn check_widgets(root: &gtk::Widget) {
                         bounds.height().round() as i32
                     ),
                     (size, size),
-                    "Compact tool target: {:?}",
+                    "Shared tool target: {:?}",
                     widget.css_classes()
                 );
+                if widget.has_css_class("mpv-play-button") {
+                    let image = find(&widget, |child| child.is::<gtk::Image>())
+                        .downcast::<gtk::Image>()
+                        .unwrap();
+                    assert_eq!(image.pixel_size(), PLAY_ICON_SIZE, "Playback icon baseline");
+                }
             }
             if widget.has_css_class("hero-play-button") {
                 assert_eq!(
                     widget.compute_bounds(&widget).unwrap().height().round() as i32,
-                    40,
+                    TOOL_SIZE,
                     "Detail play button height"
                 );
             }
@@ -436,7 +454,7 @@ fn check_widgets(root: &gtk::Widget) {
                         bounds.width().round() as i32,
                         bounds.height().round() as i32
                     ),
-                    (40, 40),
+                    (TOOL_SIZE, TOOL_SIZE),
                     "Song tool size"
                 );
             }
@@ -464,12 +482,30 @@ fn check_widgets(root: &gtk::Widget) {
                         bounds.width().round() as i32,
                         bounds.height().round() as i32
                     ),
-                    (16, 16),
+                    (WINDOW_CONTROL_SIZE, WINDOW_CONTROL_SIZE),
                     "Traffic light size"
                 );
+                assert_circle(&button, WINDOW_CONTROL_SIZE as f32);
             }
         }
+        if widget.is::<gtk::CheckButton>() && widget.has_css_class("theme-selector") {
+            assert_circle(&widget, THEME_SWATCH_SIZE as f32);
+        }
     }
+}
+
+fn assert_circle(widget: &gtk::Widget, diameter: f32) {
+    let bounds = widget.compute_bounds(widget).expect("Circle bounds");
+    assert_eq!(bounds.width(), diameter, "Circle width");
+    assert_eq!(bounds.height(), diameter, "Circle height");
+    let paint = surface_at_size(widget, diameter as f64, diameter as f64);
+    assert!(
+        paint.radii.iter().any(|radii| {
+            radii.iter().all(|radius| (*radius - diameter / 2.0).abs() < 0.01)
+        }),
+        "Circle corners: {:?}",
+        paint.radii
+    );
 }
 
 fn density_geometry(root: &gtk::Widget) -> Vec<(i32, i32)> {
@@ -939,6 +975,15 @@ fn main() {
                     .set_int("main-theme", theme)
                     .unwrap();
                 root.activate_action("win.settings", None).unwrap();
+                for widget in descendants(settings_window().upcast_ref()) {
+                    if let Some(header) = widget.downcast_ref::<adw::HeaderBar>() {
+                        header.set_show_end_title_buttons(true);
+                    }
+                    if let Some(controls) = widget.downcast_ref::<gtk::WindowControls>() {
+                        controls.set_use_native_controls(false);
+                        controls.set_decoration_layout(Some(":close"));
+                    }
+                }
             }
             1..=5 => {
                 let settings = settings_window();
@@ -1055,6 +1100,14 @@ fn main() {
                     }
                     1 => {
                         screenshot(main.upcast_ref(), "library-narrow");
+                        let split = find(root, |w| w.has_css_class("app-shell"))
+                            .downcast::<adw::OverlaySplitView>()
+                            .unwrap();
+                        assert!(split.is_collapsed(), "Narrow sidebar must be an overlay");
+                        assert!(!split.shows_sidebar(), "Narrow toolbar must stay unobscured");
+                        root.activate_action("win.sidebar", None).unwrap();
+                        assert!(split.shows_sidebar(), "Sidebar must remain accessible");
+                        root.activate_action("win.sidebar", None).unwrap();
                         find(root, |w| {
                             w.has_css_class("media-view-switch") && w.is_mapped()
                         })
@@ -1081,7 +1134,13 @@ fn main() {
                         .set_active_name(Some("grid"));
                         main.set_default_size(1152, 720);
                     }
-                    4 => library_tab(root, "resume"),
+                    4 => {
+                        let split = find(root, |w| w.has_css_class("app-shell"))
+                            .downcast::<adw::OverlaySplitView>()
+                            .unwrap();
+                        assert!(!split.is_collapsed(), "Wide sidebar must be restored");
+                        library_tab(root, "resume");
+                    }
                     _ => unreachable!(),
                 }
                 library_toolbar_stage.set(library_toolbar_stage.get() + 1);

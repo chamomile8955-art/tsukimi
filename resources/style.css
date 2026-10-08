@@ -22,11 +22,16 @@
 @define-color navigation_selected rgba(0, 0, 0, 0.095);
 
 :root {
+  font-size: 1.25em;
+  -gtk-icon-size: 20px;
   --tsukimi-surface-radius: 14px;
-  --tsukimi-control-size: 36px;
-  --tsukimi-tool-size: 40px;
-  --tsukimi-play-size: 48px;
-  --tsukimi-window-control-size: 16px;
+  /* Original painted sizes x 1.25, mirrored by src/ui_density.rs. */
+  --tsukimi-control-size: 55px;
+  --tsukimi-tool-size: 68px;
+  --tsukimi-transport-size: 78px;
+  --tsukimi-play-size: 88px;
+  --tsukimi-window-control-size: 30px;
+  --tsukimi-theme-swatch-size: 75px;
 }
 
 * {
@@ -103,17 +108,17 @@ pre {
 }
 
 .startup-splash .startup-title {
-  font-size: 24px;
+  font-size: 30px;
   font-weight: 600;
 }
 
 .startup-splash .startup-message {
-  font-size: 14px;
+  font-size: 17.5px;
   color: alpha(@window_fg_color, 0.85);
 }
 
 .startup-splash .startup-status {
-  font-size: 12px;
+  font-size: 15px;
   color: alpha(@window_fg_color, 0.60);
 }
 
@@ -147,7 +152,7 @@ button.pill.ultrasmall {
   min-width: 40px;
   padding: 0;
   border-radius: 999px;
-  -gtk-icon-size: 18px;
+  -gtk-icon-size: 23px;
 }
 
 .mediainfo {
@@ -187,7 +192,7 @@ button.pill.ultrasmall {
 }
 
 .media-info-card-header image {
-  -gtk-icon-size: 22px;
+  -gtk-icon-size: 28px;
   color: alpha(@window_fg_color, 0.86);
 }
 
@@ -390,7 +395,7 @@ button.star.interacted:not(.starred) image {
 }
 
 .source-sidebar row {
-  min-height: 48px;
+  min-height: 60px;
   margin: 4px 0;
   border-radius: var(--tsukimi-surface-radius);
   background-color: transparent;
@@ -545,11 +550,11 @@ row image {
 }
 
 .themeselector checkbutton {
-  min-width: calc(var(--tsukimi-tool-size) - 2px);
-  min-height: calc(var(--tsukimi-tool-size) - 2px);
-  padding: 2px;
+  min-width: calc(var(--tsukimi-theme-swatch-size) - 4px);
+  min-height: calc(var(--tsukimi-theme-swatch-size) - 4px);
+  padding: 0;
   background-clip: padding-box;
-  border-radius: var(--tsukimi-surface-radius);
+  border-radius: 999px;
 }
 
 .scroll-spinner {
@@ -567,8 +572,8 @@ row image {
 
 .themeselector checkbutton.light,
 .themeselector checkbutton.dark {
-  border: 1px solid alpha(@window_fg_color, 0.18);
-  border-radius: var(--tsukimi-surface-radius);
+  border: 2px solid alpha(@window_fg_color, 0.18);
+  border-radius: 999px;
 }
 
 .themeselector checkbutton.light {
@@ -1035,7 +1040,7 @@ window.app-window.fullscreen .window-stack > box {
   background-image: none;
   background-clip: padding-box;
   box-shadow: none;
-  -gtk-icon-size: 18px;
+  -gtk-icon-size: 23px;
 }
 
 .app-window button label,
@@ -1129,7 +1134,7 @@ window.app-window.fullscreen .window-stack > box {
   box-shadow: none;
   outline: none;
   text-shadow: none;
-  -gtk-icon-size: 18px;
+  -gtk-icon-size: 28px;
 }
 
 .app-window button.glass-button.circular,
@@ -1185,7 +1190,7 @@ window.app-window.fullscreen .window-stack > box {
   color: #ffffff;
   box-shadow: 0 8px 22px rgba(0, 0, 0, 0.22);
   text-shadow: none;
-  -gtk-icon-size: 20px;
+  -gtk-icon-size: 30px;
 }
 
 .app-window button.carousel-arrow-button:hover,
@@ -1435,7 +1440,7 @@ menubutton.glass-button > button:focus-visible {
   min-height: 36px;
   padding: 0;
   border-radius: 999px;
-  -gtk-icon-size: 18px;
+  -gtk-icon-size: 23px;
 }
 
 .app-window dropdown.media-sort-dropdown > button {
@@ -1468,7 +1473,7 @@ menubutton.glass-button > button:focus-visible {
 .app-window button.media-filter-button {
   min-width: var(--tsukimi-control-size);
   padding: 0;
-  -gtk-icon-size: 18px;
+  -gtk-icon-size: 23px;
 }
 
 .app-window menubutton.media-poster-menu > button:hover {
@@ -1659,7 +1664,7 @@ menubutton.glass-button > button:focus-visible {
 .app-window .bottom-navigation button.circular-icon-button {
   min-width: var(--tsukimi-tool-size);
   min-height: var(--tsukimi-tool-size);
-  -gtk-icon-size: 18px;
+  -gtk-icon-size: 28px;
 }
 
 /* Apple-like traffic light window controls */
@@ -2197,7 +2202,7 @@ popover.floating-dialog modelbutton image,
   background-image: none;
   color: #ffffff;
   box-shadow: 0 3px 12px rgba(40, 31, 128, 0.30);
-  -gtk-icon-size: 16px;
+  -gtk-icon-size: 20px;
 }
 
 .app-window button.played-mark:hover {
@@ -2498,7 +2503,7 @@ popover.menu modelbutton {
   min-height: calc(var(--tsukimi-tool-size) - 2px);
   padding: 0;
   border-radius: 999px;
-  -gtk-icon-size: 18px;
+  -gtk-icon-size: 23px;
 }
 
 window.app-window.desktop-density .source-panel,
@@ -2559,7 +2564,7 @@ window.app-window.desktop-density .source-actions button.circular-icon-button,
 window.app-window.desktop-density .bottom-navigation button.circular-icon-button {
   min-width: calc(var(--tsukimi-tool-size) - 2px);
   min-height: calc(var(--tsukimi-tool-size) - 2px);
-  -gtk-icon-size: 18px;
+  -gtk-icon-size: 28px;
 }
 
 window.app-window.desktop-density .segmented-control,
@@ -2614,7 +2619,7 @@ window.app-window.desktop-density .mpv-player togglebutton.mpv-control-button,
 window.app-window.desktop-density .mpv-player menubutton.mpv-control-button > button {
   min-width: calc(var(--tsukimi-tool-size) - 2px);
   min-height: calc(var(--tsukimi-tool-size) - 2px);
-  -gtk-icon-size: 18px;
+  -gtk-icon-size: 28px;
 }
 
 window.app-window.desktop-density .mpv-player button.mpv-play-button {
@@ -2879,7 +2884,7 @@ toast button image,
   background-clip: padding-box;
   box-shadow: none;
   color: #f5f6f7;
-  -gtk-icon-size: 18px;
+  -gtk-icon-size: 28px;
 }
 
 .app-window .mpv-player button.mpv-control-button:hover,
@@ -2922,12 +2927,13 @@ toast button image,
   box-shadow: none;
 }
 
-.app-window .mpv-player .mpv-transport-controls button.mpv-control-button {
-  min-width: calc(var(--tsukimi-tool-size) - 2px);
-  min-height: calc(var(--tsukimi-tool-size) - 2px);
+window.app-window .mpv-player .mpv-transport-controls button.mpv-control-button,
+window.app-window.desktop-density .mpv-player .mpv-transport-controls button.mpv-control-button {
+  min-width: calc(var(--tsukimi-transport-size) - 2px);
+  min-height: calc(var(--tsukimi-transport-size) - 2px);
   border-color: rgba(255, 255, 255, 0.12);
   background-color: rgba(255, 255, 255, 0.10);
-  -gtk-icon-size: 18px;
+  -gtk-icon-size: 31px;
 }
 
 .app-window .mpv-player .mpv-transport-controls button.mpv-control-button:hover {
@@ -2939,13 +2945,14 @@ toast button image,
   background-color: rgba(255, 255, 255, 0.26);
 }
 
-.app-window .mpv-player .mpv-transport-controls button.mpv-play-button {
+window.app-window .mpv-player .mpv-transport-controls button.mpv-play-button,
+window.app-window.desktop-density .mpv-player .mpv-transport-controls button.mpv-play-button {
   min-width: calc(var(--tsukimi-play-size) - 2px);
   min-height: calc(var(--tsukimi-play-size) - 2px);
   border-color: rgba(255, 255, 255, 0.12);
   background-color: rgba(255, 255, 255, 0.10);
   box-shadow: none;
-  -gtk-icon-size: 22px;
+  -gtk-icon-size: 45px;
 }
 
 .app-window .mpv-player .mpv-transport-controls button.mpv-play-button:hover {
@@ -3180,9 +3187,9 @@ popover.track-list-popover checkbutton {
 }
 
 .app-window .shortcut-key {
-  min-width: 32px;
-  min-height: 24px;
-  padding: 2px 9px;
+  min-width: 40px;
+  min-height: 30px;
+  padding: 2px 11px;
   border: 1px solid alpha(var(--settings-fg), 0.10);
   border-radius: var(--tsukimi-surface-radius);
   background-color: alpha(var(--settings-fg), 0.06);

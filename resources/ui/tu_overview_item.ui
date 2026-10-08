@@ -17,20 +17,20 @@
             <property name="valign">fill</property>
             <child>
               <object class="AdwClamp" id="image_width">
-                <property name="maximum-size">320</property>
-                <property name="tightening-threshold">320</property>
+                <property name="maximum-size">400</property>
+                <property name="tightening-threshold">400</property>
                 <property name="halign">start</property>
                 <property name="valign">center</property>
                 <child>
                   <object class="AdwClamp" id="image_height">
                     <property name="orientation">vertical</property>
-                    <property name="maximum-size">180</property>
-                    <property name="tightening-threshold">180</property>
+                    <property name="maximum-size">225</property>
+                    <property name="tightening-threshold">225</property>
                     <child>
                       <object class="GtkOverlay" id="overlay">
                         <property name="valign">fill</property>
-                        <property name="width-request">250</property>
-                        <property name="height-request">141</property>
+                        <property name="width-request">400</property>
+                        <property name="height-request">225</property>
                         <property name="halign">center</property>
                         <property name="overflow">hidden</property>
                         <style>

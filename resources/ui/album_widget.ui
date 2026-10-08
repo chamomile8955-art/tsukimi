@@ -28,13 +28,13 @@
                         <child>
                           <object class="AdwClamp">
                             <property name="orientation">vertical</property>
-                            <property name="maximum-size">232</property>
-                            <property name="tightening-threshold">232</property>
+                            <property name="maximum-size">290</property>
+                            <property name="tightening-threshold">290</property>
                             <property name="valign">center</property>
                             <child>
                               <object class="GtkPicture" id="cover_image">
-                                <property name="width-request">232</property>
-                                <property name="height-request">232</property>
+                                <property name="width-request">290</property>
+                                <property name="height-request">290</property>
                                 <property name="can-shrink">True</property>
                                 <property name="content-fit">cover</property>
                                 <property name="halign">center</property>
@@ -103,8 +103,8 @@
                                 <property name="margin-top">6</property>
                                 <child>
                                   <object class="GtkButton" id="_play_button">
-                                    <property name="width-request">40</property>
-                                    <property name="height-request">40</property>
+                                    <property name="width-request">68</property>
+                                    <property name="height-request">68</property>
                                     <property name="icon-name">media-playback-start-symbolic</property>
                                     <property name="tooltip-text" translatable="yes">Play</property>
                                     <property name="valign">center</property>

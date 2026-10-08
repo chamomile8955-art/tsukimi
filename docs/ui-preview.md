@@ -75,8 +75,23 @@ the window. On Wayland, the compositor retains control of placement.
 
 All resolutions use the same logical-pixel geometry and desktop density.
 Resizing or maximizing does not switch between compact and enlarged controls.
+The baseline is the pre-compact geometry in `58011eb`, not the later 36/40-pixel
+compact controls. Original painted sizes (including padding and borders) are
+44-pixel navigation tabs, 54-pixel tools, 62-pixel previous/next controls,
+70-pixel playback buttons, 24-pixel window controls, and 60-pixel theme swatches.
+Multiplying these by 1.25 and rounding gives 55, 68, 78, 88, 30, and 75 pixels.
+The explicit playback icon also scales from its original 36 pixels to 45;
+it must not retain the compact template's 22-pixel override.
+`src/ui_density.rs` owns this calculation and tests the shared CSS declarations.
+Fonts remain at 125% of the native base font, without another cumulative zoom.
+Posters are 276 x 414 and backdrops are 400 x 225 logical pixels. Both themes,
+main settings, and player utility pages share these metrics. Surface radii
+remain 14 pixels. Below 1100 logical pixels, the source sidebar becomes an
+overlay and initially hides so the single-row library toolbar has enough room;
+its header button can still open it. Player panel dismissal retains its
+separate 500sp breakpoint.
 Windows embeds a PerMonitorV2 DPI manifest (with a PerMonitor fallback), so GTK
-can redraw for each monitor's scaling without application-level scaling.
+can redraw for each monitor's scaling without an additional DPI transform.
 Native work areas are converted using the surface's fractional scale exactly
 once. System font and accessibility settings remain respected. The physical
 size and fraction of the display occupied still depend on display dimensions
@@ -151,13 +166,16 @@ Assertions check live frame radii, dialog bounds, painted button sizes (includin
 CSS padding and borders), navigation height and label fit,
 filter-title fit, poster and disabled-action text colors, action hover backgrounds,
 single-row library toolbar alignment, group spacing and unclipped navigation,
-window-control size, media-card dimensions, square album covers, available icons,
+window-control size and circular borders, 75-pixel circular theme selectors in
+both selected states, media-card dimensions, square album covers, available icons,
 full-viewport detail backdrops and visible first-screen playback actions,
 unchanged control geometry across 1152 x 720, 1280 x 800 and 1440 x 900 windows,
 active player tabs, fixed dark player surfaces and their text contrast,
 and that the loaded styles and main-window template match their build sources.
 PNG snapshots are saved alongside the fixture cache for visual inspection. The
 audit exits automatically; assertion failures return a nonzero exit status.
+The preferences-window controls use GTK-rendered close buttons during the audit
+so macOS also exercises the Windows-style title-button sizing and alignment.
 
 This is a UI smoke test, not a substitute for real-server integration tests,
 video/audio playback, or verification on each supported operating system.

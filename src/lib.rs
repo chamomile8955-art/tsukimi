@@ -14,6 +14,7 @@ mod macros;
 #[cfg(target_os = "linux")]
 mod mpris_common;
 mod ui;
+pub mod ui_density;
 mod utils;
 mod window_placement;
 

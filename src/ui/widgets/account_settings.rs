@@ -153,6 +153,7 @@ mod imp {
         fn constructed(&self) {
             self.parent_constructed();
             let obj = self.obj();
+            obj.connect_map(|window| window.center_title_controls());
             obj.set_sidebar();
             obj.bind_settings();
             obj.refersh_descriptors();
@@ -196,6 +197,21 @@ fn directory_size(path: &std::path::Path) -> u64 {
 
 #[template_callbacks]
 impl AccountSettings {
+    fn center_title_controls(&self) {
+        // Native preference headers otherwise stretch controls to the row height.
+        let mut pending = vec![self.clone().upcast::<gtk::Widget>()];
+        while let Some(widget) = pending.pop() {
+            if let Some(controls) = widget.downcast_ref::<gtk::WindowControls>() {
+                controls.set_valign(gtk::Align::Center);
+            }
+            let mut child = widget.first_child();
+            while let Some(widget) = child {
+                child = widget.next_sibling();
+                pending.push(widget);
+            }
+        }
+    }
+
     pub fn new(window: crate::Window) -> Self {
         glib::Object::builder().property("window", window).build()
     }

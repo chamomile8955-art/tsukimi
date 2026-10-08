@@ -19,6 +19,36 @@ mod tests {
     }
 
     #[test]
+    fn readable_density_is_shared_without_a_second_theme_scale() {
+        let css = include_str!("../../../../resources/style.css");
+        for declaration in [
+            "font-size: 1.25em;",
+            "--tsukimi-control-size: 55px;",
+            "--tsukimi-tool-size: 68px;",
+            "--tsukimi-play-size: 88px;",
+            "--tsukimi-window-control-size: 30px;",
+        ] {
+            assert!(css.contains(declaration), "Missing density: {declaration}");
+        }
+        for css in [
+            include_str!("../../../../resources/style-dark.css"),
+            include_str!("../../../../resources/style-settings.css"),
+        ] {
+            assert!(!css.contains("font-size: 1.25em;"));
+            assert!(!css.contains("--tsukimi-control-size:"));
+            assert!(!css.contains("--tsukimi-tool-size:"));
+            assert!(!css.contains("--tsukimi-play-size:"));
+            assert!(!css.contains("--tsukimi-window-control-size:"));
+            assert!(!css.contains("--tsukimi-transport-size:"));
+            assert!(!css.contains("--tsukimi-theme-swatch-size:"));
+        }
+        let (width, height) = crate::ui::widgets::utils::TU_ITEM_POST_SIZE;
+        assert_eq!(width * 3, height * 2, "Poster aspect ratio");
+        let (width, height) = crate::ui::widgets::utils::TU_ITEM_VIDEO_SIZE;
+        assert_eq!(width * 9, height * 16, "Backdrop aspect ratio");
+    }
+
+    #[test]
     fn styles_do_not_introduce_independent_surface_radii() {
         let declarations = regex::Regex::new(r"border(?:-[a-z]+)*-radius\s*:\s*([^;]+);").unwrap();
         for css in [

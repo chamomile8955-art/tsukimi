@@ -75,7 +75,7 @@ window.account-settings {
 .account-settings .boxed-list > row,
 .app-window .settings-surface .boxed-list > row,
 .settings-editor .boxed-list > row {
-  min-height: 56px;
+  min-height: 70px;
   border-radius: 0;
   background-color: transparent;
   color: var(--settings-fg);
@@ -277,15 +277,22 @@ window.account-settings {
   color: var(--settings-fg);
 }
 
-.account-settings .themeselector checkbutton {
-  min-width: 36px;
-  min-height: 36px;
+/* Title buttons must not inherit the settings toolbar's larger flat targets. */
+.account-settings windowcontrols button,
+.account-settings windowcontrols button.flat,
+.settings-editor windowcontrols button,
+.settings-editor windowcontrols button.flat {
+  min-width: calc(var(--tsukimi-window-control-size) - 2px);
+  min-height: calc(var(--tsukimi-window-control-size) - 2px);
+  margin: 8px 5px;
+  padding: 0;
+  border-radius: 999px;
 }
 
 /* Spin controls live inside a settings row, not inside a second capsule. */
 .app-window .settings-surface spinbutton,
 .app-window .settings-surface spinbutton text {
-  min-height: 40px;
+  min-height: var(--tsukimi-tool-size);
   background-color: transparent;
   background-image: none;
   border: none;
@@ -295,8 +302,8 @@ window.account-settings {
 }
 
 .app-window .settings-surface spinbutton button {
-  min-width: 32px;
-  min-height: 40px;
+  min-width: 40px;
+  min-height: var(--tsukimi-tool-size);
   padding: 0;
   border: none;
   background-color: transparent;
@@ -329,11 +336,6 @@ window.account-settings {
   background-image: none;
   box-shadow: none;
   color: var(--settings-fg);
-}
-
-window.app-window.compact-1080 .navigation-switcher > button {
-  padding-left: 14px;
-  padding-right: 14px;
 }
 
 .app-window .navigation-switcher > button:hover {

@@ -17,8 +17,15 @@
       </object>
     </child>
     <child>
+      <object class="AdwBreakpoint">
+        <condition>max-width: 1100px</condition>
+        <setter object="split_view" property="show-sidebar">False</setter>
+      </object>
+    </child>
+    <child>
       <object class="AdwBreakpoint" id="sidebar_breakpoint">
         <condition>max-width: 500sp</condition>
+        <setter object="split_view" property="show-sidebar">False</setter>
         <setter object="mpv_view" property="show-sidebar">False</setter>
       </object>
     </child>
@@ -58,8 +65,8 @@
                         <property name="name">main</property>
                         <property name="child">
                           <object class="AdwOverlaySplitView" id="split_view">
-                            <property name="min-sidebar-width">240</property>
-                            <property name="max-sidebar-width">280</property>
+                            <property name="min-sidebar-width">300</property>
+                            <property name="max-sidebar-width">350</property>
                             <property name="sidebar-width-fraction">0.22</property>
                             <style>
                               <class name="app-shell"/>
@@ -370,22 +377,22 @@
                                                                 <property name="selection-mode">none</property>
                                                                 <property name="homogeneous">True</property>
                                                                 <child>
-                                                                  <object class="GtkBox"><property name="width-request">220</property><property name="height-request">330</property><style><class name="poster-skeleton"/></style></object>
+                                                                  <object class="GtkBox"><property name="width-request">276</property><property name="height-request">414</property><style><class name="poster-skeleton"/></style></object>
                                                                 </child>
                                                                 <child>
-                                                                  <object class="GtkBox"><property name="width-request">220</property><property name="height-request">330</property><style><class name="poster-skeleton"/></style></object>
+                                                                  <object class="GtkBox"><property name="width-request">276</property><property name="height-request">414</property><style><class name="poster-skeleton"/></style></object>
                                                                 </child>
                                                                 <child>
-                                                                  <object class="GtkBox"><property name="width-request">220</property><property name="height-request">330</property><style><class name="poster-skeleton"/></style></object>
+                                                                  <object class="GtkBox"><property name="width-request">276</property><property name="height-request">414</property><style><class name="poster-skeleton"/></style></object>
                                                                 </child>
                                                                 <child>
-                                                                  <object class="GtkBox"><property name="width-request">220</property><property name="height-request">330</property><style><class name="poster-skeleton"/></style></object>
+                                                                  <object class="GtkBox"><property name="width-request">276</property><property name="height-request">414</property><style><class name="poster-skeleton"/></style></object>
                                                                 </child>
                                                                 <child>
-                                                                  <object class="GtkBox"><property name="width-request">220</property><property name="height-request">330</property><style><class name="poster-skeleton"/></style></object>
+                                                                  <object class="GtkBox"><property name="width-request">276</property><property name="height-request">414</property><style><class name="poster-skeleton"/></style></object>
                                                                 </child>
                                                                 <child>
-                                                                  <object class="GtkBox"><property name="width-request">220</property><property name="height-request">330</property><style><class name="poster-skeleton"/></style></object>
+                                                                  <object class="GtkBox"><property name="width-request">276</property><property name="height-request">414</property><style><class name="poster-skeleton"/></style></object>
                                                                 </child>
                                                               </object>
                                                             </child>
@@ -483,8 +490,8 @@
                             <property name="show-sidebar">False</property>
                             <property name="pin-sidebar">False</property>
                             <property name="sidebar-position">end</property>
-                            <property name="min-sidebar-width">448</property>
-                            <property name="max-sidebar-width">520</property>
+                            <property name="min-sidebar-width">560</property>
+                            <property name="max-sidebar-width">650</property>
                             <style>
                               <class name="mpv-overlay-menu"/>
                             </style>

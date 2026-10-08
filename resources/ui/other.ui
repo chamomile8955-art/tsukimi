@@ -55,8 +55,8 @@
                                     <property name="margin-top">12</property>
                                     <property name="halign">fill</property>
                                     <property name="valign">start</property>
-                                    <property name="height-request">330</property>
-                                    <property name="width-request">220</property>
+                                    <property name="height-request">414</property>
+                                    <property name="width-request">276</property>
                                   </object>
                                 </child>
                                 <child>
@@ -88,8 +88,8 @@
                                         <property name="margin-top">6</property>
                                         <child>
                                           <object class="GtkButton" id="play_button">
-                                            <property name="width-request">40</property>
-                                            <property name="height-request">40</property>
+                                            <property name="width-request">68</property>
+                                            <property name="height-request">68</property>
                                             <property name="icon-name">media-playback-start-symbolic</property>
                                             <property name="tooltip-text" translatable="yes">Play</property>
                                             <property name="valign">center</property>
