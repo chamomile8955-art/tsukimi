@@ -44,11 +44,53 @@ fn output_dir() -> PathBuf {
     let path = std::env::var_os("TSUKIMI_UI_AUDIT_DIR")
         .map(PathBuf::from)
         .unwrap_or_else(|| std::env::temp_dir().join("tsukimi-ui-audit"));
+    let path = if audit_4k() { path.join("4k") } else { path };
     std::path::absolute(path).unwrap()
+}
+
+fn audit_4k() -> bool {
+    std::env::var_os("TSUKIMI_UI_AUDIT_4K").is_some()
+}
+
+fn restore_main_size(window: &tsukimi::Window) {
+    let (width, height) = if audit_4k() { (1920, 1080) } else { (1152, 720) };
+    resize_main(window, width, height);
+}
+
+fn resize_main(window: &tsukimi::Window, width: i32, height: i32) {
+    if audit_4k() {
+        window.set_size_request(width, height);
+    }
+    window.set_default_size(width, height);
 }
 
 fn screenshot(window: &gtk::Window, name: &str) {
     let snapshot = gtk::Snapshot::new();
+    if audit_4k() {
+        // Render the GTK scene at 2x, rather than resizing a captured bitmap.
+        snapshot.scale(2.0, 2.0);
+        snapshot.append_color(
+            &gdk::RGBA::new(0.12, 0.12, 0.13, 1.0),
+            &gtk::graphene::Rect::new(0.0, 0.0, 1920.0, 1080.0),
+        );
+        if window.type_().name() != "AppWindow" {
+            if let Some(parent) = window.transient_for() {
+                snapshot.save();
+                snapshot.translate(&gtk::graphene::Point::new(
+                    (1920 - parent.width()) as f32 / 2.0,
+                    (1080 - parent.height()) as f32 / 2.0,
+                ));
+                gtk::WidgetPaintable::new(Some(&parent)).snapshot(
+                    &snapshot, parent.width() as f64, parent.height() as f64,
+                );
+                snapshot.restore();
+            }
+        }
+        snapshot.translate(&gtk::graphene::Point::new(
+            (1920 - window.width()) as f32 / 2.0,
+            (1080 - window.height()) as f32 / 2.0,
+        ));
+    }
     gtk::WidgetPaintable::new(Some(window)).snapshot(
         &snapshot,
         window.width() as f64,
@@ -56,13 +98,41 @@ fn screenshot(window: &gtk::Window, name: &str) {
     );
     let node = snapshot.to_node().expect("Nonblank window");
     let renderer = gsk::Renderer::for_surface(&window.surface().unwrap()).unwrap();
-    let texture = renderer.render_texture(&node, None);
+    let viewport = audit_4k().then(|| gtk::graphene::Rect::new(0.0, 0.0, 3840.0, 2160.0));
+    let texture = renderer.render_texture(&node, viewport.as_ref());
+    if audit_4k() {
+        assert_eq!((texture.width(), texture.height()), (3840, 2160));
+    }
     let theme = std::env::var("AUDIT_THEME").unwrap_or_else(|_| "3".into());
     texture
         .save_to_png(output_dir().join(format!("{theme}-{name}.png")))
         .unwrap();
     renderer.unrealize();
     println!("CHECK {name}: {}x{}", window.width(), window.height());
+    if std::env::var_os("TSUKIMI_UI_AUDIT_TRACE").is_some() {
+        println!(
+            "FONT root: {:?}",
+            window
+                .pango_context()
+                .font_description()
+                .map(|f| f.to_string())
+        );
+        for label in descendants(window.upcast_ref())
+            .into_iter()
+            .filter(|w| w.is_mapped())
+            .filter_map(|w| w.downcast::<gtk::Label>().ok())
+            .take(8)
+        {
+            println!(
+                "FONT {}: {:?}",
+                label.text(),
+                label
+                    .pango_context()
+                    .font_description()
+                    .map(|f| f.to_string())
+            );
+        }
+    }
     check_widgets(window.upcast_ref());
     if std::env::var_os("TSUKIMI_UI_AUDIT_TRACE").is_some() && name == "movie" {
         for widget in descendants(window.upcast_ref())
@@ -225,6 +295,14 @@ fn check_widgets(root: &gtk::Widget) {
                     .into_iter()
                     .filter_map(|w| w.downcast::<gtk::Label>().ok())
                 {
+                    let font = label.pango_context().font_description().unwrap();
+                    assert!(font.is_size_absolute());
+                    assert_eq!(
+                        font.size(),
+                        18 * gtk::pango::SCALE,
+                        "Navigation font: {}",
+                        label.text()
+                    );
                     let (_, natural, _, _) = label.measure(gtk::Orientation::Horizontal, -1);
                     assert!(
                         label.width() >= natural,
@@ -359,9 +437,10 @@ fn check_widgets(root: &gtk::Widget) {
                 let bounds = widget.compute_bounds(&widget).expect("Tool bounds");
                 let size = if widget.has_css_class("mpv-play-button") {
                     PLAY_SIZE
-                } else if widget.parent().is_some_and(|parent| {
-                    parent.has_css_class("mpv-transport-controls")
-                }) {
+                } else if widget
+                    .parent()
+                    .is_some_and(|parent| parent.has_css_class("mpv-transport-controls"))
+                {
                     TRANSPORT_SIZE
                 } else {
                     TOOL_SIZE
@@ -501,7 +580,9 @@ fn assert_circle(widget: &gtk::Widget, diameter: f32) {
     let paint = surface_at_size(widget, diameter as f64, diameter as f64);
     assert!(
         paint.radii.iter().any(|radii| {
-            radii.iter().all(|radius| (*radius - diameter / 2.0).abs() < 0.01)
+            radii
+                .iter()
+                .all(|radius| (*radius - diameter / 2.0).abs() < 0.01)
         }),
         "Circle corners: {:?}",
         paint.radii
@@ -668,10 +749,10 @@ fn serve(mut stream: TcpStream, image: Arc<Vec<u8>>) {
 fn mock_server() -> String {
     let listener = TcpListener::bind("127.0.0.1:0").unwrap();
     let address = format!("http://{}/", listener.local_addr().unwrap());
-    let image = image::RgbImage::from_fn(320, 480, |x, y| {
+    let image = image::RgbImage::from_fn(1200, 1800, |x, y| {
         image::Rgb([
-            if x < 160 { 45 } else { 180 },
-            if y < 240 { 150 } else { 55 },
+            if x < 600 { 45 } else { 180 },
+            if y < 900 { 150 } else { 55 },
             100,
         ])
     });
@@ -899,6 +980,10 @@ fn main() {
     std::fs::create_dir_all(output_dir()).unwrap();
     let address = mock_server();
     gtk::init().unwrap();
+    // Fix the test font only, so computed CSS sizes are comparable across hosts.
+    gtk::Settings::default()
+        .unwrap()
+        .set_gtk_font_name(Some("Sans 12px"));
     if std::env::var_os("TSUKIMI_UI_AUDIT_TRACE").is_some() {
         glib::log_set_handler(
             Some("Gtk"),
@@ -937,6 +1022,9 @@ fn main() {
         let root = main.upcast_ref::<gtk::Widget>();
         match stage.get() {
             0 => {
+                if audit_4k() {
+                    restore_main_size(&main);
+                }
                 for (resource, source) in [
                     (
                         "style.css",
@@ -1009,12 +1097,12 @@ fn main() {
                     0 => {
                         screenshot(main.upcast_ref(), "home");
                         *baseline_geometry.borrow_mut() = density_geometry(root);
-                        main.set_default_size(1280, 800);
+                        resize_main(&main, 1280, 800);
                     }
                     1 => {
                         screenshot(main.upcast_ref(), "home-1280x800");
                         assert_eq!(density_geometry(root), *baseline_geometry.borrow());
-                        main.set_default_size(1440, 900);
+                        resize_main(&main, 1440, 900);
                     }
                     2 => {
                         screenshot(main.upcast_ref(), "home-1440x900");
@@ -1027,7 +1115,7 @@ fn main() {
                             *baseline_geometry.borrow(),
                             "UI controls must not grow with the window"
                         );
-                        main.set_default_size(1152, 720);
+                        restore_main_size(&main);
                     }
                     3 => {
                         screenshot(main.upcast_ref(), "home-restored");
@@ -1096,7 +1184,7 @@ fn main() {
                 match library_toolbar_stage.get() {
                     0 => {
                         screenshot(main.upcast_ref(), "library-all");
-                        main.set_default_size(900, 600);
+                        resize_main(&main, 900, 600);
                     }
                     1 => {
                         screenshot(main.upcast_ref(), "library-narrow");
@@ -1104,7 +1192,10 @@ fn main() {
                             .downcast::<adw::OverlaySplitView>()
                             .unwrap();
                         assert!(split.is_collapsed(), "Narrow sidebar must be an overlay");
-                        assert!(!split.shows_sidebar(), "Narrow toolbar must stay unobscured");
+                        assert!(
+                            !split.shows_sidebar(),
+                            "Narrow toolbar must stay unobscured"
+                        );
                         root.activate_action("win.sidebar", None).unwrap();
                         assert!(split.shows_sidebar(), "Sidebar must remain accessible");
                         root.activate_action("win.sidebar", None).unwrap();
@@ -1132,7 +1223,7 @@ fn main() {
                         .downcast::<adw::ToggleGroup>()
                         .unwrap()
                         .set_active_name(Some("grid"));
-                        main.set_default_size(1152, 720);
+                        restore_main_size(&main);
                     }
                     4 => {
                         let split = find(root, |w| w.has_css_class("app-shell"))
@@ -1217,7 +1308,7 @@ fn main() {
                     "Detail recommendations must remain accessible by scrolling"
                 );
                 adjustment.set_value(adjustment.lower());
-                main.set_default_size(900, 600);
+                resize_main(&main, 900, 600);
             }
             22 => {
                 screenshot(main.upcast_ref(), "movie-narrow");
@@ -1241,7 +1332,7 @@ fn main() {
                 dialog(root).close();
             }
             25 => {
-                main.set_default_size(1152, 720);
+                restore_main_size(&main);
                 main.homepage();
             }
             26 => {
@@ -1325,7 +1416,7 @@ fn main() {
             41 => {
                 screenshot(main.upcast_ref(), "player-info");
                 player_tab(root, "win.mpv-media-info");
-                main.set_default_size(900, 600);
+                resize_main(&main, 900, 600);
             }
             42 => {
                 screenshot(main.upcast_ref(), "player-narrow");
@@ -1350,7 +1441,7 @@ fn main() {
                     .downcast::<gtk::Stack>()
                     .unwrap()
                     .set_visible_child_name("main");
-                main.set_default_size(1152, 720);
+                restore_main_size(&main);
                 main.homepage();
                 root.activate_action("win.add-server", None).unwrap();
             }
@@ -1464,7 +1555,7 @@ fn main() {
             }
             64 => {
                 settings_window().close();
-                main.set_default_size(900, 600);
+                resize_main(&main, 900, 600);
                 find(root, |w| w.has_css_class("window-stack"))
                     .downcast::<gtk::Stack>()
                     .unwrap()

@@ -705,8 +705,7 @@ impl Window {
 
     pub fn log_ui_runtime_diagnostics(&self) {
         tracing::info!(
-            baseline = crate::ui_density::BASELINE_REVISION,
-            enlargement = crate::ui_density::SCALE,
+            font_scale = crate::ui_density::FONT_SCALE,
             navigation = crate::ui_density::CONTROL_SIZE,
             tools = crate::ui_density::TOOL_SIZE,
             playback = crate::ui_density::PLAY_SIZE,

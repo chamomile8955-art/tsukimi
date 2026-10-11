@@ -75,21 +75,26 @@ the window. On Wayland, the compositor retains control of placement.
 
 All resolutions use the same logical-pixel geometry and desktop density.
 Resizing or maximizing does not switch between compact and enlarged controls.
-The baseline is the pre-compact geometry in `58011eb`, not the later 36/40-pixel
-compact controls. Original painted sizes (including padding and borders) are
-44-pixel navigation tabs, 54-pixel tools, 62-pixel previous/next controls,
-70-pixel playback buttons, 24-pixel window controls, and 60-pixel theme swatches.
-Multiplying these by 1.25 and rounding gives 55, 68, 78, 88, 30, and 75 pixels.
-The explicit playback icon also scales from its original 36 pixels to 45;
-it must not retain the compact template's 22-pixel override.
-`src/ui_density.rs` owns this calculation and tests the shared CSS declarations.
-Fonts remain at 125% of the native base font, without another cumulative zoom.
+Painted sizes (including padding and borders) are 50-pixel navigation tabs,
+60-pixel tools, 70-pixel previous/next controls, 80-pixel playback buttons,
+28-pixel window controls, and 68-pixel theme swatches. These trim about 10%
+from the previous enlarged controls. The explicit playback icon is 40 pixels.
+`src/ui_density.rs` owns these dimensions and tests the shared CSS declarations.
+Fonts use 150% of the native base font once at the root: a 12-pixel native
+font becomes 18 pixels, with 16.2-pixel poster metadata. The UI audit checks
+computed navigation fonts as well as button bounds in both themes.
 Posters are 276 x 414 and backdrops are 400 x 225 logical pixels. Both themes,
 main settings, and player utility pages share these metrics. Surface radii
 remain 14 pixels. Below 1100 logical pixels, the source sidebar becomes an
 overlay and initially hides so the single-row library toolbar has enough room;
 its header button can still open it. Player panel dismissal retains its
 separate 500sp breakpoint.
+Poster requests use DPI-specific pixel bounds (400 x 600 at 1x, 800 x 1200
+at 2x, 1200 x 1800 at 3x), with separate thumbnail/banner/backdrop profiles.
+Resolution is part of the cache key, so old 300 x 300 thumbnails are not reused.
+Monitor scale changes reload images; the decoded static-image LRU has a
+128 MiB pixel budget in addition to its entry limit (visible images remain
+owned by their widgets). Image sharpness still depends on the server's source.
 Windows embeds a PerMonitorV2 DPI manifest (with a PerMonitor fallback), so GTK
 can redraw for each monitor's scaling without an additional DPI transform.
 Native work areas are converted using the surface's fractional scale exactly
@@ -124,17 +129,17 @@ GTK Inspector availability depends on the GTK runtime included with the build.
 
 ## Native UI Regression Audit
 
-Desktop control targets share CSS variables: navigation tabs are 36 pixels,
-tool buttons are 40 pixels, the primary playback control is 48 pixels, and
-traffic lights are 16 pixels. Frame radii remain unchanged. Player utility
+Desktop control targets share CSS variables: navigation tabs are 50 pixels,
+tool buttons are 60 pixels, the primary playback control is 80 pixels, and
+traffic lights are 28 pixels. Frame radii remain unchanged. Player utility
 panels always use a dark palette, independent of the application theme.
 
-Media sizes are restored to 220 x 330 for posters, 320 x 180 for backdrops,
-232 x 232 for square covers, 440 x 82 for banners, and 156 x 156 for people.
+Media sizes are 276 x 414 for posters, 400 x 225 for backdrops,
+290 x 290 for square covers, 550 x 103 for banners, and 195 x 195 for people.
 Media cards and list/episode thumbnails retain these dimensions at all window
 sizes, before and after binding/rebinding. Ellipsized
 labels and intrinsic image sizes do not enlarge cards; album details retain
-a 232-pixel square cover.
+a 290-pixel square cover.
 
 Movie and series detail backdrops fill the first content viewport, including
 after resizing. The title and playback actions remain over the backdrop;
@@ -146,6 +151,14 @@ With a desktop session and the normal native build dependencies installed:
 just ui-audit 3  # Dark theme
 just ui-audit 2  # Light theme
 ```
+
+To capture a 4K / 200% preview, run each theme with
+`TSUKIMI_UI_AUDIT_4K=1 just ui-audit 3` (or `2`). Images are written to
+`target/ui-audit/4k`. The audit forces the large main window to 1920 x 1080
+logical pixels and renders its GTK scene at 2x into 3840 x 2160 PNGs. Dialogs
+and narrow-window test cases retain their normal size and are centered on
+the same canvas. These are local GTK renders with fixtures, not Windows
+desktop captures. This mode does not alter production window sizing.
 
 The audit builds fresh resources and a development executable, then exercises
 the real application in isolated preview mode. A loopback-only mock server
@@ -166,7 +179,7 @@ Assertions check live frame radii, dialog bounds, painted button sizes (includin
 CSS padding and borders), navigation height and label fit,
 filter-title fit, poster and disabled-action text colors, action hover backgrounds,
 single-row library toolbar alignment, group spacing and unclipped navigation,
-window-control size and circular borders, 75-pixel circular theme selectors in
+window-control size and circular borders, 68-pixel circular theme selectors in
 both selected states, media-card dimensions, square album covers, available icons,
 full-viewport detail backdrops and visible first-screen playback actions,
 unchanged control geometry across 1152 x 720, 1280 x 800 and 1440 x 900 windows,

@@ -22,16 +22,16 @@
 @define-color navigation_selected rgba(0, 0, 0, 0.095);
 
 :root {
-  font-size: 1.25em;
+  font-size: 1.5em;
   -gtk-icon-size: 20px;
   --tsukimi-surface-radius: 14px;
-  /* Original painted sizes x 1.25, mirrored by src/ui_density.rs. */
-  --tsukimi-control-size: 55px;
-  --tsukimi-tool-size: 68px;
-  --tsukimi-transport-size: 78px;
-  --tsukimi-play-size: 88px;
-  --tsukimi-window-control-size: 30px;
-  --tsukimi-theme-swatch-size: 75px;
+  /* Painted logical sizes, mirrored by src/ui_density.rs. */
+  --tsukimi-control-size: 50px;
+  --tsukimi-tool-size: 60px;
+  --tsukimi-transport-size: 70px;
+  --tsukimi-play-size: 80px;
+  --tsukimi-window-control-size: 28px;
+  --tsukimi-theme-swatch-size: 68px;
 }
 
 * {
@@ -2933,7 +2933,7 @@ window.app-window.desktop-density .mpv-player .mpv-transport-controls button.mpv
   min-height: calc(var(--tsukimi-transport-size) - 2px);
   border-color: rgba(255, 255, 255, 0.12);
   background-color: rgba(255, 255, 255, 0.10);
-  -gtk-icon-size: 31px;
+  -gtk-icon-size: 28px;
 }
 
 .app-window .mpv-player .mpv-transport-controls button.mpv-control-button:hover {
@@ -2952,7 +2952,7 @@ window.app-window.desktop-density .mpv-player .mpv-transport-controls button.mpv
   border-color: rgba(255, 255, 255, 0.12);
   background-color: rgba(255, 255, 255, 0.10);
   box-shadow: none;
-  -gtk-icon-size: 45px;
+  -gtk-icon-size: 40px;
 }
 
 .app-window .mpv-player .mpv-transport-controls button.mpv-play-button:hover {

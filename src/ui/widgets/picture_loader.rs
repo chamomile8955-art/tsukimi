@@ -31,10 +31,22 @@ const IMAGE_DECODE_RETRY_DELAY: std::time::Duration = std::time::Duration::from_
 const IMAGE_RESULT_BATCH_DELAY: std::time::Duration = std::time::Duration::from_millis(16);
 const IMAGE_NETWORK_RETRY_DELAY: std::time::Duration = std::time::Duration::from_millis(180);
 const DECODED_IMAGE_CACHE_CAPACITY: usize = 300;
-const POSTER_MAX_WIDTH: &str = "300";
-const POSTER_MAX_HEIGHT: &str = "300";
-const BACKDROP_MAX_WIDTH: &str = "1280";
-const BACKDROP_MAX_HEIGHT: &str = "800";
+const DECODED_IMAGE_CACHE_BYTES: u64 = 128 * 1024 * 1024;
+
+fn image_dimensions(image_type: &str, scale: i32) -> (&'static str, &'static str) {
+    // Leave room for hover enlargement; request physical pixels, not logical ones.
+    let level = scale.clamp(1, 3) as usize - 1;
+    match image_type {
+        "Backdrop" => [("1920", "1200"), ("3840", "2400"), ("3840", "2400")][level],
+        "Thumb" => [("440", "250"), ("880", "500"), ("1320", "750")][level],
+        "Banner" => [("600", "120"), ("1200", "240"), ("1800", "360")][level],
+        _ => [("400", "600"), ("800", "1200"), ("1200", "1800")][level],
+    }
+}
+
+fn paintable_bytes(paintable: &gtk::gdk::Paintable) -> u64 {
+    paintable.intrinsic_width().max(0) as u64 * paintable.intrinsic_height().max(0) as u64 * 4
+}
 static MAX_IMAGE_DECODE_TASKS: LazyLock<usize> = LazyLock::new(rayon::current_num_threads);
 static IMAGE_DECODE_TASKS: AtomicUsize = AtomicUsize::new(0);
 static FIRST_POSTER_RENDERED: AtomicBool = AtomicBool::new(false);
@@ -96,6 +108,7 @@ struct DecodeWaiter {
 struct DecodedImageCache {
     entries: HashMap<String, gtk::gdk::Paintable>,
     order: VecDeque<String>,
+    bytes: u64,
 }
 
 impl DecodedImageCache {
@@ -108,13 +121,19 @@ impl DecodedImageCache {
 
     fn insert(&mut self, key: String, paintable: gtk::gdk::Paintable) {
         self.order.retain(|cached_key| cached_key != &key);
-        self.entries.insert(key.clone(), paintable);
+        self.bytes += paintable_bytes(&paintable);
+        if let Some(previous) = self.entries.insert(key.clone(), paintable) {
+            self.bytes -= paintable_bytes(&previous);
+        }
         self.order.push_back(key);
 
-        while self.entries.len() > DECODED_IMAGE_CACHE_CAPACITY {
-            if let Some(oldest) = self.order.pop_front() {
-                self.entries.remove(&oldest);
-            }
+        while self.entries.len() > DECODED_IMAGE_CACHE_CAPACITY
+            || (self.bytes > DECODED_IMAGE_CACHE_BYTES && self.entries.len() > 1)
+        {
+            if let Some(oldest) = self.order.pop_front()
+                && let Some(paintable) = self.entries.remove(&oldest) {
+                    self.bytes -= paintable_bytes(&paintable);
+                }
         }
     }
 }
@@ -216,6 +235,21 @@ pub(crate) mod imp {
 
     #[glib::derived_properties]
     impl ObjectImpl for PictureLoader {
+        fn constructed(&self) {
+            self.parent_constructed();
+            self.obj().connect_scale_factor_notify(|obj| {
+                // Moving between monitors must not retain a lower-DPI thumbnail.
+                obj.reset();
+                if obj.is_mapped() {
+                    if let Some(url) = obj.url() {
+                        obj.start_url_loading(url);
+                    } else {
+                        obj.start_loading();
+                    }
+                }
+            });
+        }
+
         fn dispose(&self) {
             self.obj().cancel_loading();
         }
@@ -796,11 +830,7 @@ impl PictureLoader {
     }
 
     fn image_dimensions(&self) -> (&'static str, &'static str) {
-        if self.imagetype() == "Backdrop" {
-            (BACKDROP_MAX_WIDTH, BACKDROP_MAX_HEIGHT)
-        } else {
-            (POSTER_MAX_WIDTH, POSTER_MAX_HEIGHT)
-        }
+        image_dimensions(&self.imagetype(), self.scale_factor())
     }
 
     fn remove_bad_cache(path: PathBuf) {
@@ -1004,5 +1034,36 @@ impl PictureLoader {
         }
 
         result
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn requests_cover_media_frames_at_each_monitor_scale() {
+        for scale in 1..=3 {
+            for (kind, width, height) in [
+                ("Primary", 276, 414),
+                ("Primary", 400, 225),
+                ("Primary", 290, 290),
+                ("Thumb", 400, 225),
+                ("Banner", 550, 103),
+            ] {
+                let (max_width, max_height) = image_dimensions(kind, scale);
+                assert!(max_width.parse::<i32>().unwrap() >= width * scale);
+                assert!(max_height.parse::<i32>().unwrap() >= height * scale);
+            }
+        }
+        assert_eq!(
+            image_dimensions("Primary", 0),
+            image_dimensions("Primary", 1)
+        );
+        assert_eq!(image_dimensions("Backdrop", 4), ("3840", "2400"));
+        assert_ne!(
+            image_dimensions("Primary", 1),
+            image_dimensions("Primary", 2)
+        );
     }
 }

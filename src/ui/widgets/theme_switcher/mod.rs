@@ -22,11 +22,11 @@ mod tests {
     fn readable_density_is_shared_without_a_second_theme_scale() {
         let css = include_str!("../../../../resources/style.css");
         for declaration in [
-            "font-size: 1.25em;",
-            "--tsukimi-control-size: 55px;",
-            "--tsukimi-tool-size: 68px;",
-            "--tsukimi-play-size: 88px;",
-            "--tsukimi-window-control-size: 30px;",
+            "font-size: 1.5em;",
+            "--tsukimi-control-size: 50px;",
+            "--tsukimi-tool-size: 60px;",
+            "--tsukimi-play-size: 80px;",
+            "--tsukimi-window-control-size: 28px;",
         ] {
             assert!(css.contains(declaration), "Missing density: {declaration}");
         }
@@ -34,7 +34,7 @@ mod tests {
             include_str!("../../../../resources/style-dark.css"),
             include_str!("../../../../resources/style-settings.css"),
         ] {
-            assert!(!css.contains("font-size: 1.25em;"));
+            assert!(!css.contains("font-size: 1.5em;"));
             assert!(!css.contains("--tsukimi-control-size:"));
             assert!(!css.contains("--tsukimi-tool-size:"));
             assert!(!css.contains("--tsukimi-play-size:"));

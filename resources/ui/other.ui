@@ -88,8 +88,8 @@
                                         <property name="margin-top">6</property>
                                         <child>
                                           <object class="GtkButton" id="play_button">
-                                            <property name="width-request">68</property>
-                                            <property name="height-request">68</property>
+                                            <property name="width-request">60</property>
+                                            <property name="height-request">60</property>
                                             <property name="icon-name">media-playback-start-symbolic</property>
                                             <property name="tooltip-text" translatable="yes">Play</property>
                                             <property name="valign">center</property>
